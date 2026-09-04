@@ -6,6 +6,7 @@ import { CatalogCards, CatalogTable } from '@/components/sections/businesses/cat
 import { OnboardingState } from '@/components/sections/onboarding-state';
 import { Container } from '@/components/ui/layout';
 import { Eyebrow } from '@/components/ui/typography';
+import { track } from '@/lib/analytics/events';
 import { peekGsap, type GsapBundle } from '@/lib/motion/gsap-setup';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import type { CatalogFacet, CatalogRow } from '@/lib/selectors';
@@ -72,6 +73,10 @@ export function ProductCatalog({
 
     setCategory(slug);
     router.replace(slug === 'all' ? pathname : `${pathname}?category=${slug}`, { scroll: false });
+    track('catalog_filter', {
+      category: slug,
+      visibleRows: rows.filter((row) => slug === 'all' || row.categorySlug === slug).length,
+    });
   };
 
   /* Flip.from runs after React has swapped the rows in */

@@ -175,3 +175,41 @@ pauses on hover and focus-within and stops under reduced motion; the honeypot is
 tab)" unless the caller supplied an aria-label; the catalogue table has a
 `sr-only` caption and `scope` on every header cell; every form field has
 `autoComplete`.
+## 037 — P21: one transport seam, one typed event bus, no analytics provider
+
+**Transport.** `src/lib/forms/transport.ts` defines `EnquiryTransport`
+(`id`, `disclosure`, `submit`) and a `SubmissionResult` union:
+`{ kind: 'mailto', href }` or `{ kind: 'queued', reference }`. Both forms call
+`submitThroughTransport(enquiry, event)`; the active transport is
+`mailtoTransport`, and swapping in a server action or CRM webhook is a one-line
+change to the exported `transport`. The union matters because the two results
+are different truths: a mailto result means "your mail client now has this, and
+nothing is stored here", a queued result means "we accepted it, reference X".
+`SentPanel` in both forms now renders either sentence — the queued branch is
+unreachable until a backend exists, and it is written rather than stubbed so
+nobody has to invent copy under pressure later.
+
+**Events.** `src/lib/analytics/events.ts` holds a typed map of the commercial
+events (`rfq_compose`, `contact_compose`, `catalog_filter`, `rfq_cta_click`,
+`callback_request`, `audit_request`, `bot_discarded`) and a `track()` that fans
+out to subscribers and re-dispatches as a `trivoxa:analytics` CustomEvent.
+Emitted today: `rfq_compose` (with division, industry, category, requested path,
+destination), `contact_compose` (inquiry type, mailbox), `catalog_filter`
+(category, visible row count) and `bot_discarded` (which form's honeypot was
+filled).
+
+Three of the seven are declared but NOT emitted — `rfq_cta_click`,
+`callback_request`, `audit_request` — and that is a decision, not an oversight.
+Every one of them lives on a server component (the closing CTA band, the hero,
+the compliance audit CTA), so tracking a click means either adding a client
+component to every page, which P20 just spent its budget removing, or appending
+`?from=` to links, which pollutes canonical URLs for a metric that a real
+analytics provider would get from referrer data anyway. They stay in the map as
+the contract for whoever adopts a provider.
+
+**No provider is installed.** No gtag, no GA/Plausible/Meta script, no vendor
+SDK anywhere in `src/`, and `tests/forms.test.ts` fails the build if one appears
+without the cookie notice changing in the same commit. The cookie notice's
+honest sentence — this site sets no analytics cookies and runs no third-party
+tracking — is a product position, not a gap to be filled quietly. Data leaves the
+browser only when the buyer's own mail client sends the composed message.

@@ -6,8 +6,10 @@ import { Input, Select, Textarea } from '@/components/ui/field';
 import { Eyebrow, Prose } from '@/components/ui/typography';
 import { CONTACT } from '@/content/taxonomy';
 import { INQUIRY_TYPES } from '@/content/faqs';
+import { track } from '@/lib/analytics/events';
 import { focusFirstInvalid } from '@/lib/forms/focus-first-invalid';
-import { HONEYPOT_FIELD, composeEnquiry, isBot, isEmail } from '@/lib/forms/mailto';
+import { HONEYPOT_FIELD, isBot, isEmail, type Enquiry } from '@/lib/forms/mailto';
+import { submitThroughTransport, type SubmissionResult } from '@/lib/forms/transport';
 
 /**
  * P16 — the contact form.
@@ -47,7 +49,7 @@ export function ContactForm() {
   const [values, setValues] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement | null>(null);
-  const [sent, setSent] = useState<string | null>(null);
+  const [sent, setSent] = useState<SubmissionResult | 'nothing' | null>(null);
 
   const set = (key: keyof FormState, value: string): void => {
     setValues((current) => ({ ...current, [key]: value }));
@@ -60,6 +62,7 @@ export function ContactForm() {
   const onSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
     if (isBot(values as Record<string, string | undefined>)) {
+      track('bot_discarded', { form: 'contact' });
       setSent('nothing');
       return;
     }
@@ -77,7 +80,7 @@ export function ContactForm() {
       return;
     }
 
-    const href = composeEnquiry({
+    const enquiry: Enquiry = {
       to: mailbox,
       subject: `Enquiry — ${selected?.label ?? 'General'}${
         values.companyName.trim() ? ` — ${values.companyName.trim()}` : ''
@@ -91,14 +94,27 @@ export function ContactForm() {
         { label: 'Message', value: values.message },
       ],
       footer: `Sent from trivoxagroup.com/contact · ${new Date().toISOString().slice(0, 10)}`,
-    });
+    };
 
-    window.location.href = href;
-    setSent(href);
+    void submitThroughTransport(enquiry, {
+      name: 'contact_compose',
+      payload: { inquiryType: values.inquiryType, mailbox },
+    }).then((result) => {
+      if (result.kind === 'mailto') window.location.href = result.href;
+      setSent(result);
+    });
   };
 
   if (sent === 'nothing') return <SentPanel href="" mailbox={mailbox} />;
-  if (sent) return <SentPanel href={sent} mailbox={mailbox} />;
+  if (sent) {
+    return (
+      <SentPanel
+        href={sent.kind === 'mailto' ? sent.href : ''}
+        mailbox={mailbox}
+        reference={sent.kind === 'queued' ? sent.reference : undefined}
+      />
+    );
+  }
 
   return (
     <form ref={formRef} onSubmit={onSubmit} noValidate className="flex flex-col gap-lg">
@@ -184,7 +200,15 @@ export function ContactForm() {
   );
 }
 
-function SentPanel({ href, mailbox }: { href: string; mailbox: string }) {
+function SentPanel({
+  href,
+  mailbox,
+  reference,
+}: {
+  href: string;
+  mailbox: string;
+  reference?: string;
+}) {
   const headingRef = useRef<HTMLHeadingElement | null>(null);
 
   useEffect(() => {
@@ -199,7 +223,9 @@ function SentPanel({ href, mailbox }: { href: string; mailbox: string }) {
         Message composed
       </Eyebrow>
       <h2 ref={headingRef} tabIndex={-1} className="text-heading-lg max-w-[30ch] rounded-sm">
-        Your mail client has the message — send it and we reply {CONTACT.responseWindow}.
+        {reference
+          ? `Message received — reference ${reference}. We reply ${CONTACT.responseWindow}.`
+          : `Your mail client has the message — send it and we reply ${CONTACT.responseWindow}.`}
       </h2>
       <Prose className="text-body-md">
         <p className="surface-muted max-w-[62ch]">

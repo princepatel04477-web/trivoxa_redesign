@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input, Select, Textarea } from '@/components/ui/field';
 import { Eyebrow, Prose } from '@/components/ui/typography';
 import { CATEGORIES, CONTACT, INDUSTRIES, PRODUCTS } from '@/content/taxonomy';
+import { track } from '@/lib/analytics/events';
 import { focusFirstInvalid } from '@/lib/forms/focus-first-invalid';
-import { HONEYPOT_FIELD, composeEnquiry, isBot, isEmail } from '@/lib/forms/mailto';
+import { HONEYPOT_FIELD, isBot, isEmail, type Enquiry } from '@/lib/forms/mailto';
+import { submitThroughTransport, type SubmissionResult } from '@/lib/forms/transport';
 
 /**
  * P16 — the RFQ form. The single commercial conversion on the site.
@@ -77,7 +79,7 @@ export function RfqForm({ prefill }: { prefill: RfqPrefill }) {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement | null>(null);
-  const [sent, setSent] = useState<string | null>(null);
+  const [sent, setSent] = useState<SubmissionResult | 'nothing' | null>(null);
 
   const set = (key: keyof FormState, value: string): void => {
     setValues((current) => {
@@ -125,6 +127,7 @@ export function RfqForm({ prefill }: { prefill: RfqPrefill }) {
   const onSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
     if (isBot(values as Record<string, string | undefined>)) {
+      track('bot_discarded', { form: 'rfq' });
       setSent('nothing'); // say nothing, exactly as if it had worked
       return;
     }
@@ -144,7 +147,7 @@ export function RfqForm({ prefill }: { prefill: RfqPrefill }) {
       ? `RFQ — ${about} — ${values.companyName.trim()}`
       : `RFQ — ${about}`;
 
-    const href = composeEnquiry({
+    const enquiry: Enquiry = {
       to: serviceSide ? CONTACT.general : CONTACT.sales,
       subject,
       fields: [
@@ -161,17 +164,36 @@ export function RfqForm({ prefill }: { prefill: RfqPrefill }) {
         { label: 'Requested path', value: pathLabel(prefill.path) },
       ],
       footer: `Sent from trivoxagroup.com/rfq · ${new Date().toISOString().slice(0, 10)}`,
-    });
+    };
 
-    window.location.href = href;
-    setSent(href);
+    // One seam, one event. Today the transport composes a mailto and the buyer's
+    // mail client opens; when a backend exists it returns a reference instead and
+    // this component does not change (P21, ADR 037).
+    void submitThroughTransport(enquiry, {
+      name: 'rfq_compose',
+      payload: {
+        division: serviceSide ? 'service-exports' : 'product-exports',
+        industry: industry?.slug,
+        category: category?.slug,
+        path: prefill.path ?? undefined,
+        destination: values.destination.trim() || undefined,
+      },
+    }).then((result) => {
+      if (result.kind === 'mailto') window.location.href = result.href;
+      setSent(result);
+    });
   };
 
-  if (sent && sent !== 'nothing') {
-    return <SentPanel href={sent} />;
-  }
   if (sent === 'nothing') {
     return <SentPanel href="" />;
+  }
+  if (sent) {
+    return (
+      <SentPanel
+        href={sent.kind === 'mailto' ? sent.href : ''}
+        reference={sent.kind === 'queued' ? sent.reference : undefined}
+      />
+    );
   }
 
   return (
@@ -299,7 +321,7 @@ export function RfqForm({ prefill }: { prefill: RfqPrefill }) {
 
 /* ------------------------------------------------------------------------ */
 
-function SentPanel({ href }: { href: string }) {
+function SentPanel({ href, reference }: { href: string; reference?: string }) {
   const headingRef = useRef<HTMLHeadingElement | null>(null);
 
   useEffect(() => {
@@ -316,7 +338,9 @@ function SentPanel({ href }: { href: string }) {
         Enquiry composed
       </Eyebrow>
       <h2 ref={headingRef} tabIndex={-1} className="text-heading-lg max-w-[28ch] rounded-sm">
-        Your mail client has the enquiry — send it and the desk replies {CONTACT.responseWindow}.
+        {reference
+          ? `Enquiry received — reference ${reference}. The desk replies ${CONTACT.responseWindow}.`
+          : `Your mail client has the enquiry — send it and the desk replies ${CONTACT.responseWindow}.`}
       </h2>
       <Prose className="text-body-md">
         <p className="surface-muted max-w-[62ch]">
