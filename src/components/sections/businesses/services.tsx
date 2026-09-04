@@ -26,7 +26,7 @@ export function ServiceLines() {
               href={DIGITAL_PROPERTY.href}
               target="_blank"
               rel="noreferrer noopener"
-              className="text-bronze inline-flex items-center gap-1 text-body-md font-medium"
+              className="text-bronze-ink inline-flex items-center gap-1 text-body-md font-medium"
             >
               {DIGITAL_PROPERTY.label}
               <ArrowUpRight aria-hidden size={14} />

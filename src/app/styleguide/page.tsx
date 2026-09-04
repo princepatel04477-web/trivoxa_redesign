@@ -46,7 +46,7 @@ export default function StyleguidePage() {
           {BODY_FONT_IS_FALLBACK ? (
             <Card className="border-bronze/60 p-lg">
               <p className="text-body-md">
-                <strong className="text-bronze">Body face fallback active.</strong>{' '}
+                <strong className="text-bronze-ink">Body face fallback active.</strong>{' '}
                 Rendering <span data-spec>{BODY_FONT_FAMILY}</span> because Satoshi is not in{' '}
                 <span data-spec>src/fonts/custom/</span>. Drop the WOFF2 files there and rebuild.
               </p>
@@ -156,7 +156,7 @@ function ColorSection() {
                       <span
                         className={cn(
                           'font-semibold uppercase tracking-wide',
-                          entry.clears === 'normal' ? 'text-bronze' : 'surface-faint',
+                          entry.clears === 'normal' ? 'text-bronze-ink' : 'surface-faint',
                         )}
                       >
                         {entry.clears}

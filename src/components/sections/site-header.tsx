@@ -30,12 +30,22 @@ import { cn } from '@/lib/utils';
  * scroll it fills with espresso, gains a 1px bronze hairline and compresses —
  * driven by GSAP ScrollTrigger, never a scroll listener.
  */
+/**
+ * `aria-current="page"` — exact match only. A section link is not "the current
+ * page" when you are two levels inside it: announcing /businesses as current on
+ * /businesses/product-exports is a lie a screen reader user will notice (P20).
+ */
+function currentFor(href: string, pathname: string): 'page' | undefined {
+  return pathname.replace(/\/$/, '') === href ? 'page' : undefined;
+}
+
 export function SiteHeader() {
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const headerRef = useRef<HTMLElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const triggersRef = useRef<(HTMLButtonElement | null)[]>([]);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const pathname = usePathname();
   const reduced = usePrefersReducedMotion();
   const menuId = useId();
@@ -93,8 +103,15 @@ export function SiteHeader() {
     const onKeyDown = (event: KeyboardEvent): void => {
       if (event.key === 'Escape') {
         event.preventDefault();
+        const index = openGroup === null ? -1 : NAV_GROUPS.findIndex((g) => g.id === openGroup);
         close();
         setMobileOpen(false);
+        // Focus has to go back to the control that opened the overlay. The panel
+        // unmounts under the focused element, and without this the browser drops
+        // focus to <body> — a keyboard user is silently teleported to the top of
+        // the document (P20).
+        if (mobileOpen) menuButtonRef.current?.focus();
+        else if (index >= 0) triggersRef.current[index]?.focus();
         return;
       }
 
@@ -156,6 +173,7 @@ export function SiteHeader() {
           href="/"
           className="shrink-0 rounded-sm py-2 text-ivory transition-opacity hover:opacity-80"
           aria-label="Trivoxa Group — home"
+          aria-current={currentFor('/', pathname)}
         >
           <BrandLockup size={30} />
         </Link>
@@ -201,6 +219,7 @@ export function SiteHeader() {
 
           <Link
             href="/rfq"
+            aria-current={currentFor('/rfq', pathname)}
             className={cn(
               'hidden items-center gap-2 border border-bronze/70 px-5 py-2.5 text-body-sm font-semibold sm:inline-flex',
               'rounded-control text-ivory transition-all duration-fast ease-house',
@@ -211,6 +230,7 @@ export function SiteHeader() {
           </Link>
 
           <button
+            ref={menuButtonRef}
             type="button"
             className="inline-flex size-10 items-center justify-center lg:hidden"
             aria-expanded={mobileOpen}
@@ -261,6 +281,7 @@ export function SiteHeader() {
 /* ------------------------------------------------------------------------ */
 
 function MegaPanel({ group }: { group: NavGroup }) {
+  const pathname = usePathname();
   const reduced = usePrefersReducedMotion();
 
   return (
@@ -287,6 +308,7 @@ function MegaPanel({ group }: { group: NavGroup }) {
               <li key={`${item.href}-${item.label}`}>
                 <Link
                   href={item.href}
+                  aria-current={currentFor(item.href, pathname)}
                   {...(item.external ? { target: '_blank', rel: 'noreferrer noopener' } : {})}
                   className="group flex items-baseline justify-between gap-md py-2 text-ivory transition-colors duration-fast ease-house hover:text-bronze"
                 >
@@ -382,6 +404,7 @@ function LocaleSwitcher() {
 /* ------------------------------------------------------------------------ */
 
 function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const pathname = usePathname();
   const reduced = usePrefersReducedMotion();
   const [expanded, setExpanded] = useState<string | null>(null);
 
@@ -436,6 +459,7 @@ function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
                             <Link
                               key={`${item.href}-${item.label}`}
                               href={item.href}
+                              aria-current={currentFor(item.href, pathname)}
                               onClick={onClose}
                               className="text-ivory/85 hover:text-bronze flex items-center justify-between py-1.5 text-body-md"
                             >
@@ -454,6 +478,7 @@ function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
             <div className="mt-xl flex flex-col gap-md">
               <Link
                 href="/rfq"
+                aria-current={currentFor('/rfq', pathname)}
                 onClick={onClose}
                 className="border-bronze/70 text-ivory hover:bg-bronze/15 inline-flex items-center justify-center border px-5 py-3 text-body-md font-semibold rounded-control"
               >

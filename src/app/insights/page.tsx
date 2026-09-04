@@ -118,7 +118,7 @@ export default function InsightsPage() {
             </div>
             <a
               href={`mailto:${CONTACT.general}?subject=Insights%20%E2%80%94%20add%20me%20to%20the%20list`}
-              className="link-underline text-bronze text-body-md font-medium"
+              className="link-underline text-bronze-ink text-body-md font-medium"
             >
               {CONTACT.general} →
             </a>

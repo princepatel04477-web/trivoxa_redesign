@@ -112,11 +112,11 @@ export default async function RfqPage({ searchParams }: { searchParams: Promise<
                 <Prose className="text-body-sm">
                   <p className="surface-muted">
                     Write to{' '}
-                    <a href={`mailto:${CONTACT.sales}`} className="link-underline text-bronze">
+                    <a href={`mailto:${CONTACT.sales}`} className="link-underline text-bronze-ink">
                       {CONTACT.sales}
                     </a>{' '}
                     with the same four details, or to{' '}
-                    <a href={`mailto:${CONTACT.general}`} className="link-underline text-bronze">
+                    <a href={`mailto:${CONTACT.general}`} className="link-underline text-bronze-ink">
                       {CONTACT.general}
                     </a>{' '}
                     if you are not sure which desk handles it. Both are read by the founders.

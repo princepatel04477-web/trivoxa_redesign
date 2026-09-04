@@ -19,7 +19,7 @@ export default function NotFound() {
     <Section surface="deep" className="flex min-h-screen items-center">
       <Container>
         <div className="flex max-w-2xl flex-col gap-lg">
-          <BrandMark size={56} className="text-bronze" />
+          <BrandMark size={56} className="text-bronze-ink" />
           <Eyebrow>Error 404</Eyebrow>
           <h1 className="text-display-lg">This lane does not exist.</h1>
           <p className="surface-muted text-body-lg">
@@ -36,7 +36,7 @@ export default function NotFound() {
             ].map((item) => (
               <li key={item.href} className="border-ivory/12 border-b py-md">
                 <Link href={item.href} className="group flex items-baseline justify-between gap-lg">
-                  <span className="text-heading-md group-hover:text-bronze transition-colors duration-fast">
+                  <span className="text-heading-md group-hover:text-bronze-ink transition-colors duration-fast">
                     {item.label}
                   </span>
                   <span className="surface-faint text-body-sm">{item.note}</span>

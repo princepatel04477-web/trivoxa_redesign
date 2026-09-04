@@ -111,7 +111,7 @@ function Node({
           href={externalHref}
           target="_blank"
           rel="noreferrer noopener"
-          className="text-bronze mt-xs inline-flex items-center gap-1 text-body-sm font-medium"
+          className="text-bronze-ink mt-xs inline-flex items-center gap-1 text-body-sm font-medium"
         >
           {externalLabel}
           <ArrowUpRight aria-hidden size={13} />

@@ -1,10 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input, Select, Textarea } from '@/components/ui/field';
 import { Eyebrow, Prose } from '@/components/ui/typography';
 import { CATEGORIES, CONTACT, INDUSTRIES, PRODUCTS } from '@/content/taxonomy';
+import { focusFirstInvalid } from '@/lib/forms/focus-first-invalid';
 import { HONEYPOT_FIELD, composeEnquiry, isBot, isEmail } from '@/lib/forms/mailto';
 
 /**
@@ -75,6 +76,7 @@ export function RfqForm({ prefill }: { prefill: RfqPrefill }) {
     [HONEYPOT_FIELD]: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement | null>(null);
   const [sent, setSent] = useState<string | null>(null);
 
   const set = (key: keyof FormState, value: string): void => {
@@ -126,7 +128,10 @@ export function RfqForm({ prefill }: { prefill: RfqPrefill }) {
       setSent('nothing'); // say nothing, exactly as if it had worked
       return;
     }
-    if (!validate()) return;
+    if (!validate()) {
+      focusFirstInvalid(formRef.current);
+      return;
+    }
 
     const industry = INDUSTRIES.find((entry) => entry.slug === values.industry);
     const category = CATEGORIES.find((entry) => entry.slug === values.category);
@@ -170,7 +175,7 @@ export function RfqForm({ prefill }: { prefill: RfqPrefill }) {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-lg">
+    <form ref={formRef} onSubmit={onSubmit} noValidate className="flex flex-col gap-lg">
       <div className="grid grid-cols-12 gap-md">
         <Input
           className="col-span-12 sm:col-span-6"
@@ -295,12 +300,22 @@ export function RfqForm({ prefill }: { prefill: RfqPrefill }) {
 /* ------------------------------------------------------------------------ */
 
 function SentPanel({ href }: { href: string }) {
+  const headingRef = useRef<HTMLHeadingElement | null>(null);
+
+  useEffect(() => {
+    // The form has been replaced by this panel, so nothing persists that a live
+    // region could have been attached to — and a region inserted together with
+    // the change is not reliably announced. Focus is: the heading is read out
+    // the moment the buyer submits (P20).
+    headingRef.current?.focus();
+  }, []);
+
   return (
-    <div className="border-bronze/50 surface-raised flex flex-col gap-md border p-xl">
+    <div role="status" className="border-bronze/50 surface-raised flex flex-col gap-md border p-xl">
       <Eyebrow tick={false} className="surface-faint">
         Enquiry composed
       </Eyebrow>
-      <h2 className="text-heading-lg max-w-[28ch]">
+      <h2 ref={headingRef} tabIndex={-1} className="text-heading-lg max-w-[28ch] rounded-sm">
         Your mail client has the enquiry — send it and the desk replies {CONTACT.responseWindow}.
       </h2>
       <Prose className="text-body-md">
@@ -311,11 +326,11 @@ function SentPanel({ href }: { href: string }) {
       </Prose>
       <div className="mt-sm flex flex-wrap gap-md">
         {href ? (
-          <a href={href} className="link-underline text-bronze text-body-md font-medium">
+          <a href={href} className="link-underline text-bronze-ink text-body-md font-medium">
             Open the enquiry again →
           </a>
         ) : null}
-        <a href={`mailto:${CONTACT.sales}`} className="link-underline text-bronze text-body-md font-medium">
+        <a href={`mailto:${CONTACT.sales}`} className="link-underline text-bronze-ink text-body-md font-medium">
           {CONTACT.sales}
         </a>
       </div>

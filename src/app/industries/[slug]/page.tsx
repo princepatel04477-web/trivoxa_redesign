@@ -291,7 +291,7 @@ export default async function IndustryPage({ params }: { params: Promise<Params>
               <li key={entry.slug} className="col-span-12 sm:col-span-6 lg:col-span-3">
                 <Link
                   href={`/industries/${entry.slug}`}
-                  className="surface-hairline surface-muted hover:border-bronze/60 hover:text-bronze flex items-center justify-between gap-md border px-md py-md text-body-sm transition-colors duration-fast ease-house"
+                  className="surface-hairline surface-muted hover:border-bronze/60 hover:text-bronze-ink flex items-center justify-between gap-md border px-md py-md text-body-sm transition-colors duration-fast ease-house"
                 >
                   {entry.name}
                   <span className="surface-faint spec-value" data-spec>

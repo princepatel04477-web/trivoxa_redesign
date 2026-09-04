@@ -115,7 +115,7 @@ export function CareersLine() {
         <div className="flex flex-wrap items-center justify-between gap-md py-xl">
           <p className="surface-muted text-body-md">
             No open roles today. We still read every application that arrives at{' '}
-            <Link href={`mailto:${CAREERS_EMAIL}`} className="link-underline text-bronze font-medium">
+            <Link href={`mailto:${CAREERS_EMAIL}`} className="link-underline text-bronze-ink font-medium">
               {CAREERS_EMAIL}
             </Link>
             .

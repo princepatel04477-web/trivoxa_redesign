@@ -14,7 +14,9 @@ export type ButtonSize = 'md' | 'lg' | 'sm';
  *   secondary — 1px outline in the surface ink.
  *   ghost     — ink only.
  * Every variant's hover treatment is bronze: the underline/border shifts to
- * bronze. Bronze is never a button background — the header's persistent
+ * bronze, and the label shifts to `text-accent` — which resolves to bronze-ink
+ * on a light surface (AA) and to true bronze on a dark one (P20).
+ * Bronze is never a button background — the header's persistent
  * "Request a Quote" is the single bronze-heavy element, and it is bronze by
  * *accent*, not by fill.
  */
@@ -28,9 +30,9 @@ const VARIANTS: Record<ButtonVariant, string> = {
   ),
   secondary: cn(
     'surface-fg border-current bg-transparent',
-    'hover:border-bronze hover:text-bronze',
+    'hover:border-bronze hover:text-accent',
   ),
-  ghost: cn('surface-fg border border-transparent bg-transparent', 'hover:text-bronze'),
+  ghost: cn('surface-fg border border-transparent bg-transparent', 'hover:text-accent'),
 };
 
 const SIZES: Record<ButtonSize, string> = {

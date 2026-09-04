@@ -53,7 +53,7 @@ export function LegalDocumentView({ document }: { document: LegalDocument }) {
                     <li key={anchor.id} className="surface-hairline border-b">
                       <a
                         href={`#${anchor.id}`}
-                        className="surface-muted hover:text-bronze flex items-baseline gap-md py-md text-body-sm transition-colors duration-fast ease-house"
+                        className="surface-muted hover:text-bronze-ink flex items-baseline gap-md py-md text-body-sm transition-colors duration-fast ease-house"
                       >
                         <span className="surface-faint spec-value" data-spec>
                           {String(index + 1).padStart(2, '0')}

@@ -58,7 +58,14 @@ export const BRAND = {
   bronze: {
     token: '--color-bronze',
     hex: '#A88B68',
-    role: 'ACCENT ONLY. Hairlines, hover underlines, small icon fills, focus rings.',
+    role:
+      'ACCENT ONLY. Hairlines, hover underlines, small icon fills, focus rings, and TEXT ON DARK SURFACES ONLY (5.2:1 on espresso, 5.8:1 on espresso-deep).',
+  },
+  bronzeInk: {
+    token: '--color-bronze-ink',
+    hex: '#7A6244',
+    role:
+      'The same bronze, darkened until it is legible: text and links on ivory and soft ivory (5.0:1 and 5.4:1 — AA for body copy). Bronze proper fails AA on light surfaces at 2.8:1, so any bronze-coloured WORD on a light background uses this token instead. Never a surface, never a hairline.',
   },
   white: {
     token: '--color-white',
@@ -100,8 +107,17 @@ export type SurfaceTokens = {
   hairline: Hex;
   /** Raised card ground. Composited the same way. */
   raised: Hex;
-  /** Accent, always bronze. */
+  /** Accent, always bronze. Hairlines, borders, underlines, icon fills. */
   accent: Hex;
+  /**
+   * Accent as WORDS (P20). Bronze proper is 2.8:1 on ivory — it fails WCAG
+   * 1.4.3 for text at any size we actually set — so on the light surface this
+   * is `bronzeInk`, the same hue darkened to 5.0:1. On espresso and
+   * espresso-deep bronze already clears AA for body text, so it stays bronze.
+   * `text-accent` in globals.css maps to this; components on a fixed light
+   * ground use `text-bronze-ink` directly.
+   */
+  accentText: Hex;
   /** `color-scheme` for form controls and scrollbars. */
   colorScheme: 'light' | 'dark';
   /** The alphas the derived tokens were built from — the real design inputs. */
@@ -124,6 +140,8 @@ function defineSurface(input: {
   fg: Hex;
   raised: Hex;
   alpha: SurfaceTokens['alpha'];
+  /** Defaults to bronze; the light surface overrides it with bronzeInk. */
+  accentText?: Hex;
 }): SurfaceTokens {
   const { surface, bg, fg, alpha } = input;
   return {
@@ -135,6 +153,7 @@ function defineSurface(input: {
     hairline: composite(fg, alpha.hairline, bg),
     raised: input.raised,
     accent: BRAND.bronze.hex,
+    accentText: input.accentText ?? BRAND.bronze.hex,
     colorScheme: surface === 'light' ? 'light' : 'dark',
     alpha,
   };
@@ -147,6 +166,7 @@ export const SURFACES: Record<Surface, SurfaceTokens> = {
     fg: BRAND.espresso.hex,
     // ivorySoft is a canonical token, not a derived one.
     raised: BRAND.ivorySoft.hex,
+    accentText: BRAND.bronzeInk.hex,
     alpha: { muted: 0.74, faint: 0.5, hairline: 0.16, raised: 1 },
   }),
   dark: defineSurface({
@@ -285,6 +305,8 @@ export function contrastReport(): ContrastEntry[] {
       ['faint on bg', surface.faint, surface.bg],
       ['fg on raised', surface.fg, surface.raised],
       ['accent on bg', surface.accent, surface.bg],
+      ['accentText on bg', surface.accentText, surface.bg],
+      ['accentText on raised', surface.accentText, surface.raised],
     ];
 
     for (const [pair, fg, bg] of pairs) {
@@ -308,10 +330,11 @@ export function contrastReport(): ContrastEntry[] {
  * consult this instead of hardcoding an assumption — `faint` never clears
  * AA-normal, so it is legal for placeholders and disabled labels and illegal
  * for body copy, and `accent` is never body copy on any surface (bronze rule).
+ * Bronze WORDS go through `accentText`, which clears AA-normal on all three.
  */
 export function inkClearance(
   surface: Surface,
-  token: 'fg' | 'muted' | 'faint' | 'accent',
+  token: 'fg' | 'muted' | 'faint' | 'accent' | 'accentText',
 ): ContrastEntry['clears'] {
   const s = SURFACES[surface];
   return classify(contrastRatio(s[token], s.bg));

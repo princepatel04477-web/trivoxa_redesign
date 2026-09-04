@@ -20,7 +20,7 @@ export function Badge({
         'inline-flex items-center gap-1.5 rounded-pill border px-2.5 py-1',
         'text-[0.6875rem] font-semibold tracking-[0.12em] uppercase',
         tone === 'neutral' && 'surface-muted surface-hairline',
-        tone === 'accent' && 'border-bronze/60 text-bronze',
+        tone === 'accent' && 'border-bronze/60 text-bronze-ink',
         tone === 'outline' && 'surface-fg surface-hairline',
         className,
       )}

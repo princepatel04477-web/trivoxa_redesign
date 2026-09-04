@@ -61,7 +61,7 @@ export function CatalogTable({ rows }: { rows: CatalogRow[] }) {
                   <StatusBadge status={row.status} detail={row.certificationNote ?? undefined} />
                   <a
                     href={`/rfq?product=${row.slug}&category=${row.categorySlug}`}
-                    className="link-underline text-bronze text-body-sm font-medium opacity-0 transition-opacity duration-fast ease-house group-hover:opacity-100 group-focus-within:opacity-100"
+                    className="link-underline text-bronze-ink text-body-sm font-medium opacity-0 transition-opacity duration-fast ease-house group-hover:opacity-100 group-focus-within:opacity-100"
                   >
                     Quote
                   </a>
@@ -135,7 +135,7 @@ export function CatalogCards({ rows }: { rows: CatalogRow[] }) {
 
           <a
             href={`/rfq?product=${row.slug}&category=${row.categorySlug}`}
-            className="link-underline text-bronze text-body-sm font-medium"
+            className="link-underline text-bronze-ink text-body-sm font-medium"
           >
             Request a quotation →
           </a>

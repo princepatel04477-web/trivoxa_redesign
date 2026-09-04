@@ -4,7 +4,7 @@
  *  · ivory-on-espresso and espresso-on-ivory clear WCAG AA, computed;
  *  · motion values in TS match the CSS @theme block (no magic numbers).
  */
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -80,5 +80,73 @@ describe('motion parity', () => {
   it('the house curve is identical in both layers', () => {
     const theme = themeBlock();
     expect(theme).toContain(`--ease-house: ${EASE.house}`);
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* P20 — accent text contrast                                                 */
+/* -------------------------------------------------------------------------- */
+
+describe('bronze words (P20)', () => {
+  it('accentText clears AA for body copy on every surface ground and card', () => {
+    for (const surface of Object.values(SURFACES)) {
+      expect(
+        meetsAA(contrastRatio(surface.accentText, surface.bg), 'normal'),
+        `${surface.surface}: accentText on bg`,
+      ).toBe(true);
+      expect(
+        meetsAA(contrastRatio(surface.accentText, surface.raised), 'normal'),
+        `${surface.surface}: accentText on raised`,
+      ).toBe(true);
+    }
+  });
+
+  it('the light surface darkens bronze to bronze-ink; dark surfaces keep bronze', () => {
+    expect(SURFACES.light.accentText).toBe(BRAND.bronzeInk.hex);
+    expect(SURFACES.dark.accentText).toBe(BRAND.bronze.hex);
+    expect(SURFACES.deep.accentText).toBe(BRAND.bronze.hex);
+    // Bronze itself still fails AA as text on ivory — that is the reason the
+    // second token exists, and this is what stops anyone collapsing them.
+    expect(meetsAA(contrastRatio(BRAND.bronze.hex, BRAND.ivory.hex), 'normal')).toBe(false);
+  });
+
+  it('globals.css wires --surface-accent-text per surface', () => {
+    const block = (surface: string): string => {
+      const start = css.indexOf(`[data-surface='${surface}']`);
+      expect(start, surface).toBeGreaterThan(-1);
+      return css.slice(start, css.indexOf('}', css.indexOf('--surface-shadow-lift', start)));
+    };
+
+    expect(block('light')).toContain('--surface-accent-text: var(--color-bronze-ink)');
+    expect(block('dark')).toContain('--surface-accent-text: var(--color-bronze)');
+    expect(block('deep')).toContain('--surface-accent-text: var(--color-bronze)');
+    expect(css).toContain('@utility text-accent');
+  });
+
+  it('text-bronze only ever appears on a dark surface', () => {
+    // A gate, not a style preference: bronze on ivory is 2.8:1. Any component
+    // that renders bronze WORDS must be able to point at the dark ground it
+    // sits on (data-surface="deep"/"dark", or an explicit espresso background).
+    const root = path.resolve(__dirname, '../src');
+    const offenders: string[] = [];
+
+    const walk = (dir: string): void => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) walk(full);
+        else if (entry.name.endsWith('.tsx')) {
+          const src = readFileSync(full, 'utf8');
+          const usesBronzeText = /text-bronze(?!-ink)/.test(src);
+          const darkGround =
+            /data-surface=['"](?:dark|deep)['"]/.test(src) ||
+            /bg-espresso/.test(src) ||
+            /data-\[scrolled=true\]:bg-espresso/.test(src);
+          if (usesBronzeText && !darkGround) offenders.push(path.relative(root, full));
+        }
+      }
+    };
+
+    walk(root);
+    expect(offenders, `text-bronze on a light surface: ${offenders.join(', ')}`).toEqual([]);
   });
 });

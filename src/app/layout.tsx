@@ -67,9 +67,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Suspense>
             <ScrollProgress />
             <SiteHeader />
-            <div id="main" className="isolate">
+            <main id="main" className="isolate">
               {children}
-            </div>
+            </main>
             <SiteFooter />
           </SmoothScroll>
         </PerfTierProvider>

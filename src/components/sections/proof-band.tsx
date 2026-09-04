@@ -30,7 +30,7 @@ export function ProofBand() {
             <ul className="flex flex-col">
               {PORTS.map((port) => (
                 <li key={port.slug} className="border-ivory/12 flex gap-md border-b py-md first:border-t">
-                  <span className="spec-value text-bronze w-14 shrink-0" data-spec>
+                  <span className="spec-value text-bronze-ink w-14 shrink-0" data-spec>
                     {port.locode}
                   </span>
                   <span className="flex flex-col gap-1">
@@ -76,7 +76,7 @@ export function ProofBand() {
             </p>
             <Link
               href="/compliance"
-              className="link-underline text-bronze mt-md inline-block text-body-sm font-semibold"
+              className="link-underline text-bronze-ink mt-md inline-block text-body-sm font-semibold"
             >
               Read the certification register →
             </Link>

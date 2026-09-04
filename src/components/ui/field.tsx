@@ -44,7 +44,7 @@ export function FieldShell({ label, hint, error, required, className, children }
       <label htmlFor={id} className="surface-fg text-body-sm font-medium">
         {label}
         {required ? (
-          <span aria-hidden className="text-bronze">
+          <span aria-hidden className="text-bronze-ink">
             {' '}
             *
           </span>
@@ -61,7 +61,7 @@ export function FieldShell({ label, hint, error, required, className, children }
       ) : null}
 
       {error ? (
-        <p id={errorId} role="alert" className="text-body-sm font-medium text-bronze">
+        <p id={errorId} role="alert" className="text-body-sm font-medium text-bronze-ink">
           {error}
         </p>
       ) : null}

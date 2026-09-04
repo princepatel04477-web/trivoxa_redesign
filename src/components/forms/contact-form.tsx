@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input, Select, Textarea } from '@/components/ui/field';
 import { Eyebrow, Prose } from '@/components/ui/typography';
 import { CONTACT } from '@/content/taxonomy';
 import { INQUIRY_TYPES } from '@/content/faqs';
+import { focusFirstInvalid } from '@/lib/forms/focus-first-invalid';
 import { HONEYPOT_FIELD, composeEnquiry, isBot, isEmail } from '@/lib/forms/mailto';
 
 /**
@@ -45,6 +46,7 @@ const EMPTY: FormState = {
 export function ContactForm() {
   const [values, setValues] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLFormElement | null>(null);
   const [sent, setSent] = useState<string | null>(null);
 
   const set = (key: keyof FormState, value: string): void => {
@@ -70,7 +72,10 @@ export function ContactForm() {
       next.callback = 'That does not look like a reachable number.';
     }
     setErrors(next);
-    if (Object.keys(next).length > 0) return;
+    if (Object.keys(next).length > 0) {
+      focusFirstInvalid(formRef.current);
+      return;
+    }
 
     const href = composeEnquiry({
       to: mailbox,
@@ -96,7 +101,7 @@ export function ContactForm() {
   if (sent) return <SentPanel href={sent} mailbox={mailbox} />;
 
   return (
-    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-lg">
+    <form ref={formRef} onSubmit={onSubmit} noValidate className="flex flex-col gap-lg">
       <Select
         label="What is this about?"
         required
@@ -180,12 +185,20 @@ export function ContactForm() {
 }
 
 function SentPanel({ href, mailbox }: { href: string; mailbox: string }) {
+  const headingRef = useRef<HTMLHeadingElement | null>(null);
+
+  useEffect(() => {
+    // See the note in the RFQ panel: focus, not a live region, is what makes
+    // this confirmation reach a screen reader (P20).
+    headingRef.current?.focus();
+  }, []);
+
   return (
-    <div className="border-bronze/50 surface-raised flex flex-col gap-md border p-xl">
+    <div role="status" className="border-bronze/50 surface-raised flex flex-col gap-md border p-xl">
       <Eyebrow tick={false} className="surface-faint">
         Message composed
       </Eyebrow>
-      <h2 className="text-heading-lg max-w-[30ch]">
+      <h2 ref={headingRef} tabIndex={-1} className="text-heading-lg max-w-[30ch] rounded-sm">
         Your mail client has the message — send it and we reply {CONTACT.responseWindow}.
       </h2>
       <Prose className="text-body-md">
@@ -196,11 +209,11 @@ function SentPanel({ href, mailbox }: { href: string; mailbox: string }) {
       </Prose>
       <div className="mt-sm flex flex-wrap gap-md">
         {href ? (
-          <a href={href} className="link-underline text-bronze text-body-md font-medium">
+          <a href={href} className="link-underline text-bronze-ink text-body-md font-medium">
             Open the message again →
           </a>
         ) : null}
-        <a href={`mailto:${mailbox}`} className="link-underline text-bronze text-body-md font-medium">
+        <a href={`mailto:${mailbox}`} className="link-underline text-bronze-ink text-body-md font-medium">
           {mailbox}
         </a>
       </div>

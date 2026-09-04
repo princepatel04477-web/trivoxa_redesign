@@ -56,7 +56,7 @@ export function BusinessesPreview() {
                       href={division.externalHref}
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="text-bronze inline-flex items-center gap-1 text-body-sm font-semibold"
+                      className="text-bronze-ink inline-flex items-center gap-1 text-body-sm font-semibold"
                     >
                       {division.externalLabel}
                       <ArrowUpRight aria-hidden size={14} />

@@ -75,7 +75,7 @@ export default function ContactPage() {
                         <span className="surface-faint text-body-sm">{alias.label}</span>
                         <a
                           href={`mailto:${alias.value}`}
-                          className="link-underline text-bronze text-body-md font-medium"
+                          className="link-underline text-bronze-ink text-body-md font-medium"
                         >
                           {alias.value}
                         </a>
@@ -99,7 +99,7 @@ export default function ContactPage() {
                       <span className="surface-fg text-body-md">{leader.name}</span>
                       <a
                         href={`mailto:${leader.email}`}
-                        className="link-underline surface-muted hover:text-bronze text-body-sm"
+                        className="link-underline surface-muted hover:text-bronze-ink text-body-sm"
                       >
                         {leader.email}
                       </a>
@@ -169,7 +169,7 @@ export default function ContactPage() {
                           href={social.href}
                           target="_blank"
                           rel="noreferrer noopener"
-                          className="link-underline surface-muted hover:text-bronze text-body-sm"
+                          className="link-underline surface-muted hover:text-bronze-ink text-body-sm"
                         >
                           {social.label}
                         </a>
@@ -205,7 +205,7 @@ export default function ContactPage() {
                 </span>
                 <a
                   href={`mailto:${CONTACT[type.routesTo]}`}
-                  className="link-underline text-bronze col-span-12 text-body-sm sm:col-span-3 sm:text-right"
+                  className="link-underline text-bronze-ink col-span-12 text-body-sm sm:col-span-3 sm:text-right"
                 >
                   {CONTACT[type.routesTo]}
                 </a>

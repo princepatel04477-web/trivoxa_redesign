@@ -20,9 +20,17 @@ export function Link({ href, children, className, underline = true, ...rest }: A
   const classes = cn('surface-fg transition-colors duration-fast ease-house', underline && 'link-underline', className);
 
   if (isExternalHref(href)) {
+    const { target, ...anchorRest } = rest;
+    const finalTarget = target ?? '_blank';
+    // A new tab is a context change a screen reader does not announce on its
+    // own. We say it, unless the caller supplied an aria-label that already
+    // carries the link's full meaning (P20).
+    const announce = finalTarget === '_blank' && !anchorRest['aria-label'];
+
     return (
-      <a href={href} className={classes} target={rest.target ?? '_blank'} rel="noreferrer noopener" {...rest}>
+      <a href={href} className={classes} target={finalTarget} rel="noreferrer noopener" {...anchorRest}>
         {children}
+        {announce ? <span className="sr-only"> (opens in a new tab)</span> : null}
       </a>
     );
   }
@@ -47,7 +55,7 @@ export function ArrowLink({
   return (
     <Link href={href} className={cn('group inline-flex items-center gap-2 font-medium', className)}>
       <span className="link-underline">{children}</span>
-      <svg aria-hidden viewBox="0 0 20 12" className="h-3 w-5 shrink-0 text-bronze transition-transform duration-fast ease-house group-hover:translate-x-1 rtl:-scale-x-100" fill="none">
+      <svg aria-hidden viewBox="0 0 20 12" className="h-3 w-5 shrink-0 text-bronze-ink transition-transform duration-fast ease-house group-hover:translate-x-1 rtl:-scale-x-100" fill="none">
         <path d="M0 6h17M12 1l5 5-5 5" stroke="currentColor" strokeWidth="1.5" />
       </svg>
     </Link>

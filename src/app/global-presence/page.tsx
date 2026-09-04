@@ -133,7 +133,7 @@ export default function GlobalPresencePage() {
                     <li key={industry.slug}>
                       <Link
                         href={`/industries/${industry.slug}`}
-                        className="surface-hairline surface-muted hover:border-bronze/60 hover:text-bronze border px-2.5 py-1 text-body-sm transition-colors duration-fast ease-house"
+                        className="surface-hairline surface-muted hover:border-bronze/60 hover:text-bronze-ink border px-2.5 py-1 text-body-sm transition-colors duration-fast ease-house"
                       >
                         {industry.name}
                       </Link>

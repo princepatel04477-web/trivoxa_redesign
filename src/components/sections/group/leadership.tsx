@@ -46,7 +46,7 @@ export function GroupLeadership() {
 
               <a
                 href={`mailto:${leader.email}`}
-                className="link-underline text-bronze mt-auto inline-flex items-center gap-2 text-body-sm font-medium"
+                className="link-underline text-bronze-ink mt-auto inline-flex items-center gap-2 text-body-sm font-medium"
               >
                 <Mail aria-hidden size={14} />
                 {leader.email}

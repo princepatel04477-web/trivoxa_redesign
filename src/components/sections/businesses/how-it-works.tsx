@@ -39,7 +39,7 @@ export function HowItWorks({
                 key={step.step}
                 className="surface-hairline group grid grid-cols-12 gap-md border-b py-xl transition-colors duration-base ease-house hover:border-bronze/50"
               >
-                <span className="surface-faint spec-value col-span-2 text-display-sm leading-none transition-colors duration-base ease-house group-hover:text-bronze sm:col-span-1" data-spec>
+                <span className="surface-faint spec-value col-span-2 text-display-sm leading-none transition-colors duration-base ease-house group-hover:text-bronze-ink sm:col-span-1" data-spec>
                   {String(step.step).padStart(2, '0')}
                 </span>
 

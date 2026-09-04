@@ -135,7 +135,7 @@ export function ProductCatalog({
               <button
                 type="button"
                 onClick={() => select('all')}
-                className="link-underline text-bronze font-medium"
+                className="link-underline text-bronze-ink font-medium"
               >
                 Clear filter
               </button>
@@ -195,7 +195,7 @@ function FilterChip({
         'border px-md py-xs text-body-sm transition-colors duration-fast ease-house',
         active
           ? 'border-bronze bg-espresso text-ivory'
-          : 'surface-hairline surface-muted hover:border-bronze/60 hover:text-bronze',
+          : 'surface-hairline surface-muted hover:border-bronze/60 hover:text-bronze-ink',
       ].join(' ')}
     >
       {label}
@@ -224,11 +224,11 @@ function EmptyState({ onClear }: { onClear: () => void }) {
         <button
           type="button"
           onClick={onClear}
-          className="link-underline text-bronze text-body-sm font-medium"
+          className="link-underline text-bronze-ink text-body-sm font-medium"
         >
           Clear filter
         </button>
-        <a href="/rfq" className="link-underline text-bronze text-body-sm font-medium">
+        <a href="/rfq" className="link-underline text-bronze-ink text-body-sm font-medium">
           Request a sourced quotation →
         </a>
       </div>

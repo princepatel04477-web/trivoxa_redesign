@@ -126,3 +126,52 @@ visible table rows, poster images) — which was already the P4/P6 rule. The one
 frame-critical exception is the catalogue's Flip transition, which cannot wait
 for a promise: it uses `peekGsap()` and simply skips the transition if GSAP has
 not landed, because by the time a buyer clicks a category filter it always has.
+## 036 — P20 accessibility: bronze words, focus, and landmarks
+
+Four findings, four decisions. Each one is pinned by a test so it cannot be
+quietly reverted.
+
+**1. Bronze is not a text colour on light surfaces.** #A88B68 on ivory is 2.80:1
+— it fails WCAG 1.4.3 at every size we set, and it was in use for eyebrows,
+links, error messages and hover states across 26 files. A sixth brand token,
+`bronzeInk` #7A6244, is the same hue darkened to 5.01:1 on ivory and 5.41:1 on
+soft ivory: AA for body copy. Surfaces now expose `accentText` alongside
+`accent` (bronze stays for hairlines, borders, underlines and icon fills, which
+are non-text), and `--surface-accent-text` resolves per surface: bronze-ink on
+light, true bronze on espresso (5.23:1) and espresso-deep (5.80:1), where bronze
+already passes. `text-accent` is the surface-aware utility for components that
+appear on both grounds (buttons); components that only ever sit on ivory use
+`text-bronze-ink`. The header and footer — both dark — keep `text-bronze`, and a
+test gate now requires any file using `text-bronze` to be able to point at a
+dark ground. The contrast matrix in `scripts/check-brand-assets.ts` gained
+`accentText on bg` and `accentText on raised` rows for all three surfaces.
+
+**2. `<div id="main">` was not a landmark.** The skip link targeted it and it
+behaved like a main region visually, but screen readers had no `main` landmark
+to jump to. It is now `<main id="main">`.
+
+**3. Focus was being dropped.** Two cases: Escape-closing the mega panel or the
+mobile drawer unmounted the focused element and left focus on `<body>`, so a
+keyboard user was silently returned to the top of the document — focus now goes
+back to the trigger that opened the overlay. And a failed form submit coloured
+six borders and fired six `role="alert"` announcements without saying which
+field was the problem — `focusFirstInvalid()` now moves focus to the first
+`aria-invalid` field on the next frame (after React has written the attributes).
+The post-submit confirmation panel focuses its own heading for the same reason:
+the panel replaces the form in the DOM, so there is no persistent element a live
+region could have been attached to, and a region inserted together with the
+change is not reliably announced. It carries `role="status"` as well.
+
+**4. `aria-current="page"`, exact match only.** Nav links, mobile drawer links,
+the RFQ CTAs and the home lockup now report the current route. Exact match
+deliberately: announcing `/businesses` as "current page" while the buyer reads
+`/businesses/product-exports` is wrong, and the breadcrumb already carries the
+section context.
+
+Also verified rather than assumed: one `h1` per route and no skipped heading
+levels on `/`, `/industries/textile-apparel` and `/contact`; the region marquee
+pauses on hover and focus-within and stops under reduced motion; the honeypot is
+`aria-hidden` with `tabIndex={-1}`; external links announce "(opens in a new
+tab)" unless the caller supplied an aria-label; the catalogue table has a
+`sr-only` caption and `scope` on every header cell; every form field has
+`autoComplete`.

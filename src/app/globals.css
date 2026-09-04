@@ -21,6 +21,7 @@
   --color-espresso-deep: #171210;
   --color-ivory-soft: #faf8f3;
   --color-bronze: #a88b68;
+  --color-bronze-ink: #7a6244;
   --color-white: #ffffff;
 
   /* ---------------------------------------------------------------------- */
@@ -151,6 +152,10 @@
     --surface-hairline: color-mix(in srgb, var(--color-espresso) 16%, var(--color-ivory));
     --surface-raised: var(--color-ivory-soft);
     --surface-accent: var(--color-bronze);
+    /* Words in bronze have to be legible: bronze itself is 2.8:1 on ivory, so
+       accent TEXT on a light surface is bronze-ink (5.0:1). Hairlines, borders
+       and underlines keep the true bronze. */
+    --surface-accent-text: var(--color-bronze-ink);
     --surface-shadow: var(--shadow-card-light);
     --surface-shadow-lift: var(--shadow-lift-light);
   }
@@ -164,6 +169,7 @@
     --surface-hairline: color-mix(in srgb, var(--color-ivory) 18%, var(--color-espresso));
     --surface-raised: color-mix(in srgb, var(--color-ivory) 4.5%, var(--color-espresso));
     --surface-accent: var(--color-bronze);
+    --surface-accent-text: var(--color-bronze); /* 5.2:1 on espresso */
     --surface-shadow: var(--shadow-card-dark);
     --surface-shadow-lift: var(--shadow-lift-dark);
   }
@@ -177,6 +183,7 @@
     --surface-hairline: color-mix(in srgb, var(--color-ivory) 16%, var(--color-espresso-deep));
     --surface-raised: color-mix(in srgb, var(--color-ivory) 4.5%, var(--color-espresso-deep));
     --surface-accent: var(--color-bronze);
+    --surface-accent-text: var(--color-bronze); /* 5.8:1 on espresso-deep */
     --surface-shadow: var(--shadow-card-dark);
     --surface-shadow-lift: var(--shadow-lift-dark);
   }
@@ -443,6 +450,13 @@
 @utility surface-raised {
   background-color: var(--surface-raised);
 }
+/* Surface-aware bronze words: bronze-ink on light, bronze on dark. Use this
+   (or text-bronze-ink in a component that only ever sits on a light surface)
+   instead of text-bronze whenever the accent is TEXT. */
+@utility text-accent {
+  color: var(--surface-accent-text);
+}
+
 @utility surface-hairline {
   border-color: var(--surface-hairline);
 }
