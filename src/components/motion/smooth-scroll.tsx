@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect } from 'react';
-import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
-import { setupGsap, ScrollTrigger } from '@/lib/motion/gsap-setup';
+import { loadGsap } from '@/lib/motion/gsap-setup';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { usePerfTier } from '@/lib/perf-tier';
 
@@ -23,26 +22,39 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
     if (reduced || tier === 'low') return;
     if (window.matchMedia('(pointer: coarse)').matches && tier !== 'high') return;
 
-    const gsap = setupGsap();
+    let disposed = false;
+    let teardown: (() => void) | null = null;
 
-    const lenis = new Lenis({
-      duration: 1.05,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-      touchMultiplier: 1.4,
+    // Lenis is imported with GSAP: a smoother without ScrollTrigger in sync is
+    // worse than native scrolling, and neither belongs in blocking JS.
+    void Promise.all([loadGsap(), import('lenis')]).then(([bundle, lenisModule]) => {
+      if (disposed) return;
+
+      const Lenis = lenisModule.default;
+      const lenis = new Lenis({
+        duration: 1.05,
+        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+        touchMultiplier: 1.4,
+      });
+
+      const onScroll = (): void => bundle.ScrollTrigger.update();
+      lenis.on('scroll', onScroll);
+
+      const tick = (time: number): void => lenis.raf(time * 1000);
+      bundle.gsap.ticker.add(tick);
+      bundle.gsap.ticker.lagSmoothing(0);
+
+      teardown = () => {
+        bundle.gsap.ticker.remove(tick);
+        lenis.off('scroll', onScroll);
+        lenis.destroy();
+      };
     });
 
-    const onScroll = (): void => ScrollTrigger.update();
-    lenis.on('scroll', onScroll);
-
-    const tick = (time: number): void => lenis.raf(time * 1000);
-    gsap.ticker.add(tick);
-    gsap.ticker.lagSmoothing(0);
-
     return () => {
-      gsap.ticker.remove(tick);
-      lenis.off('scroll', onScroll);
-      lenis.destroy();
+      disposed = true;
+      teardown?.();
     };
   }, [reduced, tier]);
 

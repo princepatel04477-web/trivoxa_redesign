@@ -13,7 +13,6 @@ import {
   Wheat,
   type LucideIcon,
 } from 'lucide-react';
-import { animate } from 'animejs';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { DURATION } from '@/lib/tokens/motion';
 
@@ -74,12 +73,16 @@ export function IndustryIcon({
         if (!entries.some((entry) => entry.isIntersecting)) return;
         observer.disconnect();
 
-        drawable.forEach((el, index) => {
-          animate(el, {
-            strokeDashoffset: [el.getTotalLength(), 0],
-            duration: DURATION.slow,
-            delay: index * 60,
-            ease: 'outExpo',
+        // anime.js is loaded when an icon first enters view, not on first paint:
+        // nine icons on an industry page should not cost a blocking library.
+        void import('animejs').then(({ animate }) => {
+          drawable.forEach((el, index) => {
+            animate(el, {
+              strokeDashoffset: [el.getTotalLength(), 0],
+              duration: DURATION.slow,
+              delay: index * 60,
+              ease: 'outExpo',
+            });
           });
         });
       },

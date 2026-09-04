@@ -5,7 +5,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { BRAND } from '@/lib/tokens/colors';
 import { HQ, arcPoints, latLngToVector3, regionsWithAnchors } from '@/lib/geo';
-import { setupGsap, ScrollTrigger } from '@/lib/motion/gsap-setup';
+import { loadGsap, peekGsap, type GsapBundle } from '@/lib/motion/gsap-setup';
 
 /**
  * P9 · HIGH TIER — the signature globe.
@@ -64,17 +64,30 @@ function Corridors() {
 
   /* draw-on-scroll, SCRUBBED — the corridor is drawn by the visitor, not by a timer */
   useEffect(() => {
-    setupGsap();
-    const trigger = ScrollTrigger.create({
-      trigger: '#global-presence-preview',
-      start: 'top 75%',
-      end: 'bottom 35%',
-      scrub: 0.5,
-      onUpdate: (self) => {
-        progress.current = self.progress;
-      },
-    });
-    return () => trigger.kill();
+    let trigger: { kill: () => void } | null = null;
+    let cancelled = false;
+
+    const create = ({ ScrollTrigger }: GsapBundle): void => {
+      if (cancelled) return;
+      trigger = ScrollTrigger.create({
+        trigger: '#global-presence-preview',
+        start: 'top 75%',
+        end: 'bottom 35%',
+        scrub: 0.5,
+        onUpdate: (self) => {
+          progress.current = self.progress;
+        },
+      });
+    };
+
+    const ready = peekGsap();
+    if (ready) create(ready);
+    else void loadGsap().then(create);
+
+    return () => {
+      cancelled = true;
+      trigger?.kill();
+    };
   }, []);
 
   useFrame(() => {

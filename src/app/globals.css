@@ -482,3 +482,29 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* HeroCopyMotion (P20): the hero's non-headline copy enters on CSS, not on a
+   JavaScript animation library, because it sits on the LCP path. Reduced motion
+   removes the animation entirely — the copy is simply there. */
+@keyframes hero-copy-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero-copy-enter {
+  animation: hero-copy-enter var(--duration-base) var(--ease-house) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-copy-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

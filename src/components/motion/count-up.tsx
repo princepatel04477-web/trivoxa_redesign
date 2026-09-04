@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { setupGsap, ScrollTrigger } from '@/lib/motion/gsap-setup';
+import { loadGsap, peekGsap, type GsapBundle } from '@/lib/motion/gsap-setup';
 import { DURATION, EASE_GSAP } from '@/lib/tokens/motion';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { formatNumber } from '@/lib/utils';
@@ -44,27 +44,44 @@ export function CountUp({
 
   useEffect(() => {
     if (reduced) return;
-    const el = ref.current;
-    if (!el) return;
+    if (!ref.current) return;
 
-    const gsap = setupGsap();
-    const state = { current: Math.max(0, Math.round(value * from)) };
+    let cancelled = false;
+    let tween: { kill: () => void; scrollTrigger?: { kill: () => void } } | null = null;
 
-    const tween = gsap.to(state, {
-      current: value,
-      duration: DURATION.slow / 1000,
-      ease: EASE_GSAP.outExpo,
-      snap: { current: 1 },
-      onUpdate: () => {
-        el.textContent = `${prefix}${formatNumber(Math.round(state.current), locale)}${suffix}`;
-      },
-      scrollTrigger: { trigger: el, start, once: true },
-    });
+    const begin = ({ gsap, ScrollTrigger }: GsapBundle): void => {
+      const el = ref.current;
+      if (cancelled || !el) return;
+
+      const state = { current: Math.max(0, Math.round(value * from)) };
+
+      tween = gsap.to(state, {
+        current: value,
+        duration: DURATION.slow / 1000,
+        ease: EASE_GSAP.outExpo,
+        snap: { current: 1 },
+        onUpdate: () => {
+          el.textContent = `${prefix}${formatNumber(Math.round(state.current), locale)}${suffix}`;
+        },
+        scrollTrigger: { trigger: el, start, once: true },
+      }) as unknown as { kill: () => void; scrollTrigger?: { kill: () => void } };
+
+      void ScrollTrigger;
+    };
+
+    // GSAP is off the critical path now: run immediately if it has landed
+    // (the usual case — the download starts during hydration), otherwise when
+    // it does. The server-rendered final value is on screen either way, so
+    // there is never a "0 regions served" frame.
+    const ready = peekGsap();
+    if (ready) begin(ready);
+    else void loadGsap().then(begin);
 
     return () => {
-      tween.scrollTrigger?.kill();
-      tween.kill();
-      ScrollTrigger.refresh();
+      cancelled = true;
+      tween?.scrollTrigger?.kill();
+      tween?.kill();
+      peekGsap()?.ScrollTrigger.refresh();
     };
   }, [value, locale, suffix, prefix, from, start, reduced]);
 

@@ -1,9 +1,7 @@
 'use client';
 
 import { useId, useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { DURATION, EASE_MOTION } from '@/lib/tokens/motion';
 
 export type AccordionItem = {
   id: string;
@@ -82,24 +80,24 @@ export function Accordion({
               </button>
             </h3>
 
-            <AnimatePresence initial={false}>
-              {isOpen ? (
-                <motion.div
-                  id={panelId}
-                  role="region"
-                  aria-labelledby={triggerId}
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: DURATION.base / 1000, ease: EASE_MOTION.house }}
-                  className="overflow-hidden"
-                >
-                  <div className="surface-muted pb-lg text-body-md [&_p+p]:mt-md">
-                    {item.answer}
-                  </div>
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
+            {/* Height animation without a library (P20): grid-template-rows
+                0fr -> 1fr transitions to auto height, and `inert` keeps a
+                closed panel out of the tab order and the a11y tree. */}
+            <div
+              id={panelId}
+              role="region"
+              aria-labelledby={triggerId}
+              inert={!isOpen}
+              className={`grid overflow-hidden transition-[grid-template-rows,opacity] duration-base ease-[var(--ease-house)] ${
+                isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+              }`}
+            >
+              <div>
+                <div className="surface-muted pb-lg text-body-md [&_p+p]:mt-md">
+                  {item.answer}
+                </div>
+              </div>
+            </div>
           </div>
         );
       })}

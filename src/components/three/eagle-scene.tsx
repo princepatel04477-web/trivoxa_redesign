@@ -5,7 +5,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { sampleEagle } from '@/lib/three/eagle-points';
-import { setupGsap, ScrollTrigger } from '@/lib/motion/gsap-setup';
+import { loadGsap, peekGsap, type GsapBundle } from '@/lib/motion/gsap-setup';
 import { BRAND } from '@/lib/tokens/colors';
 
 /**
@@ -118,21 +118,33 @@ function EaglePoints({ count, interactive }: { count: number; interactive: boole
 
   /* scroll dissolve — SCRUBBED. The user controls it. */
   useEffect(() => {
-    const g = setupGsap();
-    const trigger = ScrollTrigger.create({
-      trigger: '#hero',
-      start: 'top top',
-      end: 'bottom top',
-      scrub: 0.4,
-      onUpdate: (self) => {
-        u.current.uDisperse.value = self.progress;
-        u.current.uOpacity.value = 0.9 * (1 - self.progress * 0.85);
-      },
-    });
+    let trigger: { kill: () => void } | null = null;
+    let cancelled = false;
+
+    const create = ({ ScrollTrigger }: GsapBundle): void => {
+      if (cancelled) return;
+      trigger = ScrollTrigger.create({
+        trigger: '#hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 0.4,
+        onUpdate: (self) => {
+          u.current.uDisperse.value = self.progress;
+          u.current.uOpacity.value = 0.9 * (1 - self.progress * 0.85);
+        },
+      });
+    };
+
+    // Scrub only — no entrance animation — so an async GSAP load costs nothing
+    // here: the poster is already on screen and the canvas stays at progress 0
+    // until the trigger exists.
+    const ready = peekGsap();
+    if (ready) create(ready);
+    else void loadGsap().then(create);
 
     return () => {
-      trigger.kill();
-      void g;
+      cancelled = true;
+      trigger?.kill();
     };
   }, [u]);
 

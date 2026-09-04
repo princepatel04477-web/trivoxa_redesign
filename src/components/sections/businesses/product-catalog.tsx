@@ -2,12 +2,11 @@
 
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Flip } from 'gsap/Flip';
 import { CatalogCards, CatalogTable } from '@/components/sections/businesses/catalog-table';
 import { OnboardingState } from '@/components/sections/onboarding-state';
 import { Container } from '@/components/ui/layout';
 import { Eyebrow } from '@/components/ui/typography';
-import { setupGsap } from '@/lib/motion/gsap-setup';
+import { peekGsap, type GsapBundle } from '@/lib/motion/gsap-setup';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import type { CatalogFacet, CatalogRow } from '@/lib/selectors';
 
@@ -51,7 +50,7 @@ export function ProductCatalog({
 
   const [category, setCategory] = useState(initialCategory);
   const scopeRef = useRef<HTMLDivElement | null>(null);
-  const flipState = useRef<ReturnType<typeof Flip.getState> | null>(null);
+  const flipState = useRef<ReturnType<GsapBundle['Flip']['getState']> | null>(null);
 
   const validCategory = facets.some((facet) => facet.slug === category) ? category : 'all';
   const activeFacet = facets.find((facet) => facet.slug === validCategory);
@@ -62,8 +61,13 @@ export function ProductCatalog({
   );
 
   const select = (slug: string): void => {
-    if (!reduced && scopeRef.current) {
-      flipState.current = Flip.getState(scopeRef.current.querySelectorAll('[data-row]'));
+    // GSAP is loaded off the critical path. Capturing the pre-change layout has
+    // to happen in this frame or not at all, so if the bundle has not landed yet
+    // we simply skip the Flip — rows swap instantly, which is correct, just less
+    // graceful. By the time a buyer is clicking filters it is always there.
+    const bundle = peekGsap();
+    if (!reduced && bundle && scopeRef.current) {
+      flipState.current = bundle.Flip.getState(scopeRef.current.querySelectorAll('[data-row]'));
     }
 
     setCategory(slug);
@@ -76,7 +80,10 @@ export function ProductCatalog({
     if (!state || !scopeRef.current) return;
     flipState.current = null;
 
-    const gsap = setupGsap();
+    const bundle = peekGsap();
+    if (!bundle) return;
+    const { gsap, Flip } = bundle;
+
     Flip.from(state, {
       targets: scopeRef.current.querySelectorAll('[data-row]'),
       duration: 0.5,

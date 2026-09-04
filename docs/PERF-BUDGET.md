@@ -98,3 +98,25 @@ and anime.js.
 WebGL status is as designed: `eagle-scene`, `globe-r3f` and `globe-cobe` are
 separate lazy chunks reached only from inside a tier check, and a tier-`low`
 visitor downloads none of them.
+
+## Measurements after P20 (2026-09-04)
+
+`npm run build`, First Load JS:
+
+| Route | P19 | P20 | Budget |
+| --- | --- | --- | --- |
+| `/` | 249 kB | **138 kB** | < 180 kB ✓ |
+| `/businesses` | 174 kB | **118 kB** | ✓ |
+| `/businesses/product-exports` | 177 kB | **121 kB** | ✓ |
+| `/businesses/service-exports` | 220 kB | **119 kB** | ✓ |
+| `/contact` | 252 kB | **151 kB** | ✓ |
+| `/rfq` | 228 kB | see build log | ✓ |
+| `/global-presence` | 183 kB | **127 kB** | ✓ |
+| `/group` | 181 kB | **126 kB** | ✓ |
+
+What moved: GSAP and its plugins (~36 kB gz chunk plus ~26 kB of plugin chunks),
+Motion (~43 kB gz) and Lenis (~9 kB gz) out of the initial HTML — see ADR 035.
+The WebGL poster/scenes were already lazy and unchanged.
+
+Still to watch: `/contact` and `/rfq` carry form validation (zod) at ~33 kB
+above the base; that is real functionality, not decoration, and it stays.

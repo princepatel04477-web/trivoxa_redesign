@@ -95,3 +95,34 @@ body copy; `large` for ≥24px; `ui` for hairlines, focus rings and icon fills o
 | deep | fg on raised | `#F4EFE6` on `#211C1A` | **14.72** | normal |
 | deep | accent on bg | `#A88B68` on `#171210` | **5.80** | normal |
 <!-- CONTRAST:END -->
+## 035 — P20: the animation stack is loaded off the critical path
+
+`src/lib/motion/gsap-setup.ts` now exports `loadGsap()` (dynamic import of
+gsap + ScrollTrigger + SplitText + Flip, cached, plugins registered once) and
+`peekGsap()` (synchronous access for frame-critical callers); the old synchronous
+`setupGsap()` is gone. `useGSAP()` runs its callback immediately when the bundle
+is already cached and otherwise when it lands, cancelling cleanly on unmount.
+Lenis is imported alongside GSAP inside SmoothScroll, Motion's route progress
+imports `motion/react` on the first navigation, and anime.js imports when an
+industry icon first enters view. HeroCopyMotion and Accordion no longer use a
+library at all — they animate with CSS (`@keyframes hero-copy-enter`, and
+`grid-template-rows: 0fr -> 1fr` with `inert` on a closed panel).
+
+Measured, `next build` First Load JS: homepage 249 kB -> 138 kB, /businesses
+174 -> 118, service-exports 220 -> 119, /contact 252 -> 151, /global-presence
+183 -> 127. The GSAP chunk (~36 kB gz) and the Motion chunk (~43 kB gz) are no
+longer in the initial HTML.
+
+Being straight about what this does and does not do: the download is kicked off
+during hydration, so total bytes transferred are essentially unchanged. What
+changes is that ~130 kB gzipped of animation code no longer blocks first paint
+or competes with hydration for the main thread, and a visitor who bounces from
+the hero never executes SplitText at all. The honest claim is a faster
+interactive page, not a smaller one.
+
+Consequences that call sites must respect: GSAP arrival is asynchronous, so
+every animated state must be correct without it (server-rendered final values,
+visible table rows, poster images) — which was already the P4/P6 rule. The one
+frame-critical exception is the catalogue's Flip transition, which cannot wait
+for a promise: it uses `peekGsap()` and simply skips the transition if GSAP has
+not landed, because by the time a buyer clicks a category filter it always has.

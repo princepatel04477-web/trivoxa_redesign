@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { animate } from 'motion/react';
 import { DURATION, EASE_MOTION } from '@/lib/tokens/motion';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 
@@ -29,19 +28,33 @@ export function RouteProgress() {
     }
 
     bar.style.opacity = '1';
-    const run = animate(bar, { scaleX: [0, 0.7] }, { duration: DURATION.slow / 1000, ease: 'easeOut' });
+    bar.style.transform = 'scaleX(0)';
 
-    const finish = animate(
-      bar,
-      { scaleX: 1, opacity: [1, 0] },
-      { duration: DURATION.fast / 1000, ease: EASE_MOTION.house, delay: 0.12 },
-    );
+    let run: { stop: () => void } | null = null;
+    let finish: { stop: () => void } | null = null;
+    let cancelled = false;
+
+    // Motion is the right tool for this (an imperative, interruptible tween on a
+    // DOM node), but it is imported only when a navigation actually happens —
+    // the first route change, not first paint.
+    void import('motion/react').then(({ animate }) => {
+      if (cancelled) return;
+      run = animate(bar, { scaleX: [0, 0.7] }, { duration: DURATION.slow / 1000, ease: 'easeOut' }) as unknown as {
+        stop: () => void;
+      };
+      finish = animate(
+        bar,
+        { scaleX: 1, opacity: [1, 0] },
+        { duration: DURATION.fast / 1000, ease: EASE_MOTION.house, delay: 0.12 },
+      ) as unknown as { stop: () => void };
+    });
 
     return () => {
-      run.stop();
-      finish.stop();
+      cancelled = true;
+      run?.stop();
+      finish?.stop();
     };
-  }, [pathname, searchParams, reduced]);
+    }, [pathname, searchParams, reduced]);
 
   if (reduced) return null;
 
