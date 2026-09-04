@@ -86,6 +86,32 @@ npm run build     # type-checks, lints, runs check-taxonomy + check-brand-assets
                   # prerenders 35 routes, prints the First Load JS budget
 ```
 
+Route-level sweep (all 25 sitemap URLs, plus hostile inputs):
+
+| Probe | Result |
+| --- | --- |
+| Every sitemap URL | 200, unique `<title>` and description, canonical present, `og:image` and `twitter:card` set |
+| `/legal/not-a-doc`, `/industries/nope`, `/businesses/nope`, unknown top-level path | 404 with the designed not-found page |
+| `/businesses/product-exports?category=bogus` | 200, falls back to all 25 products rather than an empty table |
+| `/businesses/product-exports?category=textile-apparel` | 200, 5 rows — filtered server-side, so it survives with JavaScript off |
+| `/rfq?product=cotton-yarn&division=service-exports&path=audit` | 200, prefill selected, audit path reflected in the composed message |
+| Homepage with scripting unavailable | Ports and UN/LOCODEs, 25 products, 9 industries, 6 regions and the 24-hour response window are all in the served HTML — `<CountUp>` renders its final value server-side, so there is no "0 regions served" frame |
+
+Copy spot-check (the spec's rule is concrete or nothing): `/industries/agriculture-food`
+opens "Gujarat's agri belt, exported properly: spices, groundnuts, castor
+derivatives, dry fruits and processed foods with per-lot analysis";
+`/businesses/service-exports` describes AI work as "applied engineering for
+businesses that want AI in a process rather than in a press release" and
+marketing as "measured on enquiries that name a product and a quantity rather
+than on impressions or follower counts". No abstraction-stacking found, no
+placeholder copy anywhere in `src/`.
+
+One workflow caveat discovered while auditing: running `npm run build` while
+`npm run dev` is serving the same `.next` directory leaves the dev server
+requiring production chunk layouts and returning 500s for routes that are
+perfectly healthy. Stop the dev server before building, or delete `.next` and
+restart it afterwards. The application was never at fault.
+
 Runtime spot-checks used for this audit (production build, `next start`):
 `/sitemap.xml` returns 25 URLs and no `/styleguide`; `/robots.txt` disallows
 `/styleguide` and names the sitemap; JSON-LD `@type` sets present on `/`,
