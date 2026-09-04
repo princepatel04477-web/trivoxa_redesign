@@ -8,6 +8,18 @@ import { ProofBand } from '@/components/sections/proof-band';
 import { WhoWeAre } from '@/components/sections/who-we-are';
 import { WhyTrivoxa } from '@/components/sections/why-trivoxa';
 
+import type { Metadata } from 'next';
+
+/**
+ * The title and description come from the root layout's defaults; what the
+ * homepage must state for itself is its canonical. Without it, `/`, `/?category=…`
+ * and any future query-parametered variant are all separate documents to a
+ * crawler — and the homepage is the one URL that cannot afford that (P22 audit).
+ */
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
+
 /**
  * The homepage (P6–P10).
  *

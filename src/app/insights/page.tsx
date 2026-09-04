@@ -9,7 +9,7 @@ import { CONTACT } from '@/content/taxonomy';
 import { INSIGHT_SERIES, INSIGHTS, hasInsights } from '@/content/editorial';
 
 export const metadata: Metadata = {
-  title: 'Insights — What Trivoxa Group Will Publish',
+  title: 'Insights — What We Will Publish',
   description:
     'No articles yet, and no placeholder cards pretending otherwise. Three series are defined: market intelligence per category, compliance and documentation changes, and how sourcing and supply chains actually work.',
   alternates: { canonical: '/insights' },

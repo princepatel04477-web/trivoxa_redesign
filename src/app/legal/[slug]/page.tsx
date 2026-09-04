@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   if (!document) return {};
 
   return {
-    title: `${document.title} — Trivoxa Group`,
+    title: document.title,
     description: document.summary,
     alternates: { canonical: `/legal/${document.slug}` },
   };

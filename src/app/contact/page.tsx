@@ -12,7 +12,7 @@ import { CONTACT } from '@/content/taxonomy';
 import { JsonLd, faqSchema } from '@/components/seo/json-ld';
 
 export const metadata: Metadata = {
-  title: 'Contact Trivoxa Group — Surat, Gujarat',
+  title: 'Contact — Surat, Gujarat, India',
   description:
     'Every way to reach Trivoxa Group: the four mailbox aliases, the three founders directly, the registered office in Surat, working hours in IST, and what to do when you would rather be called than email.',
   alternates: { canonical: '/contact' },

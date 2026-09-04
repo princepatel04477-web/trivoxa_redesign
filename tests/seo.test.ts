@@ -6,6 +6,8 @@
  * parent company described differently from the page. These tests pin the
  * schema to the content modules that render the visible page.
  */
+import { readdirSync, readFileSync } from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import sitemap from '@/app/sitemap';
 import {
@@ -142,5 +144,67 @@ describe('other schema nodes', () => {
     for (const port of PORTS) {
       expect(names.some((name) => name.includes(port.locode))).toBe(true);
     }
+  });
+});
+
+/* -------------------------------------------------------------------------- */
+/* P22 metadata audit — canonicals and titles                                 */
+/* -------------------------------------------------------------------------- */
+
+describe('per-route metadata (P22 audit)', () => {
+  const pages = ((): string[] => {
+    const out: string[] = [];
+    const walk = (dir: string): void => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) walk(full);
+        else if (entry.name === 'page.tsx') out.push(full);
+      }
+    };
+    walk(path.resolve(__dirname, '../src/app'));
+    return out;
+  })();
+
+  /**
+   * The styleguide is dev-only, disallowed in robots.txt and absent from the
+   * sitemap: giving it a canonical would tell crawlers to index a page we have
+   * asked them not to fetch. It is the one route allowed to opt out.
+   */
+  const exempt = (file: string): boolean => file.includes('/styleguide/');
+
+  it('every route that declares metadata declares a canonical', () => {
+    const missing: string[] = [];
+    for (const file of pages) {
+      if (exempt(file)) continue;
+      const src = readFileSync(file, 'utf8');
+      const declaresMetadata = /export const metadata|generateMetadata/.test(src);
+      if (declaresMetadata && !src.includes('canonical')) missing.push(path.relative(process.cwd(), file));
+    }
+    expect(missing, `no canonical: ${missing.join(', ')}`).toEqual([]);
+  });
+
+  it('the homepage self-canonicalises', () => {
+    const src = readFileSync(path.resolve(__dirname, '../src/app/page.tsx'), 'utf8');
+    expect(src).toMatch(/canonical:\s*'\/'/);
+  });
+
+  it('no route title repeats the brand the template already appends', () => {
+    // `title.template` is "%s | Trivoxa Group", so a page title containing the
+    // brand renders as "Privacy Policy — Trivoxa Group | Trivoxa Group". Nine
+    // routes shipped like that; this is what stops the tenth.
+    const offenders: string[] = [];
+    for (const file of pages) {
+      const src = readFileSync(file, 'utf8');
+      for (const line of src.split('\n')) {
+        if (/^\s*title:/.test(line) && /Trivoxa Group/.test(line)) {
+          offenders.push(`${path.relative(process.cwd(), file)}: ${line.trim()}`);
+        }
+        // generateMetadata can compose a title too
+        if (/title: `\$\{.*\} — Trivoxa Group`/.test(line)) {
+          offenders.push(`${path.relative(process.cwd(), file)}: ${line.trim()}`);
+        }
+      }
+    }
+    expect(offenders, offenders.join('\n')).toEqual([]);
   });
 });

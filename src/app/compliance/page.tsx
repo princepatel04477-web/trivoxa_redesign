@@ -10,7 +10,7 @@ import { COMPANY, SHIVESHWAR_CANONICAL_SENTENCE } from '@/content/company';
 import { CERTIFICATIONS, CONTACT } from '@/content/taxonomy';
 
 export const metadata: Metadata = {
-  title: 'Compliance & Certifications — Trivoxa Group',
+  title: 'Compliance & Certifications',
   description:
     'The credentials Trivoxa Group holds today (IEC, GST), the ones in progress with their published target quarters (FIEO, APEDA, Spice Board, FSSAI, ISO 9001, CE, WHO-GMP), and what that means for a pharmaceutical or food enquiry.',
   alternates: { canonical: '/compliance' },

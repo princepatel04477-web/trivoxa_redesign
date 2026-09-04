@@ -9,7 +9,7 @@ import { COMPANY, VALUES } from '@/content/company';
 import { CAREERS_EMAIL, HIRING_PROCESS, OPEN_ROLES, WHAT_WE_LOOK_FOR, hasOpenRoles } from '@/content/editorial';
 
 export const metadata: Metadata = {
-  title: 'Careers at Trivoxa Group — Surat',
+  title: 'Careers — Surat, Gujarat',
   description:
     'No open roles today, and no roles invented to fill a page. What we look for, how hiring works at a founder-led export group in Surat, and where to send a speculative application.',
   alternates: { canonical: '/careers' },
