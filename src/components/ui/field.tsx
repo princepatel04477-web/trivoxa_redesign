@@ -44,7 +44,7 @@ export function FieldShell({ label, hint, error, required, className, children }
       <label htmlFor={id} className="surface-fg text-body-sm font-medium">
         {label}
         {required ? (
-          <span aria-hidden className="text-bronze-ink">
+          <span aria-hidden className="text-accent">
             {' '}
             *
           </span>
@@ -61,7 +61,7 @@ export function FieldShell({ label, hint, error, required, className, children }
       ) : null}
 
       {error ? (
-        <p id={errorId} role="alert" className="text-body-sm font-medium text-bronze-ink">
+        <p id={errorId} role="alert" className="text-body-sm font-medium text-accent">
           {error}
         </p>
       ) : null}
@@ -116,7 +116,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
           required={required}
           aria-invalid={invalid}
           aria-describedby={describedBy}
-          className={cn(CONTROL, 'surface-hairline surface-bg select-chevron pr-10')}
+          className={cn(
+            CONTROL,
+            'surface-hairline surface-bg select-chevron pr-10',
+            '[&>option]:bg-espresso [&>option]:text-ivory [data-surface=light]_&>[&>option]:bg-ivory [data-surface=light]_&>[&>option]:text-espresso',
+          )}
           {...rest}
         >
           {options.map((option) => (

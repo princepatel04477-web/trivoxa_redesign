@@ -45,7 +45,7 @@ export function MagneticButton({
       };
 
       const onLeave = (): void => {
-        gsap.to(inner, { x: 0, y: 0, duration: 0.7, ease: 'elastic.out(1, 0.4)' });
+        gsap.to(inner, { x: 0, y: 0, duration: 0.6, ease: 'power3.out' });
       };
 
       root.addEventListener('pointermove', onMove);

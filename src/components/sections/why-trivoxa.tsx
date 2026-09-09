@@ -56,7 +56,7 @@ export function WhyTrivoxa() {
                 trace
                 className="col-span-12 flex flex-col gap-md p-lg md:col-span-6 xl:col-span-3"
               >
-                <Icon aria-hidden className="text-bronze-ink size-5" strokeWidth={1.25} />
+                <Icon aria-hidden className="text-accent size-5" strokeWidth={1.25} />
                 <h3 className="text-heading-lg">{pillar.title}</h3>
                 <p className="surface-muted text-body-md">{pillar.body}</p>
               </Card>

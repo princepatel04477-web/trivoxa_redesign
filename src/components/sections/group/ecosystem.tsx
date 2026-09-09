@@ -31,7 +31,7 @@ export function GroupEcosystem() {
         />
 
         <Reveal className="mt-3xl">
-          <div className="mx-auto flex max-w-4xl flex-col items-stretch">
+          <div className="mx-auto flex max-w-[56rem] flex-col items-stretch">
             {/* parent */}
             <Node
               label={RELATIONSHIP_LABEL[SHIVESHWAR_RELATIONSHIP]}

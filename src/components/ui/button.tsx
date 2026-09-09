@@ -23,9 +23,9 @@ export type ButtonSize = 'md' | 'lg' | 'sm';
 const VARIANTS: Record<ButtonVariant, string> = {
   primary: cn(
     'border border-transparent',
-    '[data-surface=light]_&:bg-espresso [data-surface=light]_&:text-ivory',
-    '[data-surface=dark]_&:bg-ivory [data-surface=dark]_&:text-espresso',
-    '[data-surface=deep]_&:bg-ivory [data-surface=deep]_&:text-espresso-deep',
+    '[data-surface=light]_&:bg-espresso [data-surface=light]_&:text-ivory [data-surface=light]_&:hover:bg-espresso/90',
+    '[data-surface=dark]_&:bg-ivory [data-surface=dark]_&:text-espresso [data-surface=dark]_&:hover:bg-ivory/90',
+    '[data-surface=deep]_&:bg-ivory [data-surface=deep]_&:text-espresso-deep [data-surface=deep]_&:hover:bg-ivory/90',
     'hover:border-bronze',
   ),
   secondary: cn(
@@ -42,12 +42,12 @@ const SIZES: Record<ButtonSize, string> = {
 };
 
 const BASE = cn(
-  'relative inline-flex items-center justify-center font-medium',
+  'group relative inline-flex items-center justify-center font-medium',
   'rounded-control select-none whitespace-nowrap',
   'transition-[color,background-color,border-color,transform] duration-fast ease-house',
-  'hover:-translate-y-px active:translate-y-0',
+  'hover:-translate-y-px active:translate-y-0 active:scale-[0.99]',
   'disabled:pointer-events-none disabled:opacity-45',
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bronze',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-bronze focus-visible:ring-offset-2',
 );
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {

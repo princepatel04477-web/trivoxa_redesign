@@ -79,10 +79,10 @@ export function BrandWordmark({ height = 14, className, decorative = false, labe
 
 export function BrandLockup({ variant = 'lockup', size = 32, className, label, decorative }: BrandLockupProps) {
   if (variant === 'mark') return <BrandMark size={size} className={className} decorative={decorative} label={label} />;
-  if (variant === 'wordmark') return <BrandWordmark height={size * 0.42} className={className} decorative={decorative} label={label} />;
+  if (variant === 'wordmark') return <BrandWordmark height={size * 0.68} className={className} decorative={decorative} label={label} />;
 
-  const wordHeight = size * 0.42;
-  const gap = size * 0.375;
+  const wordHeight = size * 0.68;
+  const gap = size * 0.32;
 
   return (
     <span

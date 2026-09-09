@@ -99,11 +99,27 @@ describe('analytics bus', () => {
     // The privacy position in the cookie notice depends on this: no gtag, no
     // GA/Plausible/Meta script, no vendor SDK. If someone adds one, this test
     // fails and the notice has to change in the same commit.
-    const { execSync } = await import('node:child_process');
-    const out = execSync(
-      "grep -rniE 'window\\.gtag|googletagmanager|google-analytics|plausible\\.io|mixpanel|segment\\.io|hotjar|clarity\\.ms|fbq\\(' src/ || true",
-      { encoding: 'utf8' },
-    );
-    expect(out.trim(), `analytics provider found:\n${out}`).toBe('');
+    const { readdirSync, readFileSync, statSync } = await import('node:fs');
+    const { join } = await import('node:path');
+
+    const pattern = /window\.gtag|googletagmanager|google-analytics|plausible\.io|mixpanel|segment\.io|hotjar|clarity\.ms|fbq\(/i;
+    const matches: string[] = [];
+
+    function scan(dir: string): void {
+      for (const entry of readdirSync(dir)) {
+        const full = join(dir, entry);
+        if (statSync(full).isDirectory()) {
+          scan(full);
+        } else if (/\.(tsx?|jsx?|mjs|cjs|html|css)$/.test(entry)) {
+          const content = readFileSync(full, 'utf8');
+          if (pattern.test(content)) {
+            matches.push(full);
+          }
+        }
+      }
+    }
+
+    scan('src');
+    expect(matches, `analytics provider found in: ${matches.join(', ')}`).toEqual([]);
   });
 });

@@ -5,12 +5,13 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion } from 'motion/react';
 import { BrandLockup } from '@/components/ui/brand-lockup';
+import { MagneticButton } from '@/components/motion/magnetic-button';
 import { StatusBadge } from '@/components/ui/badge';
 import { NAV_GROUPS, type NavGroup } from '@/lib/nav';
 import { SHIPPED_LOCALES } from '@/lib/i18n/locales';
 import { useGSAP } from '@/components/motion/use-gsap';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
-import { DURATION, EASE_MOTION, STAGGER } from '@/lib/tokens/motion';
+import { DURATION, EASE_GSAP, EASE_MOTION, STAGGER } from '@/lib/tokens/motion';
 import { CONTACT } from '@/content/taxonomy';
 import { cn } from '@/lib/utils';
 
@@ -55,32 +56,34 @@ export function SiteHeader() {
     const header = headerRef.current;
     if (!header) return;
 
-    const set = (scrolled: boolean): void => {
+    header.style.setProperty('--header-h', '84px');
+
+    // Height compression rides the house curve — driven straight off the
+    // ScrollTrigger callbacks that also flip data-scrolled (for the CSS fill
+    // and hairline), rather than a MutationObserver watching the attribute
+    // this same effect just set.
+    const compress = (scrolled: boolean): void => {
       header.dataset.scrolled = scrolled ? 'true' : 'false';
+      gsap.to(header, {
+        height: scrolled ? 64 : 84,
+        duration: reduced ? 0 : DURATION.fast / 1000,
+        ease: EASE_GSAP.outExpo,
+        overwrite: 'auto',
+        onUpdate: () => {
+          header.style.setProperty('--header-h', `${header.offsetHeight}px`);
+        },
+      });
     };
 
     const trigger = ScrollTrigger.create({
       start: 80,
       end: 'max',
-      onEnter: () => set(true),
-      onEnterBack: () => set(true),
-      onLeaveBack: () => set(false),
+      onEnter: () => compress(true),
+      onEnterBack: () => compress(true),
+      onLeaveBack: () => compress(false),
     });
-
-    // Height compression is a GSAP tween so it rides the house curve.
-    const observer = new MutationObserver(() => {
-      const scrolled = header.dataset.scrolled === 'true';
-      gsap.to(header, {
-        height: scrolled ? 64 : 84,
-        duration: reduced ? 0 : DURATION.fast / 1000,
-        ease: 'power3.out',
-        overwrite: 'auto',
-      });
-    });
-    observer.observe(header, { attributes: true, attributeFilter: ['data-scrolled'] });
 
     return () => {
-      observer.disconnect();
       trigger.kill();
     };
   });
@@ -163,20 +166,28 @@ export function SiteHeader() {
         'fixed inset-x-0 top-0 z-50 text-ivory',
         'transition-[background-color,border-color] duration-fast ease-house',
         'border-b border-transparent',
-        'data-[scrolled=true]:bg-espresso data-[scrolled=true]:border-bronze/40',
-        'data-[scrolled=true]:backdrop-blur-sm',
+        'data-[scrolled=true]:bg-espresso/95 data-[scrolled=true]:border-bronze/35',
+        'data-[scrolled=true]:backdrop-blur-md',
+        mobileOpen && 'bg-espresso border-bronze/35',
       )}
       style={{ height: 84 }}
     >
       <div className="container-content flex h-full items-center justify-between gap-lg">
-        <Link
-          href="/"
-          className="shrink-0 rounded-sm py-2 text-ivory transition-opacity hover:opacity-80"
-          aria-label="Trivoxa Group — home"
-          aria-current={currentFor('/', pathname)}
+        <motion.div
+          initial={reduced ? false : { opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: DURATION.slow / 1000, ease: EASE_MOTION.outExpo }}
+          className="shrink-0"
         >
-          <BrandLockup size={30} />
-        </Link>
+          <Link
+            href="/"
+            className="rounded-sm py-2 text-ivory transition-opacity hover:opacity-80"
+            aria-label="Trivoxa Group — home"
+            aria-current={currentFor('/', pathname)}
+          >
+            <BrandLockup size={30} />
+          </Link>
+        </motion.div>
 
         {/* desktop nav */}
         <nav aria-label="Primary" className="hidden items-center gap-xl lg:flex">
@@ -217,22 +228,26 @@ export function SiteHeader() {
         <div className="flex items-center gap-md">
           <LocaleSwitcher />
 
-          <Link
-            href="/rfq"
-            aria-current={currentFor('/rfq', pathname)}
-            className={cn(
-              'hidden items-center gap-2 border border-bronze/70 px-5 py-2.5 text-body-sm font-semibold sm:inline-flex',
-              'rounded-control text-ivory transition-all duration-fast ease-house',
-              'hover:border-bronze hover:bg-bronze/15',
-            )}
-          >
-            Request a Quote
-          </Link>
+          {/* The one magnetic element on the page (docs/MOTION.md: "applied
+              to the PRIMARY CTA only") — this is that CTA. */}
+          <MagneticButton className="hidden sm:inline-flex" strength={0.22}>
+            <Link
+              href="/rfq"
+              aria-current={currentFor('/rfq', pathname)}
+              className={cn(
+                'inline-flex items-center gap-2 border border-bronze/70 px-5 py-2.5 text-body-sm font-semibold',
+                'rounded-control text-ivory transition-all duration-fast ease-house',
+                'hover:border-bronze hover:bg-bronze/15',
+              )}
+            >
+              Request a Quote
+            </Link>
+          </MagneticButton>
 
           <button
             ref={menuButtonRef}
             type="button"
-            className="inline-flex size-10 items-center justify-center lg:hidden"
+            className="inline-flex size-11 items-center justify-center lg:hidden"
             aria-expanded={mobileOpen}
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             onClick={() => setMobileOpen((v) => !v)}
@@ -416,7 +431,7 @@ function MobileNav({ open, onClose }: { open: boolean; onClose: () => void }) {
           animate={{ opacity: 1 }}
           exit={reduced ? undefined : { opacity: 0 }}
           transition={{ duration: DURATION.fast / 1000 }}
-          className="bg-espresso-deep fixed inset-0 top-[64px] z-40 overflow-y-auto lg:hidden"
+          className="bg-espresso-deep fixed inset-x-0 bottom-0 top-[var(--header-h,84px)] z-40 overflow-y-auto lg:hidden"
         >
           <nav aria-label="Primary mobile" className="container-content flex flex-col py-xl">
             {NAV_GROUPS.map((group, index) => (

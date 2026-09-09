@@ -205,7 +205,7 @@ export default function ContactPage() {
                 </span>
                 <a
                   href={`mailto:${CONTACT[type.routesTo]}`}
-                  className="link-underline text-bronze-ink col-span-12 text-body-sm sm:col-span-3 sm:text-right"
+                  className="link-underline text-accent col-span-12 text-body-sm sm:col-span-3 sm:text-right"
                 >
                   {CONTACT[type.routesTo]}
                 </a>
@@ -220,7 +220,7 @@ export default function ContactPage() {
           <SectionHeading eyebrow="Questions" title="Practical answers, before you write." />
           <JsonLd data={faqSchema(CONTACT_FAQ, 'Contacting Trivoxa Group')} />
           <Accordion
-            className="mt-2xl max-w-3xl"
+            className="mt-2xl max-w-[48rem]"
             items={CONTACT_FAQ.map((faq) => ({
               id: faq.id,
               question: faq.question,

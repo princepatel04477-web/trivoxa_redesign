@@ -1,5 +1,6 @@
 import type { HTMLAttributes, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { KineticTextReveal } from '@/components/motion/kinetic-text-reveal';
 
 /**
  * Eyebrow — the section label the content docs call out:
@@ -38,6 +39,8 @@ export type SectionHeadingProps = {
   /** Heading level. h2 by default; pages own the single h1. */
   as?: 'h1' | 'h2' | 'h3';
   size?: 'display-xl' | 'display-lg' | 'display-md' | 'display-sm';
+  /** Whether to animate title with kinetic word reveal (default: true) */
+  reveal?: boolean;
   className?: string;
   id?: string;
 };
@@ -57,6 +60,7 @@ export function SectionHeading({
   align = 'left',
   as: Tag = 'h2',
   size = 'display-md',
+  reveal = true,
   className,
   id,
 }: SectionHeadingProps) {
@@ -79,18 +83,34 @@ export function SectionHeading({
         )}
       >
         <div className={cn('flex flex-col gap-md', centered ? 'items-center' : 'items-start')}>
-          <Tag
-            id={id}
-            className={cn(
-              size === 'display-xl' && 'text-display-xl',
-              size === 'display-lg' && 'text-display-lg',
-              size === 'display-md' && 'text-display-md',
-              size === 'display-sm' && 'text-display-sm',
-              'surface-fg',
-            )}
-          >
-            {title}
-          </Tag>
+          {reveal && typeof title === 'string' ? (
+            <KineticTextReveal
+              as={Tag}
+              id={id}
+              className={cn(
+                size === 'display-xl' && 'text-display-xl',
+                size === 'display-lg' && 'text-display-lg',
+                size === 'display-md' && 'text-display-md',
+                size === 'display-sm' && 'text-display-sm',
+                'surface-fg',
+              )}
+            >
+              {title}
+            </KineticTextReveal>
+          ) : (
+            <Tag
+              id={id}
+              className={cn(
+                size === 'display-xl' && 'text-display-xl',
+                size === 'display-lg' && 'text-display-lg',
+                size === 'display-md' && 'text-display-md',
+                size === 'display-sm' && 'text-display-sm',
+                'surface-fg',
+              )}
+            >
+              {title}
+            </Tag>
+          )}
           {lede ? (
             <p className={cn('surface-muted text-body-lg max-w-[62ch]', centered && 'mx-auto')}>
               {lede}

@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { PageHero } from '@/components/sections/page-hero';
 import { ClosingCta } from '@/components/sections/closing-cta';
@@ -16,27 +17,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/businesses/product-exports' },
 };
 
-/**
- * P12 — /businesses/product-exports.
- *
- * The catalogue is the conversion asset, so the page is the table: hero,
- * filters, table, then the two things a buyer asks next (samples, factory
- * audits) and the route into an RFQ. The seven-step process is not repeated
- * here — it is linked, because printing it twice is how two versions of it
- * eventually disagree.
- */
-type Query = Record<string, string | string[] | undefined>;
-
-/**
- * Filters are read here, on the server. That makes this route dynamic rather
- * than prerendered — a deliberate trade: a shared or crawled
- * `?category=home-textiles` link must contain the filtered rows, not a loading
- * state (ADR 027).
- */
-export default async function ProductExportsPage({ searchParams }: { searchParams: Promise<Query> }) {
-  const query = await searchParams;
-  const initialCategory = typeof query.category === 'string' ? query.category : 'all';
-
+export default function ProductExportsPage() {
   const rows = catalogRows();
   const band = proofBand();
   const sampleCategories = CATEGORIES.filter((category) => category.supportsSampleRequest).length;
@@ -64,7 +45,9 @@ export default async function ProductExportsPage({ searchParams }: { searchParam
 
       <Section surface="light" id="catalogue" bleed>
         <JsonLd data={catalogSchema(rows, 'Trivoxa Group export catalogue')} />
-        <ProductCatalog rows={rows} facets={catalogFacets()} initialCategory={initialCategory} />
+        <Suspense fallback={<div className="min-h-[400px]" />}>
+          <ProductCatalog rows={rows} facets={catalogFacets()} />
+        </Suspense>
       </Section>
 
       <Section surface="light" tight className="border-t surface-hairline">

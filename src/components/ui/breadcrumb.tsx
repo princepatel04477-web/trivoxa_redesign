@@ -21,7 +21,7 @@ export function Breadcrumb({ trail, className }: { trail: Crumb[]; className?: s
                 </span>
               ) : (
                 <>
-                  <Link href={crumb.href} className="link-underline transition-colors hover:text-bronze-ink">
+                  <Link href={crumb.href} className="link-underline transition-colors hover:text-accent">
                     {crumb.label}
                   </Link>
                   <span aria-hidden className="surface-faint">

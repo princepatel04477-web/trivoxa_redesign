@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { StatusBadge } from '@/components/ui/badge';
 import type { CatalogRow } from '@/lib/selectors';
 
@@ -59,12 +60,12 @@ export function CatalogTable({ rows }: { rows: CatalogRow[] }) {
               <td className="px-md py-lg">
                 <span className="flex items-center justify-end gap-md">
                   <StatusBadge status={row.status} detail={row.certificationNote ?? undefined} />
-                  <a
+                  <Link
                     href={`/rfq?product=${row.slug}&category=${row.categorySlug}`}
-                    className="link-underline text-bronze-ink text-body-sm font-medium opacity-0 transition-opacity duration-fast ease-house group-hover:opacity-100 group-focus-within:opacity-100"
+                    className="link-underline text-accent text-body-sm font-medium opacity-70 md:opacity-0 transition-opacity duration-fast ease-house group-hover:opacity-100 group-focus-within:opacity-100"
                   >
                     Quote
-                  </a>
+                  </Link>
                 </span>
               </td>
             </tr>
@@ -133,12 +134,12 @@ export function CatalogCards({ rows }: { rows: CatalogRow[] }) {
             ))}
           </dl>
 
-          <a
+          <Link
             href={`/rfq?product=${row.slug}&category=${row.categorySlug}`}
-            className="link-underline text-bronze-ink text-body-sm font-medium"
+            className="link-underline text-accent text-body-sm font-medium"
           >
             Request a quotation →
-          </a>
+          </Link>
         </li>
       ))}
     </ul>

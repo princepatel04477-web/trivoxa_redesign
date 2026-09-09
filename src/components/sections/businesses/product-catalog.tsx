@@ -1,7 +1,7 @@
 'use client';
 
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { CatalogCards, CatalogTable } from '@/components/sections/businesses/catalog-table';
 import { OnboardingState } from '@/components/sections/onboarding-state';
 import { Container } from '@/components/ui/layout';
@@ -47,9 +47,16 @@ export function ProductCatalog({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const reduced = usePrefersReducedMotion();
 
-  const [category, setCategory] = useState(initialCategory);
+  const queryCategory = searchParams.get('category');
+  const [category, setCategory] = useState(queryCategory ?? initialCategory);
+
+  useEffect(() => {
+    if (queryCategory) setCategory(queryCategory);
+  }, [queryCategory]);
+
   const scopeRef = useRef<HTMLDivElement | null>(null);
   const flipState = useRef<ReturnType<GsapBundle['Flip']['getState']> | null>(null);
 

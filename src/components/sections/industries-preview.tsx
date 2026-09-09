@@ -49,8 +49,8 @@ export function IndustriesPreview() {
 
               <h3 className="text-heading-lg">{industry.name}</h3>
 
-              {/* description appears on hover/focus — the tile stays calm */}
-              <p className="surface-muted text-body-sm opacity-0 transition-opacity duration-fast ease-house group-hover:opacity-100 group-focus-within:opacity-100">
+              {/* description visible on mobile, reveals on hover/focus on desktop */}
+              <p className="surface-muted text-body-sm opacity-100 md:opacity-0 transition-opacity duration-fast ease-house md:group-hover:opacity-100 md:group-focus-within:opacity-100">
                 {industry.shortDescription}
               </p>
 

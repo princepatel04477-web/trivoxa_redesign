@@ -8,6 +8,8 @@ import { SITE_URL } from '@/components/seo/json-ld';
  * dev-only and returns 404 in production — asking a crawler not to fetch it is
  * cheaper than letting it record a 404 against the domain.
  */
+export const dynamic = 'force-static';
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [

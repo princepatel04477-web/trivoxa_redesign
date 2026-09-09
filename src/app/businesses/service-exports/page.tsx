@@ -130,7 +130,7 @@ export default function ServiceExportsPage() {
           <SectionHeading eyebrow="Questions" title="What buyers ask before step one." />
           <JsonLd data={faqSchema(SERVICE_FAQ, 'Working with Trivoxa Digital')} />
           <Accordion
-            className="mt-2xl max-w-3xl"
+            className="mt-2xl max-w-[48rem]"
             items={SERVICE_FAQ.map((faq) => ({
               id: faq.id,
               question: faq.question,

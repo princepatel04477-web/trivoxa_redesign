@@ -202,7 +202,7 @@ export function GlobeR3F() {
   const [hovered, setHovered] = useState<string | null>(null);
 
   return (
-    <div className="relative">
+    <div className="relative h-full w-full">
       <Canvas
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true }}

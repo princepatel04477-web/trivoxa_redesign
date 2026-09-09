@@ -32,6 +32,8 @@ const STATIC_ROUTES: { path: string; priority: number; changeFrequency: Metadata
   { path: '/careers', priority: 0.6, changeFrequency: 'monthly' },
 ];
 
+export const dynamic = 'force-static';
+
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     ...STATIC_ROUTES.map((route) => ({

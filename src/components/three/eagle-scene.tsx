@@ -180,8 +180,10 @@ function EaglePoints({ count, interactive }: { count: number; interactive: boole
     target.lerp(pointerTarget.current, 1 - Math.pow(0.001, delta));
   });
 
+  const responsiveScale = Math.min(1, (viewport.width * 0.92) / 2.15);
+
   return (
-    <points geometry={geometry} frustumCulled={false}>
+    <points scale={responsiveScale} geometry={geometry} frustumCulled={false}>
       <shaderMaterial
         vertexShader={VERTEX}
         fragmentShader={FRAGMENT}

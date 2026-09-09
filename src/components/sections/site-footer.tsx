@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { BrandLockup } from '@/components/ui/brand-lockup';
+import { Reveal } from '@/components/motion/reveal';
 import { Container } from '@/components/ui/layout';
 import { CATEGORIES, CONTACT, INDUSTRIES } from '@/content/taxonomy';
 import { SHIVESHWAR_FOOTER_LINE } from '@/content/company';
@@ -24,7 +25,7 @@ export function SiteFooter() {
   return (
     <footer data-surface="deep" className="surface-bg surface-fg border-t border-bronze/25">
       <Container className="py-section-tight">
-        <div className="grid grid-cols-12 gap-xl">
+        <Reveal as="div" staggerChildren className="grid grid-cols-12 gap-xl">
           {/* brand + contact block */}
           <div className="col-span-12 flex flex-col gap-lg lg:col-span-4">
             <BrandLockup size={34} className="text-ivory" />
@@ -107,7 +108,7 @@ export function SiteFooter() {
               .map((category) => (
                 <Link
                   key={category.slug}
-                  href={`/businesses/product-exports/${category.slug}`}
+                  href={`/businesses/product-exports?category=${category.slug}`}
                   className="surface-muted hover:text-bronze py-1 text-body-sm transition-colors duration-fast"
                 >
                   {category.name}
@@ -184,18 +185,18 @@ export function SiteFooter() {
               </Link>
             </div>
           </div>
-        </div>
+        </Reveal>
 
         {/* regions line — one array, two surfaces, no drift */}
         <div className="border-ivory/12 mt-3xl border-t pt-lg">
           <p className="eyebrow mb-md">Regions We Serve</p>
-          <ul className="flex flex-wrap gap-x-lg gap-y-xs">
+          <Reveal as="ul" staggerChildren distance="subtle" className="flex flex-wrap gap-x-lg gap-y-xs">
             {regions.map((region) => (
               <li key={region.slug} className="surface-muted text-body-sm">
                 {region.name}
               </li>
             ))}
-          </ul>
+          </Reveal>
         </div>
 
         <div className="border-ivory/12 mt-xl flex flex-col gap-md border-t pt-lg md:flex-row md:items-center md:justify-between">

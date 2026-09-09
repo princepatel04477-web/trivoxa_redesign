@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input, Select, Textarea } from '@/components/ui/field';
 import { Eyebrow, Prose } from '@/components/ui/typography';
@@ -63,23 +64,74 @@ export type RfqPrefill = {
   path?: string;
 };
 
-export function RfqForm({ prefill }: { prefill: RfqPrefill }) {
-  const [values, setValues] = useState<FormState>({
+export function PathNote({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="border-bronze/40 surface-raised mb-2xl flex flex-col gap-xs border p-lg">
+      <Eyebrow tick={false} className="surface-faint">
+        {title}
+      </Eyebrow>
+      <p className="surface-muted text-body-md max-w-[74ch]">{body}</p>
+    </div>
+  );
+}
+
+export function RfqPathNote() {
+  const searchParams = useSearchParams();
+  const path = searchParams.get('path');
+  if (path === 'audit') {
+    return (
+      <PathNote
+        title="Factory audit request"
+        body="Marked for the audit route: tell us the protocol, the dates and who is attending. We arrange access at our parent company's mill in Surat or at the partner factory, and send the documentation set in advance."
+      />
+    );
+  }
+  if (path === 'sample') {
+    return (
+      <PathNote
+        title="Sample request"
+        body="Marked for sampling: give us the specification and the courier account or address. Textile samples typically ship within 20 days of specification lock, and your approval is recorded against the sample reference."
+      />
+    );
+  }
+  return null;
+}
+
+export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
+  const searchParams = useSearchParams();
+  const paramCategory = searchParams.get('category') ?? prefill?.category ?? '';
+  const paramProduct = searchParams.get('product') ?? prefill?.product ?? '';
+  const paramDivision = searchParams.get('division') ?? prefill?.division ?? '';
+  const paramPath = searchParams.get('path') ?? prefill?.path ?? '';
+
+  const [values, setValues] = useState<FormState>(() => ({
     fullName: '',
     companyName: '',
     email: '',
     phone: '',
     destination: '',
     industry: '',
-    category: prefill.category && CATEGORIES.some((c) => c.slug === prefill.category) ? prefill.category : '',
-    product: resolveProductName(prefill.product),
+    category: paramCategory && CATEGORIES.some((c) => c.slug === paramCategory) ? paramCategory : '',
+    product: resolveProductName(paramProduct),
     requirement: '',
     referral: '',
     [HONEYPOT_FIELD]: '',
-  });
+  }));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement | null>(null);
   const [sent, setSent] = useState<SubmissionResult | 'nothing' | null>(null);
+
+  useEffect(() => {
+    const cat = searchParams.get('category');
+    const prod = searchParams.get('product');
+    if (cat || prod) {
+      setValues((current) => ({
+        ...current,
+        category: cat && CATEGORIES.some((c) => c.slug === cat) ? cat : current.category,
+        product: prod ? resolveProductName(prod) : current.product,
+      }));
+    }
+  }, [searchParams]);
 
   const set = (key: keyof FormState, value: string): void => {
     setValues((current) => {
@@ -138,7 +190,7 @@ export function RfqForm({ prefill }: { prefill: RfqPrefill }) {
 
     const industry = INDUSTRIES.find((entry) => entry.slug === values.industry);
     const category = CATEGORIES.find((entry) => entry.slug === values.category);
-    const serviceSide = prefill.division === 'service-exports' || values.industry === 'technology';
+    const serviceSide = paramDivision === 'service-exports' || values.industry === 'technology';
 
     // The subject line the desk sees: what it is about, then who it is from.
     const about =
@@ -161,7 +213,7 @@ export function RfqForm({ prefill }: { prefill: RfqPrefill }) {
         { label: 'Product or service of interest', value: values.product },
         { label: 'Requirement', value: values.requirement },
         { label: 'How they heard about us', value: referralLabel(values.referral) },
-        { label: 'Requested path', value: pathLabel(prefill.path) },
+        { label: 'Requested path', value: pathLabel(paramPath) },
       ],
       footer: `Sent from trivoxagroup.com/rfq · ${new Date().toISOString().slice(0, 10)}`,
     };
@@ -175,7 +227,7 @@ export function RfqForm({ prefill }: { prefill: RfqPrefill }) {
         division: serviceSide ? 'service-exports' : 'product-exports',
         industry: industry?.slug,
         category: category?.slug,
-        path: prefill.path ?? undefined,
+        path: paramPath || undefined,
         destination: values.destination.trim() || undefined,
       },
     }).then((result) => {

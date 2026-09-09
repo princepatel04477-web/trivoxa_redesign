@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { CountUp } from '@/components/motion/count-up';
+import { Reveal } from '@/components/motion/reveal';
 import { Container, Section } from '@/components/ui/layout';
 import { CERTIFICATIONS, PORTS } from '@/content/taxonomy';
 import { proofBand } from '@/lib/selectors';
@@ -23,14 +24,14 @@ export function ProofBand() {
   return (
     <Section surface="deep" tight className="border-t border-bronze/25">
       <Container>
-        <div className="grid grid-cols-12 gap-xl">
+        <Reveal as="div" staggerChildren className="grid grid-cols-12 gap-xl">
           {/* ports */}
           <div className="col-span-12 lg:col-span-5">
             <p className="eyebrow mb-md">Export Ports</p>
             <ul className="flex flex-col">
               {PORTS.map((port) => (
                 <li key={port.slug} className="border-ivory/12 flex gap-md border-b py-md first:border-t">
-                  <span className="spec-value text-bronze-ink w-14 shrink-0" data-spec>
+                  <span className="spec-value text-accent w-14 shrink-0" data-spec>
                     {port.locode}
                   </span>
                   <span className="flex flex-col gap-1">
@@ -76,12 +77,12 @@ export function ProofBand() {
             </p>
             <Link
               href="/compliance"
-              className="link-underline text-bronze-ink mt-md inline-block text-body-sm font-semibold"
+              className="link-underline text-accent mt-md inline-block text-body-sm font-semibold"
             >
               Read the certification register →
             </Link>
           </div>
-        </div>
+        </Reveal>
       </Container>
     </Section>
   );

@@ -30,8 +30,12 @@ const notes: string[] = [];
 
 function checkHexParity(): void {
   const css = readFileSync(join(ROOT, 'src', 'app', 'globals.css'), 'utf8');
-  const themeStart = css.indexOf('@theme');
-  const themeEnd = css.indexOf('/* ---', themeStart);
+  const themeStart = css.indexOf('@theme {');
+  if (themeStart === -1) {
+    errors.push('globals.css is missing @theme { block.');
+    return;
+  }
+  const themeEnd = css.indexOf('}', themeStart);
   const theme = css.slice(themeStart, themeEnd === -1 ? undefined : themeEnd);
 
   const parsed = new Map<string, string>();
@@ -55,7 +59,7 @@ function checkHexParity(): void {
   }
 
   // No stray brand-ish hexes outside @theme in the CSS file.
-  const outside = css.slice(0, themeStart) + css.slice(css.indexOf('}', themeStart));
+  const outside = css.slice(0, themeStart) + css.slice(themeEnd);
   const stray = [...outside.matchAll(/#[0-9a-fA-F]{6}\b/g)].map((m) => m[0] ?? '').filter(Boolean);
   if (stray.length > 0) {
     errors.push(`Raw hex values outside the @theme token block in globals.css: ${stray.join(', ')}`);

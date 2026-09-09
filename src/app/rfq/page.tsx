@@ -1,6 +1,7 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { PageHero } from '@/components/sections/page-hero';
-import { RfqForm } from '@/components/forms/rfq-form';
+import { RfqForm, RfqPathNote } from '@/components/forms/rfq-form';
 import { Accordion } from '@/components/ui/accordion';
 import { ArrowLink } from '@/components/ui/link';
 import { Container, HairlineRow, Section } from '@/components/ui/layout';
@@ -18,11 +19,6 @@ export const metadata: Metadata = {
   alternates: { canonical: '/rfq' },
 };
 
-type Query = Record<string, string | string[] | undefined>;
-
-const first = (value: string | string[] | undefined): string | undefined =>
-  typeof value === 'string' ? value : Array.isArray(value) ? value[0] : undefined;
-
 /**
  * P16 — /rfq. The single commercial conversion on the site.
  *
@@ -31,21 +27,9 @@ const first = (value: string | string[] | undefined): string | undefined =>
  * and the answers to the five questions that arrive first. Context travels in
  * the query string: `?product=`, `?category=`, `?division=` and `?path=`
  * pre-fill from catalogue rows, industry pages and the compliance audit CTA.
- *
- * Dynamic by design (searchParams) — a pre-filled link from a catalogue row has
- * to arrive pre-filled in the HTML, not after hydration.
  */
-export default async function RfqPage({ searchParams }: { searchParams: Promise<Query> }) {
-  const query = await searchParams;
+export default function RfqPage() {
   const band = proofBand();
-  const path = first(query.path);
-
-  const prefill = {
-    product: first(query.product),
-    category: first(query.category),
-    division: first(query.division),
-    path,
-  };
 
   const outputs = [
     PRODUCT_EXPORT_PROCESS[0],
@@ -70,22 +54,15 @@ export default async function RfqPage({ searchParams }: { searchParams: Promise<
 
       <Section surface="light" className="pt-0">
         <Container>
-          {path === 'audit' ? (
-            <PathNote
-              title="Factory audit request"
-              body="Marked for the audit route: tell us the protocol, the dates and who is attending. We arrange access at our parent company's mill in Surat or at the partner factory, and send the documentation set in advance."
-            />
-          ) : null}
-          {path === 'sample' ? (
-            <PathNote
-              title="Sample request"
-              body="Marked for sampling: give us the specification and the courier account or address. Textile samples typically ship within 20 days of specification lock, and your approval is recorded against the sample reference."
-            />
-          ) : null}
+          <Suspense fallback={null}>
+            <RfqPathNote />
+          </Suspense>
 
           <div className="grid grid-cols-12 gap-2xl">
             <div className="col-span-12 lg:col-span-7">
-              <RfqForm prefill={prefill} />
+              <Suspense fallback={<div className="min-h-[400px]" />}>
+                <RfqForm />
+              </Suspense>
             </div>
 
             <aside className="col-span-12 lg:col-span-5">
@@ -137,23 +114,12 @@ export default async function RfqPage({ searchParams }: { searchParams: Promise<
           <SectionHeading eyebrow="Before you send" title="The five questions that arrive first." />
           <JsonLd data={faqSchema(RFQ_FAQ, 'Requesting a quotation from Trivoxa Group')} />
           <Accordion
-            className="mt-2xl max-w-3xl"
+            className="mt-2xl max-w-[48rem]"
             items={RFQ_FAQ.map((faq) => ({ id: faq.id, question: faq.question, answer: faq.answer }))}
             defaultOpenId={RFQ_FAQ[0]?.id}
           />
         </Container>
       </Section>
     </>
-  );
-}
-
-function PathNote({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="border-bronze/40 surface-raised mb-2xl flex flex-col gap-xs border p-lg">
-      <Eyebrow tick={false} className="surface-faint">
-        {title}
-      </Eyebrow>
-      <p className="surface-muted text-body-md max-w-[74ch]">{body}</p>
-    </div>
   );
 }

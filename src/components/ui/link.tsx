@@ -55,7 +55,7 @@ export function ArrowLink({
   return (
     <Link href={href} className={cn('group inline-flex items-center gap-2 font-medium', className)}>
       <span className="link-underline">{children}</span>
-      <svg aria-hidden viewBox="0 0 20 12" className="h-3 w-5 shrink-0 text-bronze-ink transition-transform duration-fast ease-house group-hover:translate-x-1 rtl:-scale-x-100" fill="none">
+      <svg aria-hidden viewBox="0 0 20 12" className="h-3 w-5 shrink-0 text-accent transition-transform duration-fast ease-house group-hover:translate-x-1 rtl:-scale-x-100" fill="none">
         <path d="M0 6h17M12 1l5 5-5 5" stroke="currentColor" strokeWidth="1.5" />
       </svg>
     </Link>

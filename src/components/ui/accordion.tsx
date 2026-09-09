@@ -63,7 +63,7 @@ export function Accordion({
                 className={cn(
                   'surface-fg group flex w-full items-center justify-between gap-lg py-lg text-left',
                   'text-heading-md font-display transition-colors duration-fast ease-house',
-                  'hover:text-bronze-ink',
+                  'hover:text-accent',
                 )}
               >
                 {item.question}

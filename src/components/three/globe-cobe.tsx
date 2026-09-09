@@ -81,10 +81,23 @@ export function GlobeCobe({ className }: { className?: string }) {
   }, []);
 
   return (
+    // Sized off height, not width: the parent (`global-presence-preview.tsx`)
+    // is a 4:3 box, and a globe forced to `width: 100%; aspect-ratio: 1/1`
+    // there is taller than the box itself and overflows into the ports row
+    // below it. Driving off height (with a width cap for narrow parents)
+    // keeps the sphere a true circle that always fits inside its container.
     <canvas
       ref={canvasRef}
       className={className}
-      style={{ width: '100%', aspectRatio: '1 / 1', touchAction: 'pan-y' }}
+      style={{
+        display: 'block',
+        height: '100%',
+        width: 'auto',
+        maxWidth: '100%',
+        aspectRatio: '1 / 1',
+        margin: '0 auto',
+        touchAction: 'pan-y',
+      }}
       aria-label="Rotating globe marking the six regions Trivoxa Group serves"
       role="img"
     />

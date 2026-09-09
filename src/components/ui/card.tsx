@@ -34,8 +34,8 @@ export function Card({ raised = false, trace = false, lift = false, interactive 
           ),
         lift &&
           cn(
-            'transition-transform duration-fast ease-house',
-            'hover:-translate-y-1 hover:shadow-(--surface-shadow-lift)',
+            'transition-[transform,box-shadow] duration-fast ease-house',
+            'hover:-translate-y-1 hover:shadow-[var(--surface-shadow-lift)]',
           ),
         interactive && 'cursor-pointer',
         className,

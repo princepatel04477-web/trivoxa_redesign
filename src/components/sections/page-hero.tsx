@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { SplitHeading } from '@/components/motion/split-heading';
+import { KineticTextReveal } from '@/components/motion/kinetic-text-reveal';
+import { Reveal } from '@/components/motion/reveal';
 import { Breadcrumb, type Crumb } from '@/components/ui/breadcrumb';
 import { Container, Section } from '@/components/ui/layout';
 import { Eyebrow, Prose } from '@/components/ui/typography';
@@ -66,9 +67,9 @@ export function PageHero({
         <div className="grid grid-cols-12 gap-xl">
           <div className="col-span-12 lg:col-span-8">
             <Eyebrow>{eyebrow}</Eyebrow>
-            <SplitHeading as="h1" className={`${SIZES[size]} mt-lg max-w-[20ch]`}>
+            <KineticTextReveal as="h1" isHero className={`${SIZES[size]} mt-lg max-w-[56rem]`}>
               {title}
-            </SplitHeading>
+            </KineticTextReveal>
             {lede ? (
               <Prose className="mt-lg max-w-[62ch] text-body-lg">
                 {typeof lede === 'string' ? <p>{lede}</p> : lede}
@@ -78,7 +79,7 @@ export function PageHero({
           </div>
 
           {meta && meta.length > 0 ? (
-            <div className="col-span-12 lg:col-span-4">
+            <Reveal as="div" delay={200} className="col-span-12 lg:col-span-4">
               <dl className="surface-hairline border-t">
                 {meta.map((item) => (
                   <div
@@ -94,7 +95,7 @@ export function PageHero({
                   </div>
                 ))}
               </dl>
-            </div>
+            </Reveal>
           ) : null}
         </div>
 

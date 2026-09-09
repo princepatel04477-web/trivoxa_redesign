@@ -58,8 +58,8 @@ function svgo(svg: string, name: string): string {
           overrides: {
             // `viewBox` must survive — P0 acceptance requires it.
             removeViewBox: false,
-            // currentColor must survive — one file serves both lockups.
-            convertColors: { currentColor: true },
+            // currentColor only for mark & wordmark, never for lockups with bg & ink
+            convertColors: name.includes('lockup') ? false : { currentColor: true },
           },
         },
       },
@@ -74,31 +74,30 @@ function svgo(svg: string, name: string): string {
 /* --------------------------------------------------------------- sources -- */
 
 const markSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${MARK_VIEWBOX}" fill="none" role="img" aria-label="Trivoxa">
-  <path fill="currentColor" d="${MARK}"/>
+  <path fill="currentColor" fill-rule="evenodd" d="${MARK}"/>
 </svg>`;
 
-const wordmarkSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${WORDMARK_VIEWBOX}" fill="none" role="img" aria-label="TRIVOXA">
+const wordmarkSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${WORDMARK_VIEWBOX}" fill="none" role="img" aria-label="TRIVOXA GROUP">
   <path fill="currentColor" fill-rule="evenodd" d="${WORD}"/>
 </svg>`;
 
 /**
  * Horizontal lockup. Geometry is fixed and documented so the two colourways
  * are provably identical apart from ink and ground.
- *   padding 48 · mark 96 · gap 36 · wordmark cap-height 40
+ *   padding 48 · mark 96 · gap 32 · wordmark height 58
  */
-const LOCKUP_W = 484;
+const LOCKUP_W = 480;
 const LOCKUP_H = 192;
-const MARK_SCALE = 96 / 240;
-const WORD_SCALE = 40 / WORDMARK_CAP_HEIGHT;
-const WORD_W = 766 * WORD_SCALE;
-const WORD_X = 48 + 96 + 36;
-const WORD_Y = (LOCKUP_H - 40) / 2;
+const MARK_SCALE = 96 / 997;
+const WORD_SCALE = 58 / WORDMARK_CAP_HEIGHT;
+const WORD_X = 48 + 96 + 32;
+const WORD_Y = (LOCKUP_H - 58) / 2;
 
 function lockupSvg(bg: string, ink: string): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${LOCKUP_W} ${LOCKUP_H}" fill="none" role="img" aria-label="Trivoxa Group">
   <rect width="${LOCKUP_W}" height="${LOCKUP_H}" fill="${bg}"/>
   <g transform="translate(48 48) scale(${MARK_SCALE})">
-    <path fill="${ink}" d="${MARK}"/>
+    <path fill="${ink}" fill-rule="evenodd" d="${MARK}"/>
   </g>
   <g transform="translate(${WORD_X} ${WORD_Y}) scale(${WORD_SCALE})">
     <path fill="${ink}" fill-rule="evenodd" d="${WORD}"/>
@@ -110,12 +109,13 @@ function lockupSvg(bg: string, ink: string): string {
 
 /** App-icon treatment: espresso ground, ivory mark, generous inner padding. */
 function iconSvg(size: number, radius: number): string {
-  const scale = (size * 0.66) / 240;
-  const offset = (size - size * 0.66) / 2;
+  const innerSize = size * 0.68;
+  const scale = innerSize / 997;
+  const offset = (size - innerSize) / 2;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="none">
   <rect width="${size}" height="${size}" rx="${radius}" fill="${BRAND.espresso.hex}"/>
   <g transform="translate(${offset} ${offset}) scale(${scale})">
-    <path fill="${BRAND.ivory.hex}" d="${MARK}"/>
+    <path fill="${BRAND.ivory.hex}" fill-rule="evenodd" d="${MARK}"/>
   </g>
 </svg>`;
 }
@@ -126,20 +126,21 @@ function iconSvg(size: number, radius: number): string {
  * this sandbox has no system fonts, so every glyph here is vector geometry.
  */
 function ogSvg(): string {
-  const markScale = 1;
-  const markX = (1200 - 240 * markScale) / 2;
-  const markY = 150;
-  const wordScale = 44 / WORDMARK_CAP_HEIGHT;
-  const wordWidth = 766 * wordScale;
+  const markScale = 170 / 997;
+  const markW = 1000 * markScale;
+  const markX = (1200 - markW) / 2;
+  const markY = 120;
+  const wordScale = 64 / WORDMARK_CAP_HEIGHT;
+  const wordWidth = 3020 * wordScale;
   const wordX = (1200 - wordWidth) / 2;
-  const wordY = markY + 240 + 52;
+  const wordY = markY + 170 + 44;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
   <rect width="1200" height="630" fill="${BRAND.espresso.hex}"/>
   <rect x="32.5" y="32.5" width="1135" height="565" stroke="${BRAND.bronze.hex}" stroke-opacity="0.45"/>
-  <rect x="568" y="106" width="64" height="1" fill="${BRAND.bronze.hex}"/>
+  <rect x="568" y="90" width="64" height="1" fill="${BRAND.bronze.hex}"/>
   <g transform="translate(${markX} ${markY}) scale(${markScale})">
-    <path fill="${BRAND.ivory.hex}" d="${MARK}"/>
+    <path fill="${BRAND.ivory.hex}" fill-rule="evenodd" d="${MARK}"/>
   </g>
   <g transform="translate(${wordX} ${wordY}) scale(${wordScale})">
     <path fill="${BRAND.ivory.hex}" fill-rule="evenodd" d="${WORD}"/>

@@ -71,7 +71,7 @@ export function GroupJourney() {
               <SectionHeading eyebrow="The Journey" title="From a mill in Surat to nine industries." />
 
               <div className="mt-2xl hidden items-start gap-lg lg:flex" aria-hidden>
-                <span ref={counter} className="text-display-xl text-bronze-ink leading-none">
+                <span ref={counter} className="text-display-xl text-accent leading-none">
                   01
                 </span>
                 <div className="surface-hairline relative h-24 w-px overflow-hidden">
@@ -97,11 +97,11 @@ export function GroupJourney() {
                 data-step={item.step}
                 className="surface-hairline group grid grid-cols-12 gap-md border-t py-2xl transition-colors duration-base ease-house last:border-b data-[active=true]:border-bronze/60"
               >
-                <span className="surface-faint spec-value col-span-2 text-body-sm group-data-[active=true]:text-bronze-ink" data-spec>
+                <span className="surface-faint spec-value col-span-2 text-body-sm group-data-[active=true]:text-accent" data-spec>
                   {String(item.step).padStart(2, '0')}
                 </span>
                 <div className="col-span-10 flex flex-col gap-sm">
-                  <h3 className="text-heading-lg transition-colors duration-base ease-house group-data-[active=true]:text-bronze-ink">
+                  <h3 className="text-heading-lg transition-colors duration-base ease-house group-data-[active=true]:text-accent">
                     {item.title}
                   </h3>
                   <p className="surface-muted text-body-md max-w-[58ch]">{item.body}</p>

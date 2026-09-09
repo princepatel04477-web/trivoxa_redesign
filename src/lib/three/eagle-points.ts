@@ -11,77 +11,16 @@
  * poster generator both call into here, so the static fallback and the WebGL
  * scene are provably the same eagle.
  */
-import { MARK_PATHS, MARK_VIEWBOX } from '@/lib/brand/wordmark-paths';
+import horseData from './horse-intervals.generated.json';
 import { seededRandom } from '@/lib/utils';
 
 export type Point2 = [number, number];
 export type Polygon = Point2[];
 
-/** Parse the mark's restricted path grammar (M / implicit L / Z) into polygons. */
+/** Legacy polygon export maintained for backwards compatibility. */
 export function markPolygons(): Polygon[] {
-  return MARK_PATHS.map((d) => {
-    const tokens = d.match(/[MLZ]|-?\d+(?:\.\d+)?/gi) ?? [];
-    const polygon: Polygon = [];
-    let index = 0;
-
-    while (index < tokens.length) {
-      const token = tokens[index] as string;
-      if (/^[ML]$/i.test(token)) {
-        index += 1;
-        continue;
-      }
-      if (/^Z$/i.test(token)) {
-        index += 1;
-        continue;
-      }
-      const x = Number(token);
-      const y = Number(tokens[index + 1]);
-      polygon.push([x, y]);
-      index += 2;
-    }
-
-    return polygon;
-  }).filter((polygon) => polygon.length >= 3);
+  return [];
 }
-
-function polygonArea(polygon: Polygon): number {
-  let sum = 0;
-  for (let i = 0; i < polygon.length; i += 1) {
-    const [x1, y1] = polygon[i] as Point2;
-    const [x2, y2] = polygon[(i + 1) % polygon.length] as Point2;
-    sum += x1 * y2 - x2 * y1;
-  }
-  return Math.abs(sum) / 2;
-}
-
-function pointInPolygon(polygon: Polygon, x: number, y: number): boolean {
-  let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
-    const [xi, yi] = polygon[i] as Point2;
-    const [xj, yj] = polygon[j] as Point2;
-    const intersects =
-      yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi || Number.EPSILON) + xi;
-    if (intersects) inside = !inside;
-  }
-  return inside;
-}
-
-function bbox(polygon: Polygon): { minX: number; minY: number; maxX: number; maxY: number } {
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-  for (const [x, y] of polygon) {
-    minX = Math.min(minX, x);
-    minY = Math.min(minY, y);
-    maxX = Math.max(maxX, x);
-    maxY = Math.max(maxY, y);
-  }
-  return { minX, minY, maxX, maxY };
-}
-
-/** The mark's viewBox is 240²; centre the cloud on the origin in [-1, 1]. */
-const VIEW = Number(MARK_VIEWBOX.split(' ')[2] ?? 240);
 
 export type EagleCloud = {
   /** xyz, centred, in [-1, 1] with a slight z jitter for depth. */
@@ -93,57 +32,80 @@ export type EagleCloud = {
   count: number;
 };
 
+type Interval = [number, number, number]; // y, xStart, xEnd
+
+function buildCumulativeWeights(intervals: Interval[]) {
+  const weights = new Float64Array(intervals.length);
+  let total = 0;
+  for (let i = 0; i < intervals.length; i += 1) {
+    const [, x0, x1] = intervals[i]!;
+    total += x1 - x0 + 1;
+    weights[i] = total;
+  }
+  return { weights, total };
+}
+
+const coreData = buildCumulativeWeights(horseData.core as Interval[]);
+const fringeData = buildCumulativeWeights(horseData.fringe as Interval[]);
+
+function sampleFromIntervals(
+  intervals: Interval[],
+  weights: Float64Array,
+  totalWeight: number,
+  rng: () => number,
+): [number, number] {
+  const target = rng() * totalWeight;
+  let low = 0;
+  let high = intervals.length - 1;
+  while (low < high) {
+    const mid = (low + high) >> 1;
+    if ((weights[mid] ?? 0) < target) {
+      low = mid + 1;
+    } else {
+      high = mid;
+    }
+  }
+  const [y, x0, x1] = intervals[low]!;
+  const x = x0 + rng() * (x1 - x0);
+  const jitterY = y + rng() - 0.5;
+  return [x, jitterY];
+}
+
 /**
- * Sample `count` points across the mark, weighted by polygon area so the bird's
- * mass distribution is the logo's mass distribution.
+ * Sample `count` points across the horse head logo mark with ~8% bronze fringe.
  */
 export function sampleEagle(count: number, seed = 7): EagleCloud {
-  const random = seededRandom(seed);
-  const polygons = markPolygons();
-  const areas = polygons.map(polygonArea);
-  const totalArea = areas.reduce((a, b) => a + b, 0);
-
+  const rng = seededRandom(seed);
   const positions = new Float32Array(count * 3);
   const tints = new Float32Array(count);
   const dispersed = new Float32Array(count * 3);
 
-  // Allocate per polygon, then fix rounding by giving the remainder to the largest.
-  const allocation = areas.map((area) => Math.floor((area / totalArea) * count));
-  const assigned = allocation.reduce((a, b) => a + b, 0);
-  const largest = areas.indexOf(Math.max(...areas));
-  allocation[largest] = (allocation[largest] ?? 0) + (count - assigned);
+  const W = horseData.width;
+  const H = horseData.height;
+  const cx = W / 2;
+  const cy = H / 2;
+  const scale = 0.95 / (W / 2);
 
-  let cursor = 0;
-  polygons.forEach((polygon, polygonIndex) => {
-    const box = bbox(polygon);
-    const n = allocation[polygonIndex] ?? 0;
-
-    for (let i = 0; i < n; i += 1) {
-      let x = 0;
-      let y = 0;
-      // Rejection sampling; the mark's polygons are convex-ish so this converges fast.
-      for (let attempt = 0; attempt < 24; attempt += 1) {
-        x = box.minX + random() * (box.maxX - box.minX);
-        y = box.minY + random() * (box.maxY - box.minY);
-        if (pointInPolygon(polygon, x, y)) break;
-      }
-
-      const slot = cursor + i;
-      positions[slot * 3] = (x - VIEW / 2) / (VIEW / 2);
-      positions[slot * 3 + 1] = -((y - VIEW / 2) / (VIEW / 2)); // SVG y-down → GL y-up
-      positions[slot * 3 + 2] = (random() - 0.5) * 0.06;
-      tints[slot] = random() < 0.08 ? 1 : 0; // bronze fringe, sparingly
-    }
-
-    cursor += n;
-  });
+  // Exact ~8% bronze fringe
+  const fringeCount = Math.round(count * 0.08);
 
   for (let i = 0; i < count; i += 1) {
-    // Dispersed field: a hollow shell, so the dissolve reads as "scattering
-    // outward" rather than "collapsing inward".
-    const theta = random() * Math.PI * 2;
-    const phi = Math.acos(2 * random() - 1);
-    const radius = 1.6 + random() * 1.1;
+    const isFringe = i < fringeCount;
+    const [x, y] = isFringe
+      ? sampleFromIntervals(horseData.fringe as Interval[], fringeData.weights, fringeData.total, rng)
+      : sampleFromIntervals(horseData.core as Interval[], coreData.weights, coreData.total, rng);
+
+    positions[i * 3] = (x - cx) * scale;
+    positions[i * 3 + 1] = -(y - cy) * scale; // invert Y for WebGL coordinates
+    positions[i * 3 + 2] = (rng() - 0.5) * 0.06;
+    tints[i] = isFringe ? 1 : 0;
+  }
+
+  // Dispersed field for scroll dissolve
+  for (let i = 0; i < count; i += 1) {
+    const theta = rng() * Math.PI * 2;
+    const phi = Math.acos(2 * rng() - 1);
+    const radius = 1.6 + rng() * 1.1;
     dispersed[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
     dispersed[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta) * 0.7;
     dispersed[i * 3 + 2] = radius * Math.cos(phi) * 0.5;
