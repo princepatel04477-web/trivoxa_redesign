@@ -1,20 +1,25 @@
-import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { PageHero } from '@/components/sections/page-hero';
 import { ClosingCta } from '@/components/sections/closing-cta';
 import { ProductCatalog } from '@/components/sections/businesses/product-catalog';
 import { Container, Section } from '@/components/ui/layout';
+import { SmartImage } from '@/components/ui/smart-image';
 import { ArrowLink } from '@/components/ui/link';
 import { SectionHeading, Prose } from '@/components/ui/typography';
 import { CATEGORIES } from '@/content/taxonomy';
 import { catalogFacets, catalogRows, proofBand } from '@/lib/selectors';
 import { JsonLd, catalogSchema } from '@/components/seo/json-ld';
 
+import { buildRouteMetadata } from '@/lib/seo/metadata';
+
 export const metadata: Metadata = {
-  title: 'Product Exports — Catalogue with HS Codes, MOQ and Lead Times',
-  description:
-    'The Trivoxa Group export catalogue: every product with its HS code, grade, minimum order quantity, lead time, Incoterms and loading port. Filter by category or industry.',
-  alternates: { canonical: '/businesses/product-exports' },
+  ...buildRouteMetadata({
+    title: 'Product Exports — Catalogue with HS Codes, MOQ and Lead Times',
+    description:
+      'The Trivoxa Group export catalogue: every product with its HS code, grade, minimum order quantity, lead time, Incoterms and loading port. Filter by category or industry.',
+    path: '/businesses/product-exports',
+  }),
+  alternates: { canonical: 'https://trivoxagroup.com/businesses/product-exports' },
 };
 
 export default function ProductExportsPage() {
@@ -37,17 +42,27 @@ export default function ProductExportsPage() {
         meta={[
           { label: 'Products', value: rows.length },
           { label: 'Live today', value: band.liveProductCount },
-          { label: 'Categories', value: catalogFacets().length },
+          { label: 'Categories', value: `${band.liveCategoryCount} live · ${CATEGORIES.length - band.liveCategoryCount} onboarding` },
           { label: 'Loading ports', value: band.ports.map((port) => port.locode).join(' · ') },
           { label: 'Desk response', value: band.responseWindow },
         ]}
       />
 
+      <Section surface="light" tight className="pb-0 pt-md">
+        <Container>
+          <div className="max-w-5xl mx-auto">
+            <SmartImage
+              manifestId="division-product-exports"
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              priority
+            />
+          </div>
+        </Container>
+      </Section>
+
       <Section surface="light" id="catalogue" bleed>
         <JsonLd data={catalogSchema(rows, 'Trivoxa Group export catalogue')} />
-        <Suspense fallback={<div className="min-h-[400px]" />}>
-          <ProductCatalog rows={rows} facets={catalogFacets()} />
-        </Suspense>
+        <ProductCatalog rows={rows} facets={catalogFacets()} />
       </Section>
 
       <Section surface="light" tight className="border-t surface-hairline">
@@ -65,7 +80,7 @@ export default function ProductExportsPage() {
           <div className="mt-2xl grid grid-cols-12 gap-2xl">
             <div className="col-span-12 md:col-span-6">
               <p className="surface-faint spec-value mb-xs" data-spec>
-                {sampleCategories} of {CATEGORIES.length} categories
+                {sampleCategories} categories ({band.liveCategoryCount} live, {CATEGORIES.length - band.liveCategoryCount} onboarding)
               </p>
               <h3 className="text-heading-lg">Sampling</h3>
               <Prose className="mt-sm text-body-md">
@@ -82,7 +97,7 @@ export default function ProductExportsPage() {
 
             <div className="col-span-12 md:col-span-6">
               <p className="surface-faint spec-value mb-xs" data-spec>
-                {auditCategories} of {CATEGORIES.length} categories
+                {auditCategories} categories ({band.liveCategoryCount} live, {CATEGORIES.length - band.liveCategoryCount} onboarding)
               </p>
               <h3 className="text-heading-lg">Factory audits</h3>
               <Prose className="mt-sm text-body-md">

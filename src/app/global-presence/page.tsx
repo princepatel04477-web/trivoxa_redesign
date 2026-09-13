@@ -7,14 +7,20 @@ import { ClosingCta } from '@/components/sections/closing-cta';
 import { GlobeLoader } from '@/components/three/globe-loader';
 import { Eyebrow, Prose, SectionHeading } from '@/components/ui/typography';
 import { Container, HairlineRow, Section } from '@/components/ui/layout';
+import { SmartImage } from '@/components/ui/smart-image';
 import { allPorts, presenceNumbers, proofBand, regionBlocks } from '@/lib/selectors';
 import { JsonLd, portsSchema } from '@/components/seo/json-ld';
 
+import { buildRouteMetadata } from '@/lib/seo/metadata';
+
 export const metadata: Metadata = {
-  title: 'Global Presence — Six Regions, Three Loading Ports',
-  description:
-    'Trivoxa Group serves six regions from three Gujarat and Maharashtra loading ports — Mundra (INMUN), Kandla (INIXY) and Nhava Sheva (INNSA). The corridors we operate in, with the industries strongest in each.',
-  alternates: { canonical: '/global-presence' },
+  ...buildRouteMetadata({
+    title: 'Global Presence — Six Regions, Three Loading Ports',
+    description:
+      'Trivoxa Group serves six regions from three Gujarat and Maharashtra loading ports — Mundra (INMUN), Kandla (INIXY) and Nhava Sheva (INNSA). The corridors we operate in, with the industries strongest in each.',
+    path: '/global-presence',
+  }),
+  alternates: { canonical: 'https://trivoxagroup.com/global-presence' },
 };
 
 /**
@@ -116,11 +122,17 @@ export default function GlobalPresencePage() {
                 className="surface-hairline col-span-12 flex flex-col gap-md border-t pt-lg md:col-span-6"
               >
                 <div className="flex items-baseline justify-between gap-md">
-                  <h2 className="text-heading-lg">{region.name}</h2>
+                  <h3 className="text-heading-lg">{region.name}</h3>
                   <span className="surface-faint spec-value" data-spec>
                     {industries.length} industries
                   </span>
                 </div>
+
+                <SmartImage
+                  manifestId={`region-${region.slug}`}
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  showCaption={false}
+                />
 
                 <p className="surface-muted text-body-md">{region.marketFocus}</p>
 
@@ -165,7 +177,7 @@ export default function GlobalPresencePage() {
                 <p className="surface-fg spec-value text-display-sm" data-spec>
                   {port.locode}
                 </p>
-                <h2 className="text-heading-lg">{port.name}</h2>
+                <h3 className="text-heading-lg">{port.name}</h3>
                 <p className="surface-muted text-body-md max-w-[46ch]">{port.reason}</p>
               </div>
             ))}

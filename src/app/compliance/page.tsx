@@ -9,11 +9,16 @@ import { Eyebrow, Prose, SectionHeading } from '@/components/ui/typography';
 import { COMPANY, SHIVESHWAR_CANONICAL_SENTENCE } from '@/content/company';
 import { CERTIFICATIONS, CONTACT } from '@/content/taxonomy';
 
+import { buildRouteMetadata } from '@/lib/seo/metadata';
+
 export const metadata: Metadata = {
-  title: 'Compliance & Certifications',
-  description:
-    'The credentials Trivoxa Group holds today (IEC, GST), the ones in progress with their published target quarters (FIEO, APEDA, Spice Board, FSSAI, ISO 9001, CE, WHO-GMP), and what that means for a pharmaceutical or food enquiry.',
-  alternates: { canonical: '/compliance' },
+  ...buildRouteMetadata({
+    title: 'Compliance & Certifications',
+    description:
+      'The credentials Trivoxa Group holds today (IEC, GST), the ones in progress with their published target quarters (FIEO, APEDA, Spice Board, FSSAI, ISO 9001, CE, WHO-GMP), and what that means for a pharmaceutical or food enquiry.',
+    path: '/compliance',
+  }),
+  alternates: { canonical: 'https://trivoxagroup.com/compliance' },
 };
 
 /**
@@ -67,7 +72,7 @@ export default function CompliancePage() {
       />
 
       {/* the entity block — the audit found no registered address anywhere */}
-      <Section surface="light" className="pt-0" id="entity">
+      <Section surface="light" className="pt-0 scroll-mt-24" id="entity">
         <Container>
           <HairlineRow label="The entity you contract with" />
 
@@ -132,7 +137,7 @@ export default function CompliancePage() {
                 className="surface-hairline col-span-12 flex flex-col gap-sm border-t pt-lg md:col-span-6"
               >
                 <div className="flex items-baseline justify-between gap-md">
-                  <h2 className="text-heading-lg">{cert.name}</h2>
+                  <h3 className="text-heading-lg">{cert.name}</h3>
                   <span className="surface-faint spec-value text-body-sm" data-spec>
                     {cert.registrationNumber ?? 'Number on request'}
                   </span>
@@ -222,7 +227,7 @@ export default function CompliancePage() {
                 <p className="surface-faint spec-value" data-spec>
                   {String(index + 1).padStart(2, '0')}
                 </p>
-                <h2 className="text-body-lg font-medium">{item.title}</h2>
+                <h3 className="text-body-lg font-medium">{item.title}</h3>
                 <Prose className="text-body-sm">
                   <p className="surface-muted max-w-[62ch]">{item.body}</p>
                 </Prose>
@@ -232,7 +237,7 @@ export default function CompliancePage() {
 
           <div className="border-bronze/40 surface-raised mt-2xl flex flex-wrap items-center justify-between gap-xl border p-xl">
             <div className="flex max-w-[54ch] flex-col gap-xs">
-              <h2 className="text-heading-lg">Audit the factory before you commit.</h2>
+              <h3 className="text-heading-lg">Audit the factory before you commit.</h3>
               <p className="surface-muted text-body-md">
                 Buyer-nominated or third-party, at our parent company&apos;s mill in Surat or at a
                 partner factory. Tell us the protocol and the dates; we arrange access and send the

@@ -26,8 +26,8 @@ export function GroupWay() {
                     key={value.name}
                     className="surface-hairline grid grid-cols-12 items-baseline gap-md border-b py-lg first:border-t"
                   >
-                    <span className="text-body-lg col-span-4 font-medium">{value.name}</span>
-                    <span className="surface-muted text-body-sm col-span-8">{value.note}</span>
+                    <span className="text-body-md col-span-12 sm:col-span-6 font-medium">{value.name}</span>
+                    <span className="surface-muted text-body-sm col-span-12 sm:col-span-6">{value.note}</span>
                   </li>
                 ))}
               </ul>

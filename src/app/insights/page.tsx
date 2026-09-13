@@ -7,12 +7,18 @@ import { Container, Section } from '@/components/ui/layout';
 import { Eyebrow, Prose, SectionHeading } from '@/components/ui/typography';
 import { CONTACT } from '@/content/taxonomy';
 import { INSIGHT_SERIES, INSIGHTS, hasInsights } from '@/content/editorial';
+import { NewsletterForm } from '@/components/forms/newsletter-form';
+
+import { buildRouteMetadata } from '@/lib/seo/metadata';
 
 export const metadata: Metadata = {
-  title: 'Insights — What We Will Publish',
-  description:
-    'No articles yet, and no placeholder cards pretending otherwise. Three series are defined: market intelligence per category, compliance and documentation changes, and how sourcing and supply chains actually work.',
-  alternates: { canonical: '/insights' },
+  ...buildRouteMetadata({
+    title: 'Insights — What We Will Publish',
+    description:
+      'No articles yet, and no placeholder cards pretending otherwise. Three series are defined: market intelligence per category, compliance and documentation changes, and how sourcing and supply chains actually work.',
+    path: '/insights',
+  }),
+  alternates: { canonical: 'https://trivoxagroup.com/insights' },
 };
 
 /**
@@ -36,14 +42,15 @@ export default function InsightsPage() {
       <PageHero
         eyebrow="Insights"
         title={publishing ? 'What we are learning about these markets.' : 'Nothing published yet. Here is exactly what will be.'}
-        lede="We publish when we have something a buyer can act on — a price movement with the HS heading named, a credential with its registration number, a document set from a real consignment. Until then this page says so."
+        lede="We publish when we have something a buyer can act on — a price movement with the HS heading named, a credential with its registration number, a document set from a real consignment. Our first report is scheduled for release in 2026-Q4."
         trail={[
           { href: '/', label: 'Home' },
           { href: '/insights', label: 'Insights' },
         ]}
         meta={[
           { label: 'Series', value: INSIGHT_SERIES.length },
-          { label: 'Published', value: INSIGHTS.length },
+          { label: 'Published', value: `${INSIGHTS.length} · First release 2026-Q4` },
+          { label: 'Target horizon', value: '2026-Q4' },
           { label: 'Next up', value: 'Market Intelligence' },
         ]}
       />
@@ -51,13 +58,14 @@ export default function InsightsPage() {
       {publishing ? (
         <Section surface="light" className="pt-0">
           <Container>
-            <Reveal staggerChildren className="grid grid-cols-12 gap-md">
+            <SectionHeading eyebrow="Articles" title="Published intelligence and market reports." />
+            <Reveal staggerChildren className="mt-2xl grid grid-cols-12 gap-md">
               {INSIGHTS.map((insight) => (
                 <Card key={insight.slug} trace className="col-span-12 flex flex-col gap-md p-lg lg:col-span-4">
                   <Eyebrow tick={false} className="surface-faint">
                     {insight.series} · {insight.readMinutes} min
                   </Eyebrow>
-                  <h2 className="text-heading-lg">{insight.title}</h2>
+                  <h3 className="text-heading-lg">{insight.title}</h3>
                   <Prose className="text-body-sm">
                     <p className="surface-muted">{insight.summary}</p>
                   </Prose>
@@ -85,7 +93,7 @@ export default function InsightsPage() {
                 key={series.slug}
                 className="surface-hairline col-span-12 flex flex-col gap-md border-t pt-lg md:col-span-4"
               >
-                <h2 className="text-heading-lg">{series.name}</h2>
+                <h3 className="text-heading-lg">{series.name}</h3>
                 <p className="surface-faint spec-value text-body-sm" data-spec>
                   {series.cadence}
                 </p>
@@ -103,25 +111,21 @@ export default function InsightsPage() {
         </Container>
       </Section>
 
-      <Section surface="dark" tight>
+      <Section surface="dark" tight id="subscribe" className="scroll-mt-24">
         <Container>
           <div className="border-bronze/40 surface-raised flex flex-wrap items-center justify-between gap-xl border p-xl">
             <div className="flex max-w-[56ch] flex-col gap-xs">
               <h2 className="text-heading-lg">Be told when the first piece goes out.</h2>
               <Prose className="text-body-md">
                 <p className="surface-muted">
-                  There is no newsletter form on this page yet, because a form that posts nowhere is
-                  a promise with a button on it. Email us and we will add you to the list we keep by
-                  hand — the first issue goes to those addresses.
+                  Subscribe to receive our direct briefings on market intelligence, tariff shifts,
+                  and export compliance from our desks in Surat.
                 </p>
               </Prose>
             </div>
-            <a
-              href={`mailto:${CONTACT.general}?subject=Insights%20%E2%80%94%20add%20me%20to%20the%20list`}
-              className="link-underline text-bronze-ink text-body-md font-medium"
-            >
-              {CONTACT.general} →
-            </a>
+            <div className="w-full max-w-md">
+              <NewsletterForm />
+            </div>
           </div>
         </Container>
       </Section>

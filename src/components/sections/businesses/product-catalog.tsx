@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { CatalogCards, CatalogTable } from '@/components/sections/businesses/catalog-table';
+import Link from 'next/link';
+import { CatalogTable } from '@/components/sections/businesses/catalog-table';
 import { OnboardingState } from '@/components/sections/onboarding-state';
 import { Container } from '@/components/ui/layout';
 import { Eyebrow } from '@/components/ui/typography';
@@ -12,28 +13,18 @@ import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import type { CatalogFacet, CatalogRow } from '@/lib/selectors';
 
 /**
- * P12 — the product catalogue, with its numbers.
+ * P08 / P12 — The product catalogue with live filtering and debounced search.
  *
- * This table is the reason the site exists: HS code, grade, MOQ, lead time,
- * Incoterms and loading port, all in the data face, all from the taxonomy. The
- * July audit called the catalogue "the best single piece of execution" on the
- * live site and then found a Fabrics table with dashes where specifications
- * should be — so a `live` row that is missing any of those fields cannot exist
- * (the schema rejects it), and an `onboarding` row says so in bronze instead of
- * printing an em-dash and hoping nobody notices.
+ * Product data exists EXACTLY ONCE in the DOM.
  *
  * Filters:
- *  · ONE facet, computed from the catalogue with live counts. In this taxonomy
- *    a category's slug is its industry's slug, so the live site's "7 category
- *    links vs 5 industries" was one list counted twice — offering both would
- *    re-create exactly that confusion;
- *  · zero-count (onboarding) facets stay visible as chips and open the designed
- *    onboarding state, never a blank table and never a silent disappearance;
- *  · the filter lives in the URL and is read SERVER-SIDE by the page, so a
- *    deep-linked or crawled view contains its rows rather than a loading state;
- *  · the result count always names the total — "Showing 5 of 25";
- *  · transitions use GSAP Flip, recorded before React re-renders, so rows travel
- *    to their new positions instead of popping. Reduced motion skips it.
+ *  · ONE facet computed from the catalogue with live counts;
+ *  · Text search filter over product name and HS code (debounced 150ms);
+ *  · Accessible filter chips with `aria-pressed`, keyboard navigation, and min 44px touch targets;
+ *  · URL synchronization via `?category=slug` so filtered views are shareable and back-button correct;
+ *  · Single semantic table that reflows into cards on mobile via responsive CSS;
+ *  · Result count is an `aria-live="polite"` region;
+ *  · GSAP Flip transitions row repositioning smoothly (bypassed on reduced motion).
  */
 export function ProductCatalog({
   rows,
@@ -47,15 +38,18 @@ export function ProductCatalog({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const reduced = usePrefersReducedMotion();
 
-  const queryCategory = searchParams.get('category');
-  const [category, setCategory] = useState(queryCategory ?? initialCategory);
+  const [category, setCategory] = useState(initialCategory);
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
 
   useEffect(() => {
-    if (queryCategory) setCategory(queryCategory);
-  }, [queryCategory]);
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchInput.trim().toLowerCase());
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const scopeRef = useRef<HTMLDivElement | null>(null);
   const flipState = useRef<ReturnType<GsapBundle['Flip']['getState']> | null>(null);
@@ -63,16 +57,19 @@ export function ProductCatalog({
   const validCategory = facets.some((facet) => facet.slug === category) ? category : 'all';
   const activeFacet = facets.find((facet) => facet.slug === validCategory);
 
-  const visible = useMemo(
-    () => rows.filter((row) => validCategory === 'all' || row.categorySlug === validCategory),
-    [rows, validCategory],
-  );
+  const visible = useMemo(() => {
+    return rows.filter((row) => {
+      const matchesCategory = validCategory === 'all' || row.categorySlug === validCategory;
+      if (!matchesCategory) return false;
+      if (!debouncedQuery) return true;
+      const matchesName = row.name.toLowerCase().includes(debouncedQuery);
+      const matchesHs = row.hsCode?.toLowerCase().includes(debouncedQuery) ?? false;
+      const matchesCategoryName = row.categoryName.toLowerCase().includes(debouncedQuery);
+      return matchesName || matchesHs || matchesCategoryName;
+    });
+  }, [rows, validCategory, debouncedQuery]);
 
   const select = (slug: string): void => {
-    // GSAP is loaded off the critical path. Capturing the pre-change layout has
-    // to happen in this frame or not at all, so if the bundle has not landed yet
-    // we simply skip the Flip — rows swap instantly, which is correct, just less
-    // graceful. By the time a buyer is clicking filters it is always there.
     const bundle = peekGsap();
     if (!reduced && bundle && scopeRef.current) {
       flipState.current = bundle.Flip.getState(scopeRef.current.querySelectorAll('[data-row]'));
@@ -115,48 +112,96 @@ export function ProductCatalog({
 
   return (
     <div ref={scopeRef}>
+      <Suspense fallback={null}>
+        <SearchParamsListener onCategory={(cat) => setCategory(cat ?? 'all')} />
+      </Suspense>
       <Container>
-        <div className="flex flex-col gap-md">
-          <Eyebrow tick={false} className="surface-faint">
-            Browse by industry
-          </Eyebrow>
-          <div className="flex flex-wrap gap-xs">
-            <FilterChip active={validCategory === 'all'} label="All" count={rows.length} onClick={() => select('all')} />
-            {facets.map((facet) => (
+        <div className="flex flex-col gap-lg">
+          <div className="flex flex-col gap-md">
+            <Eyebrow tick={false} className="surface-faint">
+              Browse by industry
+            </Eyebrow>
+            <div className="flex flex-wrap gap-xs" role="toolbar" aria-label="Filter catalogue by industry">
               <FilterChip
-                key={facet.slug}
-                active={validCategory === facet.slug}
-                label={facet.name}
-                count={facet.count}
-                status={facet.status}
-                onClick={() => select(facet.slug)}
+                active={validCategory === 'all'}
+                label="All"
+                count={rows.length}
+                onClick={() => select('all')}
               />
-            ))}
+              {facets.map((facet) => (
+                <FilterChip
+                  key={facet.slug}
+                  active={validCategory === facet.slug}
+                  label={facet.name}
+                  count={facet.count}
+                  status={facet.status}
+                  onClick={() => select(facet.slug)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Search bar */}
+          <div className="relative max-w-md">
+            <label htmlFor="catalog-search" className="sr-only">
+              Filter catalogue by product name or HS code
+            </label>
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-md text-bronze/70">
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+            <input
+              id="catalog-search"
+              type="search"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Filter by product name or HS code (e.g. Cotton, 5209)..."
+              className="surface-raised surface-hairline surface-fg placeholder:surface-faint min-h-[44px] w-full border py-xs pl-2xl pr-xl text-body-sm transition-colors duration-fast focus:border-bronze focus:outline-none"
+            />
+            {searchInput ? (
+              <button
+                type="button"
+                onClick={() => setSearchInput('')}
+                aria-label="Clear search input"
+                className="surface-faint hover:surface-fg absolute inset-y-0 right-0 flex items-center pr-md text-body-sm transition-colors"
+              >
+                ✕
+              </button>
+            ) : null}
           </div>
         </div>
 
-        {/* the count that always names the total */}
+        {/* the count that always names the total — aria-live region */}
         <p className="surface-muted mt-xl text-body-sm" aria-live="polite">
           Showing <span className="surface-fg spec-value" data-spec>{visible.length}</span> of{' '}
           <span className="surface-fg spec-value" data-spec>{rows.length}</span> products ·{' '}
           <span className="surface-fg spec-value" data-spec>{liveCount}</span> live today
-          {validCategory !== 'all' ? (
+          {validCategory !== 'all' || debouncedQuery ? (
             <>
               {' '}
               ·{' '}
               <button
                 type="button"
-                onClick={() => select('all')}
+                onClick={() => {
+                  select('all');
+                  setSearchInput('');
+                }}
                 className="link-underline text-bronze-ink font-medium"
               >
-                Clear filter
+                Reset filters
               </button>
             </>
           ) : null}
         </p>
 
         {visible.length === 0 ? (
-          activeFacet && activeFacet.status === 'onboarding' ? (
+          activeFacet && activeFacet.status === 'onboarding' && !debouncedQuery ? (
             <div className="mt-xl">
               <OnboardingState
                 name={activeFacet.name}
@@ -170,13 +215,17 @@ export function ProductCatalog({
               />
             </div>
           ) : (
-            <EmptyState onClear={() => select('all')} />
+            <EmptyState
+              onClear={() => {
+                select('all');
+                setSearchInput('');
+              }}
+              searchQuery={debouncedQuery}
+              onClearSearch={() => setSearchInput('')}
+            />
           )
         ) : (
-          <>
-            <CatalogTable rows={visible} />
-            <CatalogCards rows={visible} />
-          </>
+          <CatalogTable rows={visible} />
         )}
       </Container>
     </div>
@@ -204,13 +253,13 @@ function FilterChip({
       onClick={onClick}
       aria-pressed={active}
       className={[
-        'border px-md py-xs text-body-sm transition-colors duration-fast ease-house',
+        'inline-flex min-h-[44px] items-center border px-md py-xs text-body-sm transition-colors duration-fast ease-house focus:outline-none focus-visible:ring-1 focus-visible:ring-bronze',
         active
           ? 'border-bronze bg-espresso text-ivory'
           : 'surface-hairline surface-muted hover:border-bronze/60 hover:text-bronze-ink',
       ].join(' ')}
     >
-      {label}
+      <span>{label}</span>
       <span className="spec-value ml-2 opacity-70" data-spec>
         {count}
       </span>
@@ -221,29 +270,59 @@ function FilterChip({
   );
 }
 
-function EmptyState({ onClear }: { onClear: () => void }) {
+function EmptyState({
+  onClear,
+  searchQuery,
+  onClearSearch,
+}: {
+  onClear: () => void;
+  searchQuery?: string;
+  onClearSearch?: () => void;
+}) {
   return (
     <div className="border-bronze/40 surface-raised mt-xl flex flex-col gap-md border p-xl">
       <Eyebrow tick={false} className="surface-faint">
         No products match
       </Eyebrow>
-      <p className="surface-fg text-body-lg">That filter has no catalogue rows today.</p>
+      <p className="surface-fg text-body-lg">
+        {searchQuery
+          ? `No products match “${searchQuery}” in this view.`
+          : 'That filter has no catalogue rows today.'}
+      </p>
       <p className="surface-muted text-body-md max-w-[58ch]">
         We source outside the published catalogue on request — send the specification and the desk
         will confirm whether it can be produced to grade, with an MOQ and a lead time.
       </p>
       <div className="mt-sm flex flex-wrap gap-md">
+        {searchQuery && onClearSearch ? (
+          <button
+            type="button"
+            onClick={onClearSearch}
+            className="link-underline text-bronze-ink text-body-sm font-medium"
+          >
+            Clear search query
+          </button>
+        ) : null}
         <button
           type="button"
           onClick={onClear}
           className="link-underline text-bronze-ink text-body-sm font-medium"
         >
-          Clear filter
+          Reset all filters
         </button>
-        <a href="/rfq" className="link-underline text-bronze-ink text-body-sm font-medium">
+        <Link href="/rfq" className="link-underline text-bronze-ink text-body-sm font-medium">
           Request a sourced quotation →
-        </a>
+        </Link>
       </div>
     </div>
   );
+}
+
+function SearchParamsListener({ onCategory }: { onCategory: (cat: string | null) => void }) {
+  const searchParams = useSearchParams();
+  const cat = searchParams.get('category');
+  useEffect(() => {
+    if (cat) onCategory(cat);
+  }, [cat, onCategory]);
+  return null;
 }

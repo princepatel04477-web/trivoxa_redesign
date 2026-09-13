@@ -3,6 +3,7 @@ import { Container, Section } from '@/components/ui/layout';
 import { Eyebrow, Prose, SectionHeading } from '@/components/ui/typography';
 import { NetworkCanvas } from '@/components/three/network-canvas';
 import { SHIVESHWAR_CANONICAL_SENTENCE } from '@/content/company';
+import { DIVISIONS, INDUSTRIES, REGIONS } from '@/content/taxonomy';
 
 /**
  * P8 · SECTION C — Who We Are.
@@ -36,7 +37,7 @@ export function WhoWeAre() {
               </p>
               <p>{SHIVESHWAR_CANONICAL_SENTENCE}</p>
               <p>
-                Today we run two export divisions across nine industries and six regions. Tomorrow
+                Today we run {DIVISIONS.length} export divisions across {INDUSTRIES.length} industries and {REGIONS.length} regions. Tomorrow
                 we expand into new industries and markets, on the same terms: specifications before
                 superlatives, and relationships measured in years.
               </p>

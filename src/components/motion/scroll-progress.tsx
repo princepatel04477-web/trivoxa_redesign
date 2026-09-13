@@ -30,6 +30,8 @@ export function ScrollProgress() {
     { disabled: reduced },
   );
 
+  if (reduced) return null;
+
   return (
     <div
       aria-hidden

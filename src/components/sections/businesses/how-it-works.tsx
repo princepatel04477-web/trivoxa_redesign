@@ -1,6 +1,7 @@
 import { Reveal } from '@/components/motion/reveal';
 import { Container, Section } from '@/components/ui/layout';
 import { Prose, SectionHeading } from '@/components/ui/typography';
+import { cn } from '@/lib/utils';
 import type { ProcessStep } from '@/content/process';
 
 /**
@@ -19,6 +20,7 @@ export function HowItWorks({
   lede,
   surface = 'light',
   id = 'how-it-works',
+  className,
 }: {
   steps: ProcessStep[];
   eyebrow?: string;
@@ -26,9 +28,10 @@ export function HowItWorks({
   lede?: string;
   surface?: 'light' | 'dark' | 'deep';
   id?: string;
+  className?: string;
 }) {
   return (
-    <Section surface={surface} id={id}>
+    <Section surface={surface} id={id} className={cn('scroll-mt-24', className)}>
       <Container>
         <SectionHeading eyebrow={eyebrow} title={title} lede={lede} />
 

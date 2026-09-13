@@ -106,3 +106,32 @@ describe('the Shiveshwar sentence', () => {
     expect(SHIVESHWAR_CANONICAL_SENTENCE).not.toContain('strategic partner');
   });
 });
+
+describe('taxonomy consistency and labelling rules (Prompt 05)', () => {
+  it('every category marked live has at least one live product', () => {
+    const liveCats = CATEGORIES.filter((c) => c.status === 'live');
+    expect(liveCats.length).toBeGreaterThan(0);
+    for (const cat of liveCats) {
+      const prods = PRODUCTS.filter((p) => p.categorySlug === cat.slug && p.status === 'live');
+      expect(prods.length, `Category ${cat.slug} is marked live but has no live products`).toBeGreaterThan(0);
+    }
+  });
+
+  it('every industry marked live has at least one live product in catalogue', () => {
+    const liveInds = INDUSTRIES.filter((i) => i.status === 'live');
+    expect(liveInds.length).toBeGreaterThan(0);
+    for (const ind of liveInds) {
+      const indCats = CATEGORIES.filter((c) => c.industrySlug === ind.slug);
+      const hasLiveProduct = indCats.some((c) =>
+        PRODUCTS.some((p) => p.categorySlug === c.slug && p.status === 'live'),
+      );
+      expect(hasLiveProduct, `Industry ${ind.slug} is marked live but owns no live product`).toBe(true);
+    }
+  });
+
+  it('technology industry has no physical catalogue rows and is not marked live in physical catalogue', () => {
+    const tech = INDUSTRIES.find((i) => i.slug === 'technology');
+    expect(tech).toBeDefined();
+    expect(tech?.status).toBe('onboarding');
+  });
+});

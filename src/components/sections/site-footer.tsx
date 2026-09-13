@@ -23,7 +23,11 @@ export function SiteFooter() {
   const regions = footerRegions();
 
   return (
-    <footer data-surface="deep" className="surface-bg surface-fg border-t border-bronze/25">
+    <footer
+      aria-label="Global footer"
+      data-surface="deep"
+      className="surface-bg surface-fg border-t border-bronze/25"
+    >
       <Container className="py-section-tight">
         <Reveal as="div" staggerChildren className="grid grid-cols-12 gap-xl">
           {/* brand + contact block */}

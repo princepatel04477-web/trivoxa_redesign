@@ -16,7 +16,7 @@ import { LEADERSHIP } from '@/content/company';
  */
 export function GroupLeadership() {
   return (
-    <Section surface="light" id="leadership">
+    <Section surface="light" id="leadership" className="scroll-mt-24">
       <Container>
         <SectionHeading
           eyebrow="Leadership"

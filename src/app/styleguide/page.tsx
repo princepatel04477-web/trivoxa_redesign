@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 
 export const metadata = {
   title: 'Styleguide',
+  alternates: { canonical: '/styleguide' },
   robots: { index: false, follow: false },
 };
 
@@ -33,7 +34,7 @@ export default function StyleguidePage() {
   if (process.env.NODE_ENV === 'production') notFound();
 
   return (
-    <main>
+    <>
       <Section surface="deep" tight>
         <div className="flex flex-col gap-lg">
           <Eyebrow>Trivoxa Design System</Eyebrow>
@@ -63,7 +64,7 @@ export default function StyleguidePage() {
       <TypeSection />
       <TokenSection />
       <PrimitiveSection />
-    </main>
+    </>
   );
 }
 

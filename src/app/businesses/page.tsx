@@ -8,11 +8,15 @@ import { INDUSTRIES } from '@/content/taxonomy';
 import { PRODUCT_EXPORT_PROCESS } from '@/content/process';
 import { proofBand } from '@/lib/selectors';
 
+import { buildRouteMetadata } from '@/lib/seo/metadata';
+
 export const metadata: Metadata = {
-  title: 'Trivoxa Businesses — Product Exports & Service Exports',
-  description:
-    'Two export divisions on one operating discipline: product exports across nine industries from Surat, and professional services through the group\u2019s technology property. Seven documented steps from requirement mapping to delivery support.',
-  alternates: { canonical: '/businesses' },
+  ...buildRouteMetadata({
+    title: 'Businesses — Product Exports & Service Exports',
+    description: `Two export divisions on one operating discipline: product exports across ${INDUSTRIES.length} industries from Surat, and professional services through the group\u2019s technology property. ${PRODUCT_EXPORT_PROCESS.length} documented steps from requirement mapping to delivery support.`,
+    path: '/businesses',
+  }),
+  alternates: { canonical: 'https://trivoxagroup.com/businesses' },
 };
 
 /**

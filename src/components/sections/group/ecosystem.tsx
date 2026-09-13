@@ -2,7 +2,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { Reveal } from '@/components/motion/reveal';
 import { Container, Section } from '@/components/ui/layout';
 import { Eyebrow, Prose, SectionHeading } from '@/components/ui/typography';
-import { COMPANY, SHIVESHWAR_CANONICAL_SENTENCE, SHIVESHWAR_RELATIONSHIP } from '@/content/company';
+import { COMPANY, SHIVESHWAR_RELATIONSHIP } from '@/content/company';
 import { DIVISIONS } from '@/content/taxonomy';
 
 /**
@@ -27,7 +27,7 @@ export function GroupEcosystem() {
         <SectionHeading
           eyebrow="The Ecosystem"
           title="One group. One manufacturing foundation. Two export divisions."
-          lede={SHIVESHWAR_CANONICAL_SENTENCE}
+          lede="How parent manufacturing capability, group governance, and operational export divisions connect to supply physical product lines and cross-border digital services."
         />
 
         <Reveal className="mt-3xl">

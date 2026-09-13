@@ -10,6 +10,7 @@
  * support. `zod` enforces the length floor; review enforces the rest.
  */
 import { z } from 'zod';
+import { PRODUCTS } from './taxonomy';
 
 export const FaqEntrySchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/),
@@ -30,7 +31,7 @@ export const RFQ_FAQ: FaqEntry[] = FaqEntrySchema.array().parse([
     id: 'outside-catalogue',
     question: 'Do you supply products that are not in the catalogue?',
     answer:
-      'Yes. The published catalogue is what we can quote without a conversation — 25 rows with HS codes, grades and MOQs. Outside it we source against a written specification through our parent company\u2019s mill and our validated partner factories, and we tell you before quoting whether a line can be produced to your grade.',
+      `Yes. The published catalogue is what we can quote without a conversation — ${PRODUCTS.length} rows with HS codes, grades and MOQs. Outside it we source against a written specification through our parent company\u2019s mill and our validated partner factories, and we tell you before quoting whether a line can be produced to your grade.`,
   },
   {
     id: 'incoterms',

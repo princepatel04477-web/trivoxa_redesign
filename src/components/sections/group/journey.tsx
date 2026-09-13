@@ -6,6 +6,7 @@ import { Container, Section } from '@/components/ui/layout';
 import { Eyebrow, SectionHeading } from '@/components/ui/typography';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { JOURNEY } from '@/content/company';
+import { INDUSTRIES } from '@/content/taxonomy';
 
 /**
  * P11 — the journey, as a pinned reading column.
@@ -68,7 +69,7 @@ export function GroupJourney() {
           {/* sticky counter */}
           <div className="col-span-12 lg:col-span-4">
             <div className="lg:sticky lg:top-[120px]">
-              <SectionHeading eyebrow="The Journey" title="From a mill in Surat to nine industries." />
+              <SectionHeading eyebrow="The Journey" title={`From a mill in Surat to ${INDUSTRIES.length} industries.`} />
 
               <div className="mt-2xl hidden items-start gap-lg lg:flex" aria-hidden>
                 <span ref={counter} className="text-display-xl text-accent leading-none">
@@ -97,9 +98,10 @@ export function GroupJourney() {
                 data-step={item.step}
                 className="surface-hairline group grid grid-cols-12 gap-md border-t py-2xl transition-colors duration-base ease-house last:border-b data-[active=true]:border-bronze/60"
               >
-                <span className="surface-faint spec-value col-span-2 text-body-sm group-data-[active=true]:text-accent" data-spec>
-                  {String(item.step).padStart(2, '0')}
-                </span>
+                <div className="surface-faint spec-value col-span-2 flex flex-col gap-0.5 text-body-sm group-data-[active=true]:text-accent" data-spec>
+                  <span>{String(item.step).padStart(2, '0')}</span>
+                  <span className="text-body-xs opacity-75">{item.year}</span>
+                </div>
                 <div className="col-span-10 flex flex-col gap-sm">
                   <h3 className="text-heading-lg transition-colors duration-base ease-house group-data-[active=true]:text-accent">
                     {item.title}

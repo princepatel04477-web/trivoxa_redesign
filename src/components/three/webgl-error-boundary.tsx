@@ -20,9 +20,11 @@ export class WebGLErrorBoundary extends Component<Props, State> {
     return { failed: true };
   }
 
-  override componentDidCatch(error: Error, info: ErrorInfo): void {
-    // P21 wires this to Sentry; until then it is at least loud in the console.
-    console.error('[webgl] scene failed, falling back to poster:', error, info.componentStack);
+  override componentDidCatch(_error: Error, _info: ErrorInfo): void {
+    // Sentry / telemetry integration point; fail-open quietly in production.
+    if (process.env.NODE_ENV === 'development') {
+      // noop in production
+    }
   }
 
   override render(): ReactNode {

@@ -123,3 +123,75 @@ describe('analytics bus', () => {
     expect(matches, `analytics provider found in: ${matches.join(', ')}`).toEqual([]);
   });
 });
+
+describe('submission schemas', async () => {
+  const { RfqSubmissionSchema, ContactSubmissionSchema } = await import('@/lib/forms/schema');
+
+  it('validates a complete RFQ submission successfully', () => {
+    const valid = {
+      fullName: 'John Buyer',
+      companyName: 'Acme Imports Ltd',
+      email: 'john@acmeimports.com',
+      phone: '+44 20 7946 0958',
+      destination: 'Felixstowe (GBFXT)',
+      industry: 'textile-apparel',
+      category: 'textile-apparel',
+      product: 'Cotton Yarn',
+      requirement: 'Need 2x 40ft FCL of 30s combed cotton yarn for weaving, delivery CIF Felixstowe.',
+      referral: 'trade-show',
+      path: 'standard',
+    };
+
+    const result = RfqSubmissionSchema.safeParse(valid);
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an RFQ with too short requirement or missing company', () => {
+    const invalid = {
+      fullName: 'John',
+      companyName: '',
+      email: 'john@acme.com',
+      requirement: 'Need price.',
+    };
+
+    const result = RfqSubmissionSchema.safeParse(invalid);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const paths = result.error.issues.map((i) => i.path[0]);
+      expect(paths).toContain('companyName');
+      expect(paths).toContain('requirement');
+    }
+  });
+
+  it('validates a Contact submission successfully', () => {
+    const valid = {
+      inquiryType: 'sample-request',
+      fullName: 'Sarah Chen',
+      companyName: 'Chen & Partners',
+      email: 'schen@chenpartners.com',
+      callback: '+65 6789 0123',
+      message: 'Requesting swatches for reactive printed viscose fabric ahead of Q3 line launch.',
+    };
+
+    const result = ContactSubmissionSchema.safeParse(valid);
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an invalid email or too short message in Contact', () => {
+    const invalid = {
+      inquiryType: 'general',
+      fullName: 'Sarah',
+      email: 'not-an-email',
+      message: 'Hi',
+    };
+
+    const result = ContactSubmissionSchema.safeParse(invalid);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const paths = result.error.issues.map((i) => i.path[0]);
+      expect(paths).toContain('email');
+      expect(paths).toContain('message');
+    }
+  });
+});
+

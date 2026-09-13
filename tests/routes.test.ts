@@ -13,7 +13,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { INDUSTRIES } from '@/content/taxonomy';
+import { INDUSTRIES, PRODUCTS } from '@/content/taxonomy';
 import { LEGAL_DOCUMENTS } from '@/content/legal';
 import { navHrefs } from '@/lib/nav';
 
@@ -47,7 +47,11 @@ function collectRoutes(dir: string, prefix = ''): string[] {
 
 /** Values a dynamic segment is allowed to take, from the canonical data. */
 const PARAM_VALUES: Record<string, string[]> = {
-  slug: [...INDUSTRIES.map((industry) => industry.slug), ...Object.keys(LEGAL_DOCUMENTS)],
+  slug: [
+    ...INDUSTRIES.map((industry) => industry.slug),
+    ...Object.keys(LEGAL_DOCUMENTS),
+    ...PRODUCTS.map((product) => product.slug),
+  ],
 };
 
 function matches(route: string, href: string): boolean {

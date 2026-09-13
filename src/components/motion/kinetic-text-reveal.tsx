@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, type ElementType, type ReactNode } from 'react';
+import { Fragment, useEffect, useRef, type ElementType, type ReactNode } from 'react';
 import { useGSAP } from './use-gsap';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
 import { cn } from '@/lib/utils';
@@ -97,10 +97,19 @@ export function KineticTextReveal({
       // eagle) starved the main thread of the animation frames GSAP's ticker
       // needs to finish the tween. If the reveal hasn't completed shortly
       // after it was due to, jump it to its final state outright.
+      //
+      // Both this and the tween's own `onComplete` route through the same
+      // `settle()` — critically, it kills any tween still targeting `words`
+      // before forcing the final values. Without that kill, a tween whose
+      // ticker was merely delayed (not actually finished) by the same
+      // main-thread contention this failsafe exists for would tick again
+      // after the failsafe fires and silently overwrite the forced "visible"
+      // state with its own still-in-flight, partially-hidden one.
       let settled = false;
       const settle = (): void => {
         if (settled) return;
         settled = true;
+        gsap.killTweensOf(words);
         gsap.set(words, { yPercent: 0, opacity: 1, rotateX: 0 });
         onCompleteRef.current?.();
       };
@@ -114,18 +123,14 @@ export function KineticTextReveal({
         stagger,
         ease: 'power4.out',
         overwrite: 'auto' as const,
-        onComplete: () => {
-          if (settled) return;
-          settled = true;
-          onCompleteRef.current?.();
-        },
+        onComplete: () => settle(),
       };
       const failsafeMs = (delay + duration + stagger * Math.max(0, words.length - 1)) * 1000 + 800;
 
       if (isHero) {
         // Immediate entrance for hero display
         gsap.to(words, animProps);
-        const failsafe = window.setTimeout(settle, failsafeMs);
+        const failsafe = window.setTimeout(() => settle(), failsafeMs);
         return () => window.clearTimeout(failsafe);
       }
 
@@ -148,28 +153,29 @@ export function KineticTextReveal({
     { disabled: reduced, scope: containerRef },
   );
 
-  // Render string content split into masked words
+  // Render string content split into masked words with genuine DOM whitespace
   const renderContent = () => {
     if (typeof children !== 'string') {
       return children;
     }
 
+    if (reduced) {
+      return children;
+    }
+
     const words = children.split(' ');
     return words.map((word, index) => (
-      <span
-        key={`${word}-${index}`}
-        className="inline-block overflow-hidden align-top mr-[0.24em] last:mr-0"
-        style={{ perspective: '800px' }}
-      >
+      <Fragment key={`${word}-${index}`}>
         <span
-          className={cn(
-            'kinetic-word inline-block will-change-transform',
-            reduced ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full',
-          )}
+          className="inline-block overflow-hidden align-top"
+          style={{ perspective: '800px' }}
         >
-          {word}
+          <span className="kinetic-word inline-block will-change-transform">
+            {word}
+          </span>
         </span>
-      </span>
+        {index < words.length - 1 ? ' ' : null}
+      </Fragment>
     ));
   };
 

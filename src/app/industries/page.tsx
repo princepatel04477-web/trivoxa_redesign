@@ -9,13 +9,17 @@ import { ArrowLink } from '@/components/ui/link';
 import { Container, Section } from '@/components/ui/layout';
 import { Prose, SectionHeading } from '@/components/ui/typography';
 import { CAPABILITIES } from '@/content/capabilities';
-import { industryHub, proofBand } from '@/lib/selectors';
+import { industryHub, liveIndustries, onboardingIndustries, proofBand, totalIndustries } from '@/lib/selectors';
+
+import { buildRouteMetadata } from '@/lib/seo/metadata';
 
 export const metadata: Metadata = {
-  title: 'Industries We Serve — Nine Export Industries from Surat',
-  description:
-    'Nine industries, each with its catalogue rows, HS codes, MOQs, lead times and compliance notes. Six are live today; three are onboarding and labelled as such rather than marketed as active.',
-  alternates: { canonical: '/industries' },
+  ...buildRouteMetadata({
+    title: `Industries We Serve — ${totalIndustries()} Export Industries from Surat`,
+    description: `${totalIndustries()} industries, each with its catalogue rows, HS codes, MOQs, lead times and compliance notes. ${liveIndustries().length} are live today; ${onboardingIndustries().length} are onboarding and labelled as such rather than marketed as active.`,
+    path: '/industries',
+  }),
+  alternates: { canonical: 'https://trivoxagroup.com/industries' },
 };
 
 /**
@@ -30,13 +34,13 @@ export const metadata: Metadata = {
 export default function IndustriesPage() {
   const hub = industryHub();
   const band = proofBand();
-  const live = hub.filter((entry) => entry.industry.status === 'live').length;
+  const live = liveIndustries().length;
 
   return (
     <>
       <PageHero
         eyebrow="Industries"
-        title="Nine industries. One sourcing discipline."
+        title={`${hub.length} industries. One sourcing discipline.`}
         lede="Each industry below is backed by catalogue rows with HS codes, grades, MOQs and lead times — or it is labelled onboarding, with what we can do for you today stated instead."
         trail={[
           { href: '/', label: 'Home' },
@@ -52,6 +56,7 @@ export default function IndustriesPage() {
 
       <Section surface="light" className="pt-0">
         <Container>
+          <h2 className="sr-only">All Industries</h2>
           <Reveal staggerChildren className="grid grid-cols-12 gap-md">
             {hub.map(({ industry, productCount, liveProductCount }) => (
               <Card
@@ -65,7 +70,7 @@ export default function IndustriesPage() {
                   <StatusBadge status={industry.status} />
                 </div>
 
-                <h2 className="text-heading-lg">{industry.name}</h2>
+                <h3 className="text-heading-lg">{industry.name}</h3>
 
                 <Prose className="text-body-sm">
                   <p className="surface-muted">{industry.shortDescription}</p>

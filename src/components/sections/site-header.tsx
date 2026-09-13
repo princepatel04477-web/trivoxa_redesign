@@ -380,14 +380,10 @@ function LocaleSwitcher() {
     return () => document.removeEventListener('mousedown', onDown);
   }, [open]);
 
-  // P18's rule, enforced at the source: the switcher lists ONLY locales with a
-  // complete catalogue. Today that is English; de and ar join when translated.
+  // The site ships in English only today (SHIPPED_LOCALES.length === 1).
+  // Render nothing rather than a dead "EN" control with no alternates.
   if (SHIPPED_LOCALES.length <= 1) {
-    return (
-      <span className="text-ivory/70 hidden text-body-sm font-medium sm:inline" aria-label="Language: English">
-        EN
-      </span>
-    );
+    return null;
   }
 
   return (

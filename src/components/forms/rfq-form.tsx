@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input, Select, Textarea } from '@/components/ui/field';
@@ -8,8 +9,9 @@ import { Eyebrow, Prose } from '@/components/ui/typography';
 import { CATEGORIES, CONTACT, INDUSTRIES, PRODUCTS } from '@/content/taxonomy';
 import { track } from '@/lib/analytics/events';
 import { focusFirstInvalid } from '@/lib/forms/focus-first-invalid';
-import { HONEYPOT_FIELD, isBot, isEmail, type Enquiry } from '@/lib/forms/mailto';
-import { submitThroughTransport, type SubmissionResult } from '@/lib/forms/transport';
+import { composeEnquiry, type Enquiry } from '@/lib/forms/mailto';
+import { HONEYPOT_FIELD, RfqSubmissionSchema } from '@/lib/forms/schema';
+import type { SubmissionResult } from '@/lib/forms/transport';
 
 /**
  * P16 — the RFQ form. The single commercial conversion on the site.
@@ -104,38 +106,98 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
   const paramDivision = searchParams.get('division') ?? prefill?.division ?? '';
   const paramPath = searchParams.get('path') ?? prefill?.path ?? '';
 
-  const [values, setValues] = useState<FormState>(() => ({
-    fullName: '',
-    companyName: '',
-    email: '',
-    phone: '',
-    destination: '',
-    industry: '',
-    category: paramCategory && CATEGORIES.some((c) => c.slug === paramCategory) ? paramCategory : '',
-    product: resolveProductName(paramProduct),
-    requirement: '',
-    referral: '',
-    [HONEYPOT_FIELD]: '',
-  }));
+  const [mountTime] = useState<number>(() => Date.now());
+  const [prefillChip, setPrefillChip] = useState<string | null>(null);
+
+  const [values, setValues] = useState<FormState>(() => {
+    let initialCategory = '';
+    let initialIndustry = '';
+    let initialProduct = '';
+    let initialRequirement = '';
+
+    if (paramProduct) {
+      const match = PRODUCTS.find((p) => p.slug === paramProduct);
+      if (match) {
+        initialProduct = match.name;
+        initialCategory = match.categorySlug;
+        const catObj = CATEGORIES.find((c) => c.slug === match.categorySlug);
+        if (catObj) initialIndustry = catObj.industrySlug;
+        initialRequirement = `Sourcing inquiry for ${match.name} (HS Code: ${match.hsCode || 'TBD'}). Target grade, quantity, destination port, and delivery Incoterms:`;
+      } else {
+        initialProduct = paramProduct;
+      }
+    } else if (paramCategory) {
+      const catObj = CATEGORIES.find((c) => c.slug === paramCategory);
+      if (catObj) {
+        initialCategory = catObj.slug;
+        initialIndustry = catObj.industrySlug;
+      } else {
+        const indObj = INDUSTRIES.find((i) => i.slug === paramCategory);
+        if (indObj) {
+          initialIndustry = indObj.slug;
+          const firstCat = CATEGORIES.find((c) => c.industrySlug === indObj.slug);
+          if (firstCat) initialCategory = firstCat.slug;
+        }
+      }
+    }
+
+    if (!initialRequirement) {
+      if (paramPath === 'sample') {
+        initialRequirement =
+          'Sample request: please specify sample grade, delivery address or courier account, and required testing metrics.';
+      } else if (paramPath === 'audit') {
+        initialRequirement =
+          'Factory audit inquiry: please specify proposed dates, audit standards (e.g. ISO/SMETA), attendee details, and target facility.';
+      }
+    }
+
+    return {
+      fullName: '',
+      companyName: '',
+      email: '',
+      phone: '',
+      destination: '',
+      industry: initialIndustry,
+      category: initialCategory,
+      product: initialProduct,
+      requirement: initialRequirement,
+      referral: '',
+      [HONEYPOT_FIELD]: '',
+    };
+  });
+
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const formRef = useRef<HTMLFormElement | null>(null);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [fallbackMailto, setFallbackMailto] = useState<string | null>(null);
   const [sent, setSent] = useState<SubmissionResult | 'nothing' | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   useEffect(() => {
-    const cat = searchParams.get('category');
-    const prod = searchParams.get('product');
-    if (cat || prod) {
-      setValues((current) => ({
-        ...current,
-        category: cat && CATEGORIES.some((c) => c.slug === cat) ? cat : current.category,
-        product: prod ? resolveProductName(prod) : current.product,
-      }));
+    const pProd = searchParams.get('product');
+    const pCat = searchParams.get('category');
+    const pPath = searchParams.get('path');
+
+    if (pProd) {
+      const match = PRODUCTS.find((p) => p.slug === pProd);
+      if (match) {
+        setPrefillChip(`Prefilled from catalogue: ${match.name}`);
+      }
+    } else if (pCat) {
+      const match = CATEGORIES.find((c) => c.slug === pCat) || INDUSTRIES.find((i) => i.slug === pCat);
+      if (match) {
+        setPrefillChip(`Prefilled from industry: ${match.name}`);
+      }
+    } else if (pPath === 'sample') {
+      setPrefillChip('Prefilled: Sample Request route');
+    } else if (pPath === 'audit') {
+      setPrefillChip('Prefilled: Factory Audit route');
     }
   }, [searchParams]);
 
   const set = (key: keyof FormState, value: string): void => {
     setValues((current) => {
-      // choosing an industry that does not own the category clears the category
       const next = { ...current, [key]: value };
       if (key === 'industry') {
         const owned = CATEGORIES.filter((category) => category.industrySlug === value).map(
@@ -145,7 +207,24 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
       }
       return next;
     });
-    setErrors((current) => ({ ...current, [key]: '' }));
+    if (errors[key]) {
+      setErrors((current) => ({ ...current, [key]: '' }));
+    }
+  };
+
+  const validateField = (field: keyof FormState): void => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const singleParse = RfqSubmissionSchema.shape[field as keyof typeof RfqSubmissionSchema.shape]?.safeParse(
+      values[field],
+    );
+    if (singleParse && !singleParse.success) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: singleParse.error.issues[0]?.message || 'Invalid field',
+      }));
+    } else {
+      setErrors((prev) => ({ ...prev, [field]: '' }));
+    }
   };
 
   const categoryOptions = useMemo(() => {
@@ -158,82 +237,134 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
     ];
   }, [values.industry]);
 
-  const validate = (): boolean => {
-    const next: Record<string, string> = {};
+  const validateAll = (): boolean => {
+    const result = RfqSubmissionSchema.safeParse({
+      ...values,
+      path: paramPath === 'sample' || paramPath === 'audit' ? paramPath : '',
+      division: paramDivision,
+    });
 
-    if (!values.fullName.trim()) next.fullName = 'Tell us who to reply to.';
-    if (!values.companyName.trim()) next.companyName = 'A company name lets us check the market.';
-    if (!isEmail(values.email)) next.email = 'A working email address is required.';
-    if (values.phone.trim() && values.phone.trim().length < 7) {
-      next.phone = 'That does not look like a reachable number.';
+    if (!result.success) {
+      const nextErrors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const p = issue.path[0]?.toString();
+        if (p && !nextErrors[p]) {
+          nextErrors[p] = issue.message;
+        }
+      }
+      setErrors(nextErrors);
+      return false;
     }
-    if (values.requirement.trim().length < 30) {
-      next.requirement =
-        'A little more detail, please — grade, quantity, destination and target Incoterm.';
-    }
-
-    setErrors(next);
-    return Object.keys(next).length === 0;
+    setErrors({});
+    return true;
   };
 
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    if (isBot(values as Record<string, string | undefined>)) {
+    setSubmissionError(null);
+
+    // Honeypot check
+    if (values[HONEYPOT_FIELD]?.trim().length > 0) {
       track('bot_discarded', { form: 'rfq' });
-      setSent('nothing'); // say nothing, exactly as if it had worked
+      setSent('nothing');
       return;
     }
-    if (!validate()) {
+
+    if (!validateAll()) {
       focusFirstInvalid(formRef.current);
       return;
     }
 
-    const industry = INDUSTRIES.find((entry) => entry.slug === values.industry);
-    const category = CATEGORIES.find((entry) => entry.slug === values.category);
-    const serviceSide = paramDivision === 'service-exports' || values.industry === 'technology';
+    setIsSubmitting(true);
 
-    // The subject line the desk sees: what it is about, then who it is from.
+    const industryObj = INDUSTRIES.find((entry) => entry.slug === values.industry);
+    const categoryObj = CATEGORIES.find((entry) => entry.slug === values.category);
+    const serviceSide = paramDivision === 'service-exports' || values.industry === 'technology';
+    const deskMailbox = serviceSide ? CONTACT.general : CONTACT.sales;
+
     const about =
-      values.product.trim() || category?.name || industry?.name || (serviceSide ? 'Service enquiry' : 'Enquiry');
+      values.product.trim() || categoryObj?.name || industryObj?.name || (serviceSide ? 'Service enquiry' : 'Enquiry');
     const subject = values.companyName.trim()
       ? `RFQ — ${about} — ${values.companyName.trim()}`
       : `RFQ — ${about}`;
 
-    const enquiry: Enquiry = {
-      to: serviceSide ? CONTACT.general : CONTACT.sales,
+    const mailtoEnquiry: Enquiry = {
+      to: deskMailbox,
       subject,
       fields: [
         { label: 'Name', value: values.fullName },
         { label: 'Company', value: values.companyName },
         { label: 'Email', value: values.email },
         { label: 'Phone', value: values.phone },
-        { label: 'Destination (country / port)', value: values.destination },
-        { label: 'Industry', value: industry?.name ?? '' },
-        { label: 'Category', value: category?.name ?? '' },
-        { label: 'Product or service of interest', value: values.product },
+        { label: 'Destination', value: values.destination },
+        { label: 'Industry', value: industryObj?.name ?? '' },
+        { label: 'Category', value: categoryObj?.name ?? '' },
+        { label: 'Product of interest', value: values.product },
         { label: 'Requirement', value: values.requirement },
-        { label: 'How they heard about us', value: referralLabel(values.referral) },
-        { label: 'Requested path', value: pathLabel(paramPath) },
+        { label: 'Referral', value: referralLabel(values.referral) },
+        { label: 'Path', value: pathLabel(paramPath) },
       ],
       footer: `Sent from trivoxagroup.com/rfq · ${new Date().toISOString().slice(0, 10)}`,
     };
 
-    // One seam, one event. Today the transport composes a mailto and the buyer's
-    // mail client opens; when a backend exists it returns a reference instead and
-    // this component does not change (P21, ADR 037).
-    void submitThroughTransport(enquiry, {
-      name: 'rfq_compose',
-      payload: {
+    const mailtoHref = composeEnquiry(mailtoEnquiry);
+    setFallbackMailto(mailtoHref);
+
+    try {
+      const response = await fetch('/api/rfq', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...values,
+          path: paramPath === 'sample' || paramPath === 'audit' ? paramPath : '',
+          division: paramDivision,
+          submittedAt: mountTime,
+          referringUrl: typeof window !== 'undefined' ? window.location.href : '',
+        }),
+      });
+
+      const outcome = (await response.json()) as {
+        ok?: boolean;
+        reference?: string;
+        error?: string;
+        errors?: Record<string, string>;
+      };
+
+      if (!response.ok || !outcome.ok) {
+        if (outcome.errors) {
+          setErrors(outcome.errors);
+          focusFirstInvalid(formRef.current);
+        }
+        setSubmissionError(
+          outcome.error || 'The server could not accept your enquiry. Please verify details or use email fallback.',
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
+      const reference = outcome.reference || 'TRV-RFQ-OK';
+      setSent({ kind: 'queued', reference });
+      setIsSubmitting(false);
+
+      track('rfq_compose', {
         division: serviceSide ? 'service-exports' : 'product-exports',
-        industry: industry?.slug,
-        category: category?.slug,
+        industry: industryObj?.slug,
+        category: categoryObj?.slug,
         path: paramPath || undefined,
         destination: values.destination.trim() || undefined,
-      },
-    }).then((result) => {
-      if (result.kind === 'mailto') window.location.href = result.href;
-      setSent(result);
-    });
+      });
+
+      if (paramPath === 'audit') {
+        track('audit_request', { from: 'rfq' });
+      }
+    } catch {
+      setSubmissionError(
+        'Network error connecting to the export desk. Your typed information has been saved.',
+      );
+      setIsSubmitting(false);
+    }
   };
 
   if (sent === 'nothing') {
@@ -249,7 +380,35 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
   }
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} noValidate className="flex flex-col gap-lg">
+    <form ref={formRef} onSubmit={(e) => void onSubmit(e)} noValidate className="flex flex-col gap-lg">
+      {prefillChip ? (
+        <div className="border-bronze/50 surface-raised flex items-center justify-between gap-md border px-md py-sm text-body-sm">
+          <span className="surface-fg font-medium">{prefillChip}</span>
+          <button
+            type="button"
+            onClick={() => setPrefillChip(null)}
+            className="surface-muted hover:surface-fg text-body-sm font-semibold focus-visible:outline-none"
+            aria-label="Dismiss prefilled context"
+          >
+            ✕
+          </button>
+        </div>
+      ) : null}
+
+      {submissionError ? (
+        <div role="alert" className="border-accent/60 bg-accent/10 flex flex-col gap-sm border p-md text-body-sm">
+          <p className="font-medium text-accent">{submissionError}</p>
+          {fallbackMailto ? (
+            <p className="surface-fg text-body-xs">
+              You can send this exact specification directly via your email client:{' '}
+              <a href={fallbackMailto} className="link-underline font-semibold text-bronze-ink">
+                Open formatted email fallback →
+              </a>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
       <div className="grid grid-cols-12 gap-md">
         <Input
           className="col-span-12 sm:col-span-6"
@@ -257,8 +416,10 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
           required
           autoComplete="name"
           value={values.fullName}
-          error={errors.fullName}
+          error={touched.fullName ? errors.fullName : undefined}
+          onBlur={() => validateField('fullName')}
           onChange={(event) => set('fullName', event.target.value)}
+          disabled={isSubmitting}
         />
         <Input
           className="col-span-12 sm:col-span-6"
@@ -266,8 +427,10 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
           required
           autoComplete="organization"
           value={values.companyName}
-          error={errors.companyName}
+          error={touched.companyName ? errors.companyName : undefined}
+          onBlur={() => validateField('companyName')}
           onChange={(event) => set('companyName', event.target.value)}
+          disabled={isSubmitting}
         />
         <Input
           className="col-span-12 sm:col-span-6"
@@ -276,8 +439,10 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
           required
           autoComplete="email"
           value={values.email}
-          error={errors.email}
+          error={touched.email ? errors.email : undefined}
+          onBlur={() => validateField('email')}
           onChange={(event) => set('email', event.target.value)}
+          disabled={isSubmitting}
         />
         <Input
           className="col-span-12 sm:col-span-6"
@@ -286,8 +451,10 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
           hint="Optional — include the country code."
           autoComplete="tel"
           value={values.phone}
-          error={errors.phone}
+          error={touched.phone ? errors.phone : undefined}
+          onBlur={() => validateField('phone')}
           onChange={(event) => set('phone', event.target.value)}
+          disabled={isSubmitting}
         />
         <Input
           className="col-span-12 sm:col-span-6"
@@ -295,6 +462,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
           hint="Country, and the port if you know it."
           value={values.destination}
           onChange={(event) => set('destination', event.target.value)}
+          disabled={isSubmitting}
         />
         <Select
           className="col-span-12 sm:col-span-6"
@@ -305,6 +473,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
           ]}
           value={values.industry}
           onChange={(event) => set('industry', event.target.value)}
+          disabled={isSubmitting}
         />
         <Select
           className="col-span-12 sm:col-span-6"
@@ -312,6 +481,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
           options={categoryOptions}
           value={values.category}
           onChange={(event) => set('category', event.target.value)}
+          disabled={isSubmitting}
         />
         <Input
           className="col-span-12 sm:col-span-6"
@@ -319,6 +489,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
           list="rfq-products"
           value={values.product}
           onChange={(event) => set('product', event.target.value)}
+          disabled={isSubmitting}
         />
       </div>
 
@@ -334,8 +505,10 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
         rows={6}
         hint="Grade or specification, quantity, destination port, target Incoterm (EXW / FOB / CIF / DDP) and any certification your market requires."
         value={values.requirement}
-        error={errors.requirement}
+        error={touched.requirement ? errors.requirement : undefined}
+        onBlur={() => validateField('requirement')}
         onChange={(event) => set('requirement', event.target.value)}
+        disabled={isSubmitting}
       />
 
       <Select
@@ -343,6 +516,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
         options={REFERRAL_OPTIONS}
         value={values.referral}
         onChange={(event) => set('referral', event.target.value)}
+        disabled={isSubmitting}
       />
 
       {/* honeypot — off-screen, not display:none, and never labelled */}
@@ -357,13 +531,15 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
       </div>
 
       <div className="mt-md flex flex-wrap items-center gap-lg">
-        <Button type="submit" size="lg" arrow>
-          Send the enquiry
+        <Button type="submit" size="lg" arrow disabled={isSubmitting}>
+          {isSubmitting ? 'Sending to export desk...' : 'Send the enquiry'}
         </Button>
         <Prose className="text-body-sm">
           <p className="surface-muted max-w-[46ch]">
-            Opens your mail client with the enquiry formatted for our export desk. Nothing is stored
-            on this site.
+            Enquiries are received securely by our export desk and processed in accordance with our{' '}
+            <Link href="/legal/privacy" className="link-underline text-bronze-ink">
+              Privacy Policy
+            </Link>.
           </p>
         </Prose>
       </div>
@@ -387,7 +563,7 @@ function SentPanel({ href, reference }: { href: string; reference?: string }) {
   return (
     <div role="status" className="border-bronze/50 surface-raised flex flex-col gap-md border p-xl">
       <Eyebrow tick={false} className="surface-faint">
-        Enquiry composed
+        Enquiry received
       </Eyebrow>
       <h2 ref={headingRef} tabIndex={-1} className="text-heading-lg max-w-[28ch] rounded-sm">
         {reference
@@ -396,8 +572,9 @@ function SentPanel({ href, reference }: { href: string; reference?: string }) {
       </h2>
       <Prose className="text-body-md">
         <p className="surface-muted max-w-[62ch]">
-          If nothing opened, use the link below or write to us directly. Either route reaches the
-          same three people.
+          {reference
+            ? 'A confirmation email with your specification details has been sent to your address. Our export desk in Surat reviews specifications Monday to Saturday, 10:00–19:00 IST.'
+            : 'If nothing opened, use the link below or write to us directly. Either route reaches the same three people.'}
         </p>
       </Prose>
       <div className="mt-sm flex flex-wrap gap-md">
@@ -412,12 +589,6 @@ function SentPanel({ href, reference }: { href: string; reference?: string }) {
       </div>
     </div>
   );
-}
-
-function resolveProductName(slug?: string): string {
-  if (!slug) return '';
-  const product = PRODUCTS.find((entry) => entry.slug === slug);
-  return product?.name ?? slug;
 }
 
 function referralLabel(value: string): string {

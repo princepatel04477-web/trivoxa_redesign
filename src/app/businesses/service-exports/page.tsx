@@ -6,15 +6,21 @@ import { HowItWorks } from '@/components/sections/businesses/how-it-works';
 import { Accordion } from '@/components/ui/accordion';
 import { ButtonLink } from '@/components/ui/button';
 import { Container, Section } from '@/components/ui/layout';
+import { SmartImage } from '@/components/ui/smart-image';
 import { Prose, SectionHeading } from '@/components/ui/typography';
 import { DIGITAL_PROPERTY, SERVICE_ENGAGEMENT_PROCESS, SERVICE_FAQ, SERVICES } from '@/content/process';
 import { CONTACT } from '@/content/taxonomy';
 import { JsonLd, faqSchema } from '@/components/seo/json-ld';
 
+import { buildRouteMetadata } from '@/lib/seo/metadata';
+
 export const metadata: Metadata = {
-  title: 'Service Exports — Trivoxa Digital',
-  description: `${SERVICES.length} professional service lines delivered by the group's technology property: technology & AI, branding & design, digital marketing, web & app development, SaaS platforms and consulting. Five-step engagement with written scope and handover.`,
-  alternates: { canonical: '/businesses/service-exports' },
+  ...buildRouteMetadata({
+    title: 'Service Exports — Technology, Software & Digital Systems',
+    description: `${SERVICES.length} professional service lines delivered by the group's technology property: technology & AI, branding & design, digital marketing, web & app development, SaaS platforms and consulting. Five-step engagement with written scope and handover.`,
+    path: '/businesses/service-exports',
+  }),
+  alternates: { canonical: 'https://trivoxagroup.com/businesses/service-exports' },
 };
 
 /**
@@ -54,6 +60,18 @@ export default function ServiceExportsPage() {
           </>
         }
       />
+
+      <Section surface="light" tight className="pb-0 pt-md">
+        <Container>
+          <div className="max-w-5xl mx-auto">
+            <SmartImage
+              manifestId="division-service-exports"
+              sizes="(max-width: 1024px) 100vw, 1024px"
+              priority
+            />
+          </div>
+        </Container>
+      </Section>
 
       <ServiceLines />
 

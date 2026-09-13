@@ -11,11 +11,16 @@ import { COMPANY, LEADERSHIP } from '@/content/company';
 import { CONTACT } from '@/content/taxonomy';
 import { JsonLd, faqSchema } from '@/components/seo/json-ld';
 
+import { buildRouteMetadata } from '@/lib/seo/metadata';
+
 export const metadata: Metadata = {
-  title: 'Contact — Surat, Gujarat, India',
-  description:
-    'Every way to reach Trivoxa Group: the four mailbox aliases, the three founders directly, the registered office in Surat, working hours in IST, and what to do when you would rather be called than email.',
-  alternates: { canonical: '/contact' },
+  ...buildRouteMetadata({
+    title: 'Contact — Surat, Gujarat, India',
+    description:
+      'Every way to reach Trivoxa Group: the four mailbox aliases, the three founders directly, the registered office in Surat, working hours in IST, and what to do when you would rather be called than email.',
+    path: '/contact',
+  }),
+  alternates: { canonical: 'https://trivoxagroup.com/contact' },
 };
 
 /**
@@ -126,7 +131,7 @@ export default function ContactPage() {
                   </p>
                 </div>
 
-                <div>
+                <div id="callback" className="scroll-mt-24">
                   <p className="surface-faint spec-value uppercase" data-spec>
                     Telephone
                   </p>

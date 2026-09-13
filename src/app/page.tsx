@@ -9,14 +9,18 @@ import { WhoWeAre } from '@/components/sections/who-we-are';
 import { WhyTrivoxa } from '@/components/sections/why-trivoxa';
 
 import type { Metadata } from 'next';
+import { buildRouteMetadata } from '@/lib/seo/metadata';
 
-/**
- * The title and description come from the root layout's defaults; what the
- * homepage must state for itself is its canonical. Without it, `/`, `/?category=…`
- * and any future query-parametered variant are all separate documents to a
- * crawler — and the homepage is the one URL that cannot afford that (P22 audit).
- */
 export const metadata: Metadata = {
+  ...buildRouteMetadata({
+    title: 'International Trade & Business Group',
+    description:
+      'Trivoxa Group is an international trade and business group headquartered in Surat, Gujarat — product exports and service exports built on the manufacturing foundation of Shiveshwar Textiles.',
+    path: '/',
+    ogTitle: 'Trivoxa Group | International Trade & Business Group',
+    ogDescription:
+      'Product exports and professional services from India, built on the manufacturing foundation of Shiveshwar Textiles.',
+  }),
   alternates: { canonical: '/' },
 };
 

@@ -68,21 +68,21 @@ export const LEADERSHIP: Leader[] = [
     role: 'Founder & Managing Director',
     email: 'parth@trivoxagroup.com',
     message:
-      'Leadership at Trivoxa is driven by a commitment to long-term thinking, responsible decision-making, and continuous improvement.',
+      'Directs group governance, mill allocations at Shiveshwar Textiles, and strategic manufacturing partner vetting. Decisions on his desk: master supply agreements, production floor allocations, and institutional contracts. Write to him for volume procurement contracts and group-level partnerships.',
   },
   {
     name: 'Dhruv Patel',
     role: 'Co-Founder, Business Development',
     email: 'dhruv@trivoxagroup.com',
     message:
-      'Our responsibility extends beyond business growth. We are building an organization founded on trust, guided by integrity, and dedicated to creating meaningful value for our customers, partners, and communities.',
+      'Leads international commercial operations and export desk execution across our nine industries. Decisions on his desk: Incoterms structuring, freight and port lane allocation (Mundra, Kandla, Nhava Sheva), and payment terms. Write to him for quotations, sample approval sign-offs, and shipping schedules.',
   },
   {
     name: 'Tirth Kalathiya',
     role: 'Co-Founder, Technology & Innovation',
     email: 'tirth@trivoxagroup.com',
     message:
-      'As Trivoxa grows, our leadership will continue to uphold the principles that define our organization while embracing innovation and new opportunities across global markets.',
+      'Leads Global Service Exports (digital.trivoxagroup.com), internal compliance registries, and supply-chain track-and-trace systems. Decisions on his desk: digital transformation architectures, client software and AI delivery scopes, and data integrity. Write to him for service export proposals and technology engineering engagements.',
   },
 ];
 
@@ -91,39 +91,62 @@ export const LEADERSHIP: Leader[] = [
 /* ------------------------------------------------------------------------ */
 
 export const VALUES = [
-  { name: 'Vision', note: 'We build for the decade, not the quarter.' },
-  { name: 'Integrity', note: 'One answer, everywhere — including the uncomfortable ones.' },
-  { name: 'Excellence', note: 'Specifications before superlatives.' },
-  { name: 'Innovation', note: 'Better process, not more promises.' },
-  { name: 'Partnership', note: 'Relationships measured in years, not shipments.' },
-  { name: 'Impact', note: 'Value that compounds for partners and communities.' },
+  {
+    name: 'Specifications before superlatives',
+    note: 'Published HS codes, grades, MOQs, and lead times rather than marketing claims.',
+  },
+  {
+    name: 'Relationships measured in years, not shipments',
+    note: 'Long-term contracts built on documented quality tolerances and predictable supply allocations.',
+  },
+  {
+    name: 'We build for the decade, not the quarter',
+    note: 'Sustainable operational capability prioritized over opportunistic spot-market trading.',
+  },
+  {
+    name: 'One answer everywhere — including the uncomfortable ones',
+    note: 'Disclosed lead times, honest capacity constraints, and published target quarters for in-progress certifications.',
+  },
+  {
+    name: 'Better process, not more promises',
+    note: 'Seven-step order management, pre-shipment inspections, and tracked international sample sign-offs.',
+  },
+  {
+    name: 'Value that compounds for partners and communities',
+    note: 'Fair manufacturing economics in Surat coupled with reliable landed costs for international procurement desks.',
+  },
 ] as const;
 
 export const JOURNEY = [
   {
     step: 1,
+    year: '1998–2023',
     title: 'Manufacturing Foundations',
-    body: 'Shiveshwar Textiles builds deep expertise in woven textile production and quality-focused operations in Surat.',
+    body: 'Decades of woven textile production expertise established at Shiveshwar Textiles in Surat, mastering yarn selection, loom operations, and physical fabric inspection.',
   },
   {
     step: 2,
+    year: '2024',
     title: 'An International Vision',
-    body: 'The founders recognise global demand for a trusted partner into India\'s manufacturing capability.',
+    body: 'Founders identify systemic international buyer friction around Indian export consistency, transparent specifications, and verified testing documentation.',
   },
   {
     step: 3,
+    year: '2025',
     title: 'Trivoxa Group Established',
-    body: 'The international business arm is founded to bridge global buyers and Indian production.',
+    body: 'Trivoxa Group incorporates in Surat as an international trade house to connect overseas procurement desks directly to audited Indian manufacturing lines.',
   },
   {
     step: 4,
-    title: 'Two Export Divisions',
-    body: 'Product Exports and Service Exports launch as the group\'s operating arms.',
+    year: '2025–2026',
+    title: 'Two Operating Divisions',
+    body: 'Launch of Global Product Exports (physical commodities) and Global Service Exports (digital engineering & AI) on a unified specifications-first discipline.',
   },
   {
     step: 5,
-    title: 'Growing Global Partnerships',
-    body: 'The network expands across industries, regions, and long-term client relationships.',
+    year: '2026+',
+    title: 'Global Trade Network',
+    body: 'Cross-border supply network operational across nine industries, six destination regions, and published compliance target quarters.',
   },
 ] as const;
 

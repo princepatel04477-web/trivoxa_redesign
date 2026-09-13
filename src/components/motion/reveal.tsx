@@ -4,6 +4,7 @@ import { useRef, type ElementType, type ReactNode } from 'react';
 import { useGSAP } from './use-gsap';
 import { DISTANCE, DURATION, EASE_GSAP, STAGGER, STAGGER_MAX_ITEMS } from '@/lib/tokens/motion';
 import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
+import { usePerfTier } from '@/lib/perf-tier';
 
 export type RevealProps = {
   children: ReactNode;
@@ -22,16 +23,12 @@ export type RevealProps = {
 /**
  * <Reveal> — fade + 24px rise, ScrollTrigger, once.
  *
- * The server renders content at its FINAL position with no inline styles, so
- * a visitor with JS blocked or slow sees everything immediately. The start
- * state is applied in useLayoutEffect (before paint) via immediateRender,
- * which avoids both a flash-of-final-content and a CLS hit.
- *
- * Stagger is capped: item 9 and beyond enter together with item 8 rather than
- * waiting their turn — a capped stagger reads as confidence, an uncapped one
- * reads as a loading spinner.
- *
- * Under prefers-reduced-motion nothing is transformed: content simply is.
+ * Guarantees:
+ *  - Server renders content at its FINAL position with no inline styles;
+ *  - Fails open: 2.5s safety timeout forces final visible state if ScrollTrigger stalls;
+ *  - Under `prefers-reduced-motion` or `perfTier === 'low'`, animation is disabled;
+ *  - Global CSS enforces `opacity: 1 !important` under reduced motion;
+ *  - Stagger is capped at 8 items so large grids don't read as loading spinners.
  */
 export function Reveal({
   children,
@@ -46,9 +43,10 @@ export function Reveal({
 }: RevealProps) {
   const ref = useRef<HTMLElement | null>(null);
   const reduced = usePrefersReducedMotion();
-  // Polymorphic tag: props are validated by our own RevealProps, not by the
-  // union of every intrinsic element (which collapses to `never`).
+  const tier = usePerfTier();
   const Tag = As as React.ComponentType<Record<string, unknown>>;
+
+  const disabled = reduced || tier === 'low';
 
   useGSAP(
     ({ gsap }) => {
@@ -56,26 +54,42 @@ export function Reveal({
       if (!root) return;
 
       const each = STAGGER.base / 1000;
+      const targets = staggerChildren ? Array.from(root.children) : root;
 
-      gsap.from(staggerChildren ? Array.from(root.children) : root, {
+      let settled = false;
+      const settle = (): void => {
+        if (settled) return;
+        settled = true;
+        gsap.set(targets, { opacity: 1, y: 0, clearProps: 'transform,opacity' });
+      };
+
+      // Failsafe timer: content-visibility must fail open
+      const failsafe = setTimeout(settle, 2500);
+
+      gsap.from(targets, {
         y: DISTANCE[distance],
         opacity: 0,
         duration: DURATION.base / 1000,
         ease: EASE_GSAP.outExpo,
         immediateRender: true,
         delay: delay / 1000,
-        // Function-based stagger = the cap. Sibling 9+ enters with sibling 8.
         stagger: staggerChildren
           ? (index: number) => Math.min(index, STAGGER_MAX_ITEMS - 1) * each
           : 0,
         scrollTrigger: { trigger: root, start, once },
+        onComplete: () => {
+          clearTimeout(failsafe);
+          settle();
+        },
       });
+
+      return () => clearTimeout(failsafe);
     },
-    { disabled: reduced, scope: ref },
+    { disabled, scope: ref },
   );
 
   return (
-    <Tag ref={ref} id={id} className={className}>
+    <Tag ref={ref} id={id} data-reveal className={className}>
       {children}
     </Tag>
   );

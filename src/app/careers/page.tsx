@@ -5,14 +5,20 @@ import { Eyebrow, Prose, SectionHeading } from '@/components/ui/typography';
 import { Container, HairlineRow, Section } from '@/components/ui/layout';
 import { ArrowLink } from '@/components/ui/link';
 import { ButtonLink } from '@/components/ui/button';
-import { COMPANY, VALUES } from '@/content/company';
+import { COMPANY, LEADERSHIP, VALUES } from '@/content/company';
+import { DIVISIONS, INDUSTRIES } from '@/content/taxonomy';
 import { CAREERS_EMAIL, HIRING_PROCESS, OPEN_ROLES, WHAT_WE_LOOK_FOR, hasOpenRoles } from '@/content/editorial';
 
+import { buildRouteMetadata } from '@/lib/seo/metadata';
+
 export const metadata: Metadata = {
-  title: 'Careers — Surat, Gujarat',
-  description:
-    'No open roles today, and no roles invented to fill a page. What we look for, how hiring works at a founder-led export group in Surat, and where to send a speculative application.',
-  alternates: { canonical: '/careers' },
+  ...buildRouteMetadata({
+    title: 'Careers — Sourcing Desks & Operations in Surat',
+    description:
+      'No open roles today, and no roles invented to fill a page. What we look for, how hiring works at a founder-led export group in Surat, and where to send a speculative application.',
+    path: '/careers',
+  }),
+  alternates: { canonical: 'https://trivoxagroup.com/careers' },
 };
 
 /**
@@ -73,12 +79,24 @@ export default function CareersPage() {
               </h2>
               <Prose className="text-body-md">
                 <p className="surface-muted max-w-[64ch]">
-                  Three founders, two export divisions and nine industries: when we need someone, it
-                  is usually because a category is being onboarded or a document set is being
-                  systematised, and the role is written around the person who can do it. If that is
-                  you, write to us anyway — say what you would take on and why you are the one to
-                  take it on.
+                  {LEADERSHIP.length} founders, {DIVISIONS.length} export divisions and {INDUSTRIES.length} industries: when we need someone, it
+                  is usually because a category is being onboarded, a factory audit protocol is being
+                  systematised, or an export lane needs dedicated coordination. The role is created around
+                  the person who can own the outcome.
                 </p>
+                <p className="surface-muted max-w-[64ch]">
+                  We actively look for export documentation specialists, quality inspectors with weaving or materials
+                  backgrounds, cross-border freight coordinators (Mundra / Nhava Sheva lanes), and software engineers
+                  who understand international trade workflows.
+                </p>
+                <div className="surface-hairline border-t pt-md">
+                  <p className="surface-fg font-medium text-body-sm">What your speculative application should contain:</p>
+                  <ul className="surface-muted mt-xs flex flex-col gap-1 text-body-sm list-disc pl-5">
+                    <li>A concise summary of operational responsibilities you have managed (customs codes, consignments, or platforms).</li>
+                    <li>Which export division or industry you want to take on, and which bottleneck you would solve first.</li>
+                    <li>Your CV and availability for on-site work in Surat or structured hybrid engagement.</li>
+                  </ul>
+                </div>
               </Prose>
               <div className="mt-sm flex flex-wrap gap-md">
                 <ButtonLink href={`mailto:${CAREERS_EMAIL}?subject=Speculative%20application`} arrow>
@@ -107,7 +125,7 @@ export default function CareersPage() {
                 <p className="surface-faint spec-value" data-spec>
                   {String(index + 1).padStart(2, '0')}
                 </p>
-                <h2 className="text-body-lg font-medium">{item.title}</h2>
+                <h3 className="text-body-lg font-medium">{item.title}</h3>
                 <Prose className="text-body-sm">
                   <p className="surface-muted max-w-[58ch]">{item.body}</p>
                 </Prose>
@@ -134,7 +152,7 @@ export default function CareersPage() {
                   {String(step.step).padStart(2, '0')}
                 </span>
                 <div className="col-span-10 flex flex-col gap-sm sm:col-span-7">
-                  <h2 className="text-heading-lg">{step.title}</h2>
+                  <h3 className="text-heading-lg">{step.title}</h3>
                   <Prose className="text-body-md">
                     <p className="surface-muted max-w-[62ch]">{step.body}</p>
                   </Prose>

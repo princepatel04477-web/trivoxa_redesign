@@ -19,8 +19,29 @@ import {
   PRODUCTS,
   REGIONS,
   STATS,
+  liveCategories,
+  liveIndustries,
+  liveProducts,
+  onboardingCategories,
+  onboardingIndustries,
+  onboardingProducts,
+  totalCategories,
+  totalIndustries,
+  totalProducts,
 } from '@/content/taxonomy';
 import type { Category, Industry, Port, Region } from '@/content/schemas';
+
+export {
+  liveCategories,
+  liveIndustries,
+  liveProducts,
+  onboardingCategories,
+  onboardingIndustries,
+  onboardingProducts,
+  totalCategories,
+  totalIndustries,
+  totalProducts,
+};
 
 /* regions --------------------------------------------------------------- */
 

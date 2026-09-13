@@ -147,6 +147,16 @@ function checkReferences(): void {
     }
   }
 
+  // Every category marked 'live' must have at least one product marked 'live'
+  for (const category of CATEGORIES) {
+    if (category.status === 'live') {
+      const liveProds = PRODUCTS.filter((p) => p.categorySlug === category.slug && p.status === 'live');
+      if (liveProds.length === 0) {
+        fail(`CATEGORIES.${category.slug} is 'live' but has zero products with status 'live'.`);
+      }
+    }
+  }
+
   // Every live industry must own at least one live category with live products,
   // OR be explicitly onboarding. A "live" industry with an empty catalog is the
   // Furniture failure in reverse.

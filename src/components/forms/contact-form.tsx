@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input, Select, Textarea } from '@/components/ui/field';
 import { Eyebrow, Prose } from '@/components/ui/typography';
@@ -8,8 +9,9 @@ import { CONTACT } from '@/content/taxonomy';
 import { INQUIRY_TYPES } from '@/content/faqs';
 import { track } from '@/lib/analytics/events';
 import { focusFirstInvalid } from '@/lib/forms/focus-first-invalid';
-import { HONEYPOT_FIELD, isBot, isEmail, type Enquiry } from '@/lib/forms/mailto';
-import { submitThroughTransport, type SubmissionResult } from '@/lib/forms/transport';
+import { composeEnquiry, HONEYPOT_FIELD, type Enquiry } from '@/lib/forms/mailto';
+import { ContactSubmissionSchema } from '@/lib/forms/schema';
+import type { SubmissionResult } from '@/lib/forms/transport';
 
 /**
  * P16 — the contact form.
@@ -46,39 +48,75 @@ const EMPTY: FormState = {
 };
 
 export function ContactForm() {
+  const [mountTime] = useState<number>(() => Date.now());
   const [values, setValues] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const formRef = useRef<HTMLFormElement | null>(null);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [fallbackMailto, setFallbackMailto] = useState<string | null>(null);
   const [sent, setSent] = useState<SubmissionResult | 'nothing' | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   const set = (key: keyof FormState, value: string): void => {
     setValues((current) => ({ ...current, [key]: value }));
-    setErrors((current) => ({ ...current, [key]: '' }));
+    if (errors[key]) {
+      setErrors((current) => ({ ...current, [key]: '' }));
+    }
   };
 
   const selected = INQUIRY_TYPES.find((type) => type.slug === values.inquiryType) ?? INQUIRY_TYPES[0];
   const mailbox = selected ? CONTACT[selected.routesTo] : CONTACT.general;
 
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+  const validateField = (field: keyof FormState): void => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const singleParse = ContactSubmissionSchema.shape[field as keyof typeof ContactSubmissionSchema.shape]?.safeParse(
+      values[field],
+    );
+    if (singleParse && !singleParse.success) {
+      setErrors((prev) => ({
+        ...prev,
+        [field]: singleParse.error.issues[0]?.message || 'Invalid field',
+      }));
+    } else {
+      setErrors((prev) => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const validateAll = (): boolean => {
+    const result = ContactSubmissionSchema.safeParse(values);
+    if (!result.success) {
+      const nextErrors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const p = issue.path[0]?.toString();
+        if (p && !nextErrors[p]) {
+          nextErrors[p] = issue.message;
+        }
+      }
+      setErrors(nextErrors);
+      return false;
+    }
+    setErrors({});
+    return true;
+  };
+
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
-    if (isBot(values as Record<string, string | undefined>)) {
+    setSubmissionError(null);
+
+    // Honeypot check
+    if (values[HONEYPOT_FIELD]?.trim().length > 0) {
       track('bot_discarded', { form: 'contact' });
       setSent('nothing');
       return;
     }
 
-    const next: Record<string, string> = {};
-    if (!values.fullName.trim()) next.fullName = 'Tell us who to reply to.';
-    if (!isEmail(values.email)) next.email = 'A working email address is required.';
-    if (values.message.trim().length < 20) next.message = 'A sentence or two about what you need.';
-    if (values.callback.trim() && values.callback.trim().length < 7) {
-      next.callback = 'That does not look like a reachable number.';
-    }
-    setErrors(next);
-    if (Object.keys(next).length > 0) {
+    if (!validateAll()) {
       focusFirstInvalid(formRef.current);
       return;
     }
+
+    setIsSubmitting(true);
 
     const enquiry: Enquiry = {
       to: mailbox,
@@ -96,13 +134,54 @@ export function ContactForm() {
       footer: `Sent from trivoxagroup.com/contact · ${new Date().toISOString().slice(0, 10)}`,
     };
 
-    void submitThroughTransport(enquiry, {
-      name: 'contact_compose',
-      payload: { inquiryType: values.inquiryType, mailbox },
-    }).then((result) => {
-      if (result.kind === 'mailto') window.location.href = result.href;
-      setSent(result);
-    });
+    const mailtoHref = composeEnquiry(enquiry);
+    setFallbackMailto(mailtoHref);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...values,
+          submittedAt: mountTime,
+        }),
+      });
+
+      const outcome = (await response.json()) as {
+        ok?: boolean;
+        reference?: string;
+        error?: string;
+        errors?: Record<string, string>;
+      };
+
+      if (!response.ok || !outcome.ok) {
+        if (outcome.errors) {
+          setErrors(outcome.errors);
+          focusFirstInvalid(formRef.current);
+        }
+        setSubmissionError(
+          outcome.error || 'The server could not accept your enquiry. Please verify details or use email fallback.',
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
+      const reference = outcome.reference || 'TRV-CNT-OK';
+      setSent({ kind: 'queued', reference });
+      setIsSubmitting(false);
+
+      track('contact_compose', {
+        inquiryType: values.inquiryType,
+        mailbox,
+      });
+    } catch {
+      setSubmissionError(
+        'Network error connecting to the assigned desk. Your typed message has been preserved.',
+      );
+      setIsSubmitting(false);
+    }
   };
 
   if (sent === 'nothing') return <SentPanel href="" mailbox={mailbox} />;
@@ -117,7 +196,21 @@ export function ContactForm() {
   }
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} noValidate className="flex flex-col gap-lg">
+    <form ref={formRef} onSubmit={(e) => void onSubmit(e)} noValidate className="flex flex-col gap-lg">
+      {submissionError ? (
+        <div role="alert" className="border-accent/60 bg-accent/10 flex flex-col gap-sm border p-md text-body-sm">
+          <p className="font-medium text-accent">{submissionError}</p>
+          {fallbackMailto ? (
+            <p className="surface-fg text-body-xs">
+              You can send this exact message directly via your email client:{' '}
+              <a href={fallbackMailto} className="link-underline font-semibold text-bronze-ink">
+                Open formatted email fallback →
+              </a>
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
       <Select
         label="What is this about?"
         required
@@ -125,6 +218,7 @@ export function ContactForm() {
         value={values.inquiryType}
         onChange={(event) => set('inquiryType', event.target.value)}
         hint={selected?.hint}
+        disabled={isSubmitting}
       />
 
       <div className="grid grid-cols-12 gap-md">
@@ -134,8 +228,10 @@ export function ContactForm() {
           required
           autoComplete="name"
           value={values.fullName}
-          error={errors.fullName}
+          error={touched.fullName ? errors.fullName : undefined}
+          onBlur={() => validateField('fullName')}
           onChange={(event) => set('fullName', event.target.value)}
+          disabled={isSubmitting}
         />
         <Input
           className="col-span-12 sm:col-span-6"
@@ -143,6 +239,7 @@ export function ContactForm() {
           autoComplete="organization"
           value={values.companyName}
           onChange={(event) => set('companyName', event.target.value)}
+          disabled={isSubmitting}
         />
         <Input
           className="col-span-12 sm:col-span-6"
@@ -151,8 +248,10 @@ export function ContactForm() {
           required
           autoComplete="email"
           value={values.email}
-          error={errors.email}
+          error={touched.email ? errors.email : undefined}
+          onBlur={() => validateField('email')}
           onChange={(event) => set('email', event.target.value)}
+          disabled={isSubmitting}
         />
         <Input
           className="col-span-12 sm:col-span-6"
@@ -161,8 +260,10 @@ export function ContactForm() {
           hint="Optional. We publish no line of our own — give us a number and we call you."
           autoComplete="tel"
           value={values.callback}
-          error={errors.callback}
+          error={touched.callback ? errors.callback : undefined}
+          onBlur={() => validateField('callback')}
           onChange={(event) => set('callback', event.target.value)}
+          disabled={isSubmitting}
         />
       </div>
 
@@ -172,8 +273,10 @@ export function ContactForm() {
         rows={6}
         hint="What you need, and by when. If it concerns a shipment, an order reference or a specification helps."
         value={values.message}
-        error={errors.message}
+        error={touched.message ? errors.message : undefined}
+        onBlur={() => validateField('message')}
         onChange={(event) => set('message', event.target.value)}
+        disabled={isSubmitting}
       />
 
       <div className="absolute -left-[9999px] top-0" aria-hidden>
@@ -187,12 +290,15 @@ export function ContactForm() {
       </div>
 
       <div className="mt-md flex flex-wrap items-center gap-lg">
-        <Button type="submit" size="lg" arrow>
-          Send to {mailbox}
+        <Button type="submit" size="lg" arrow disabled={isSubmitting}>
+          {isSubmitting ? 'Sending to assigned desk...' : `Send to ${mailbox}`}
         </Button>
         <Prose className="text-body-sm">
           <p className="surface-muted max-w-[44ch]">
-            The inquiry type decides which mailbox this reaches. Nothing is stored on this site.
+            The inquiry type routes directly to the assigned desk under our{' '}
+            <Link href="/legal/privacy" className="link-underline text-bronze-ink">
+              Privacy Policy
+            </Link>.
           </p>
         </Prose>
       </div>
@@ -212,15 +318,13 @@ function SentPanel({
   const headingRef = useRef<HTMLHeadingElement | null>(null);
 
   useEffect(() => {
-    // See the note in the RFQ panel: focus, not a live region, is what makes
-    // this confirmation reach a screen reader (P20).
     headingRef.current?.focus();
   }, []);
 
   return (
     <div role="status" className="border-bronze/50 surface-raised flex flex-col gap-md border p-xl">
       <Eyebrow tick={false} className="surface-faint">
-        Message composed
+        Message received
       </Eyebrow>
       <h2 ref={headingRef} tabIndex={-1} className="text-heading-lg max-w-[30ch] rounded-sm">
         {reference
@@ -229,8 +333,9 @@ function SentPanel({
       </h2>
       <Prose className="text-body-md">
         <p className="surface-muted max-w-[62ch]">
-          If nothing opened, write to {mailbox} directly. It is read by the same three people who
-          read this form.
+          {reference
+            ? `Your enquiry has been delivered to ${mailbox}. A confirmation email has been dispatched to your address. Our team replies within 24 business hours IST.`
+            : `If nothing opened, write to ${mailbox} directly. It is read by the same three people who read this form.`}
         </p>
       </Prose>
       <div className="mt-sm flex flex-wrap gap-md">

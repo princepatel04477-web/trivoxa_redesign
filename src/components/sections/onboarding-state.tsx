@@ -18,6 +18,7 @@ export function OnboardingState({
   timeframe,
   note,
   rfqHref = '/rfq',
+  headingLevel = 'h2',
 }: {
   name: string;
   availableToday: string[];
@@ -25,14 +26,16 @@ export function OnboardingState({
   note?: string;
   /** Where "tell us what you are sourcing" goes; carries context when it can. */
   rfqHref?: string;
+  headingLevel?: 'h2' | 'h3';
 }) {
+  const HeadingTag = headingLevel;
   return (
     <div className="border-bronze/40 surface-raised flex flex-col gap-md border p-xl">
       <StatusBadge status="onboarding" detail={timeframe} />
 
-      <h3 className="text-heading-lg">
+      <HeadingTag className="text-heading-lg">
         {name} is being built with our manufacturing partners.
-      </h3>
+      </HeadingTag>
 
       <p className="surface-muted text-body-md">
         {note ??

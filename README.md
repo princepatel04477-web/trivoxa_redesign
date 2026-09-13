@@ -82,3 +82,35 @@ rather than the parent company.
 German and Arabic localisation (P18) is **deferred, not forgotten**: the i18n
 scaffolding and RTL-aware utilities exist and the language switcher is hidden
 until funded human translation is available. See ADR 033.
+
+---
+
+## Photography Specification & Client Shoot Guide (Prompt 11)
+
+The site uses a zero-CLS image pipeline with an architectural `<PendingPhotograph>` component. When original photography lands, drop the optimized file into the path indicated in `src/content/images.ts` — Next.js will swap the placeholder to the real photo on next build with zero layout shift.
+
+### Image Budget & Technical Requirements
+- **Budget**: Maximum **200 KB** per photograph after WebP / AVIF compression.
+- **Color Temperature**: Natural industrial daylight (5000K–5500K). High CRI. Avoid saturated artificial filters.
+- **Composition**: Documentary, honest, architectural. No generic corporate smiling models. Frame real production floors, active machinery, genuine inspection setups, and export-grade packing.
+
+### Required Shot List
+
+| Section | Slot ID | Expected File Path | Aspect Ratio | Minimum Resolution | Framing & Details |
+|---|---|---|---|---|---|
+| **Foundation** | `foundation-exterior` | `public/images/foundation/exterior.jpg` | **4:5** (portrait) | 1200 × 1500 px | Surat weaving unit facade, clean daylight, factory signage visible. |
+| **Foundation** | `foundation-weaving` | `public/images/foundation/weaving.jpg` | **4:5** (portrait) | 1200 × 1500 px | Shuttleless rapier weaving shed, motion on yarn beams, natural plant lighting. |
+| **Foundation** | `foundation-inspection` | `public/images/foundation/inspection.jpg` | **4:5** (portrait) | 1200 × 1500 px | ASTM D5430 4-point backlit grading table, inspector evaluating finished fabric. |
+| **Industry 1** | `industry-textile-apparel` | `public/images/industries/textile-apparel.jpg` | **16:9** (landscape) | 1920 × 1080 px | Combed cotton yarn cones & rolls of indigo denim fabric palletized. |
+| **Industry 2** | `industry-healthcare-pharmaceuticals` | `public/images/industries/healthcare-pharmaceuticals.jpg` | **16:9** (landscape) | 1920 × 1080 px | WHO-GMP formulation cleanroom, blister packaging, sterile attire. |
+| **Industry 3** | `industry-building-materials` | `public/images/industries/building-materials.jpg` | **16:9** (landscape) | 1920 × 1080 px | Large-format vitrified porcelain tiles & natural stone in ISPM 15 wooden crates. |
+| **Industry 4** | `industry-agriculture-food` | `public/images/industries/agriculture-food.jpg` | **16:9** (landscape) | 1920 × 1080 px | Whole cumin, sesame & groundnut sortex lines with moisture-barrier packaging. |
+| **Industry 5** | `industry-engineering-industrial` | `public/images/industries/engineering-industrial.jpg` | **16:9** (landscape) | 1920 × 1080 px | Stainless steel industrial valves, pumps & precision CNC machined hardware. |
+| **Industry 6** | `industry-chemicals-allied` | `public/images/industries/chemicals-allied.jpg` | **16:9** (landscape) | 1920 × 1080 px | UN-certified HDPE drums & IBC totes with destination GHS/SDS labelling. |
+| **Industry 7** | `industry-packaging-printing` | `public/images/industries/packaging-printing.jpg` | **16:9** (landscape) | 1920 × 1080 px | Flexographic multi-color corrugated converting line & bundled cartons. |
+| **Industry 8** | `industry-furniture-interiors` | `public/images/industries/furniture-interiors.jpg` | **16:9** (landscape) | 1920 × 1080 px | Architectural hardwood veneer panels & contract furniture assemblies. |
+| **Industry 9** | `industry-jewellery-precious-products` | `public/images/industries/jewellery-precious-products.jpg` | **16:9** (landscape) | 1920 × 1080 px | Gemologist with stereomicroscope examining certified lab-grown diamonds. |
+| **Division** | `division-product-exports` | `public/images/divisions/product-exports.jpg` | **16:9** (landscape) | 1920 × 1080 px | Mundra container freight station, export container stuffing & cranes. |
+| **Division** | `division-service-exports` | `public/images/divisions/service-exports.jpg` | **16:9** (landscape) | 1920 × 1080 px | Trivoxa Digital workstations, engineers collaborating on software & supply chain. |
+| **Regions** | `region-{europe,middle-east,...}` | `public/images/regions/*.jpg` | **16:9** (landscape) | 1920 × 1080 px | Destination port handling (Rotterdam, Jebel Ali, Mombasa, Santos, Singapore). |
+

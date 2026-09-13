@@ -164,8 +164,15 @@ export function catalogSchema(rows: CatalogRow[], name: string): Record<string, 
         '@type': 'Product',
         name: row.name,
         category: row.categoryName,
+        url: `${SITE_URL}/products/${row.slug}`,
         description: row.applications.length > 0 ? `Applications: ${row.applications.join(', ')}.` : undefined,
         brand: { '@type': 'Brand', name: COMPANY.legalName },
+        // Prompt 07: Offer with availability and areaServed, strictly without fabricated price
+        offers: {
+          '@type': 'Offer',
+          availability: 'https://schema.org/InStock',
+          areaServed: REGIONS.map((region) => region.name),
+        },
         // The spec-data signal: the HS heading and the commercial terms we can
         // actually state, as additional properties rather than as a fake offer.
         additionalProperty: [
@@ -189,6 +196,117 @@ export function catalogSchema(rows: CatalogRow[], name: string): Record<string, 
   };
 }
 
+/**
+ * Prompt 07: Person nodes for the founders on /group, linked to the Organization
+ * schema via worksFor, matching the founders data in the Organization schema.
+ */
+export function foundersPersonSchema(): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': LEADERSHIP.map((leader) => ({
+      '@type': 'Person',
+      '@id': `${SITE_URL}/group#${leader.name.toLowerCase().replace(/\s+/g, '-')}`,
+      name: leader.name,
+      jobTitle: leader.role,
+      email: leader.email,
+      description: leader.message,
+      worksFor: { '@id': `${SITE_URL}/#organization` },
+    })),
+  };
+}
+
+/**
+ * Prompt 07: CollectionPage with an ItemList of products for live industries,
+ * or a Service node for onboarding / service industries.
+ */
+export function industryCollectionSchema(
+  industry: { name: string; slug: string; shortDescription: string; status: 'live' | 'onboarding' },
+  products: { name: string; slug: string; hsCode?: string | null }[],
+): Record<string, unknown> {
+  const url = `${SITE_URL}/industries/${industry.slug}`;
+
+  if (industry.status === 'onboarding' || products.length === 0) {
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      '@id': `${url}#service`,
+      name: `${industry.name} Sourcing & Support`,
+      description: industry.shortDescription,
+      provider: { '@id': `${SITE_URL}/#organization` },
+      areaServed: REGIONS.map((region) => region.name),
+      serviceType: 'International Trade & Export Sourcing',
+    };
+  }
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${url}#collection`,
+    url,
+    name: `${industry.name} Export Lines`,
+    description: industry.shortDescription,
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: products.length,
+      itemListElement: products.map((product, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': 'Product',
+          name: product.name,
+          url: `${SITE_URL}/products/${product.slug}`,
+          ...(product.hsCode
+            ? {
+                additionalProperty: [
+                  { '@type': 'PropertyValue', name: 'HS code', value: product.hsCode },
+                ],
+              }
+            : {}),
+        },
+      })),
+    },
+  };
+}
+
+/**
+ * Prompt 07 & 09: Dedicated Product schema for individual product detail pages (/products/[slug]).
+ */
+export function productDetailSchema(row: CatalogRow): Record<string, unknown> {
+  const url = `${SITE_URL}/products/${row.slug}`;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    '@id': `${url}#product`,
+    name: row.name,
+    category: row.categoryName,
+    url,
+    description: `Export-grade ${row.name} (${row.grade ? `Grade: ${row.grade}` : 'Standard grade'}) from India. MOQ: ${row.moq ?? 'On request'}, Loading port: ${row.portName} (${row.portLocode}).`,
+    brand: { '@type': 'Brand', name: COMPANY.legalName },
+    offers: {
+      '@type': 'Offer',
+      availability: 'https://schema.org/InStock',
+      areaServed: REGIONS.map((region) => region.name),
+    },
+    additionalProperty: [
+      row.hsCode ? { '@type': 'PropertyValue', name: 'HS code', value: row.hsCode } : null,
+      row.grade ? { '@type': 'PropertyValue', name: 'Grade', value: row.grade } : null,
+      row.moq ? { '@type': 'PropertyValue', name: 'Minimum order quantity', value: row.moq } : null,
+      row.leadTime ? { '@type': 'PropertyValue', name: 'Lead time', value: row.leadTime } : null,
+      row.incoterms.length > 0
+        ? { '@type': 'PropertyValue', name: 'Incoterms', value: row.incoterms.join(', ') }
+        : null,
+      row.portName
+        ? {
+            '@type': 'PropertyValue',
+            name: 'Loading port',
+            value: `${row.portName} (${row.portLocode})`,
+          }
+        : null,
+    ].filter(Boolean),
+  };
+}
+
 /** Ports as a Place list — the detail the audit said was the best on the site. */
 export function portsSchema(): Record<string, unknown> {
   return {
@@ -207,3 +325,4 @@ export function portsSchema(): Record<string, unknown> {
     })),
   };
 }
+

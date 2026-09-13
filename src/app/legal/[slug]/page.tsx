@@ -9,15 +9,20 @@ export function generateStaticParams() {
 
 type Params = { slug: string };
 
+import { buildRouteMetadata } from '@/lib/seo/metadata';
+
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params;
   const document = LEGAL_DOCUMENTS[slug];
   if (!document) return {};
 
   return {
-    title: document.title,
-    description: document.summary,
-    alternates: { canonical: `/legal/${document.slug}` },
+    ...buildRouteMetadata({
+      title: document.title,
+      description: document.summary,
+      path: `/legal/${document.slug}`,
+    }),
+    alternates: { canonical: `https://trivoxagroup.com/legal/${document.slug}` },
   };
 }
 

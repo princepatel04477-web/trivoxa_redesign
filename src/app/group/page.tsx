@@ -6,13 +6,19 @@ import { GroupJourney } from '@/components/sections/group/journey';
 import { GroupLeadership } from '@/components/sections/group/leadership';
 import { GroupWay } from '@/components/sections/group/way-and-commitments';
 import { ButtonLink } from '@/components/ui/button';
+import { JsonLd, foundersPersonSchema } from '@/components/seo/json-ld';
 import { COMPANY, SHIVESHWAR_CANONICAL_SENTENCE } from '@/content/company';
 import { DIVISIONS, INDUSTRIES } from '@/content/taxonomy';
 
+import { buildRouteMetadata } from '@/lib/seo/metadata';
+
 export const metadata: Metadata = {
-  title: 'The Group — Leadership, Journey and Manufacturing Foundation',
-  description: `${COMPANY.legalName} is an international trade and business group from Surat, Gujarat. ${SHIVESHWAR_CANONICAL_SENTENCE}`,
-  alternates: { canonical: '/group' },
+  ...buildRouteMetadata({
+    title: 'The Group — Leadership, Journey and Manufacturing Foundation',
+    description: `${COMPANY.legalName} is an international trade and business group headquartered in Surat, Gujarat. Discover our leadership, operating export divisions, and mill manufacturing foundation.`,
+    path: '/group',
+  }),
+  alternates: { canonical: 'https://trivoxagroup.com/group' },
 };
 
 /**
@@ -26,6 +32,7 @@ export const metadata: Metadata = {
 export default function GroupPage() {
   return (
     <>
+      <JsonLd data={foundersPersonSchema()} />
       <PageHero
         eyebrow="The Group"
         title="Trivoxa Group"

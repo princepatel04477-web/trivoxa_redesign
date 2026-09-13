@@ -42,6 +42,17 @@ import type {
   Region,
 } from './schemas';
 
+export type {
+  Category,
+  Certification,
+  Contact,
+  Division,
+  Industry,
+  Port,
+  Product,
+  Region,
+};
+
 /* ------------------------------------------------------------------------ */
 /* INDUSTRIES — rendered everywhere, sliced nowhere silently                 */
 /* ------------------------------------------------------------------------ */
@@ -143,7 +154,7 @@ export const INDUSTRIES: Industry[] = [
     shortDescription:
       'Software, AI solutions and digital transformation delivered by the Service Export division — the group\'s second operating arm.',
     icon: 'Cpu',
-    status: 'live',
+    status: 'onboarding',
     relatedCategories: [],
     typicalBuyers: ['SMBs modernising operations', 'Agencies', 'Startups', 'Enterprise teams'],
     complianceNotes: [
@@ -834,9 +845,20 @@ export const CONTACT: Contact = {
 /* Selectors — the ONLY way components reach into these arrays.              */
 /* ------------------------------------------------------------------------ */
 
+export const totalIndustries = (): number => INDUSTRIES.length;
 export const liveIndustries = (): Industry[] => INDUSTRIES.filter((i) => i.status === 'live');
 export const onboardingIndustries = (): Industry[] =>
   INDUSTRIES.filter((i) => i.status === 'onboarding');
+
+export const totalCategories = (): number => CATEGORIES.length;
+export const liveCategories = (): Category[] => CATEGORIES.filter((c) => c.status === 'live');
+export const onboardingCategories = (): Category[] =>
+  CATEGORIES.filter((c) => c.status === 'onboarding');
+
+export const totalProducts = (): number => PRODUCTS.length;
+export const liveProducts = (): Product[] => PRODUCTS.filter((p) => p.status === 'live');
+export const onboardingProducts = (): Product[] =>
+  PRODUCTS.filter((p) => p.status === 'onboarding');
 
 export function industryBySlug(slug: string): Industry | undefined {
   return INDUSTRIES.find((industry) => industry.slug === slug);

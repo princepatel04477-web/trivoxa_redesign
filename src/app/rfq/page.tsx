@@ -12,11 +12,16 @@ import { RFQ_FAQ } from '@/content/faqs';
 import { proofBand } from '@/lib/selectors';
 import { JsonLd, faqSchema } from '@/components/seo/json-ld';
 
+import { buildRouteMetadata } from '@/lib/seo/metadata';
+
 export const metadata: Metadata = {
-  title: 'Request a Quotation — Export Desk',
-  description:
-    'Send a specification — grade, quantity, destination port and target Incoterm — and the Trivoxa export desk replies within 24 business hours with unit price, MOQ, lead time and loading port.',
-  alternates: { canonical: '/rfq' },
+  ...buildRouteMetadata({
+    title: 'Request a Quotation — Export Desk',
+    description:
+      'Send a specification — grade, quantity, destination port and target Incoterm — and the Trivoxa export desk replies within 24 business hours with unit price, MOQ, lead time and loading port.',
+    path: '/rfq',
+  }),
+  alternates: { canonical: 'https://trivoxagroup.com/rfq' },
 };
 
 /**

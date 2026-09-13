@@ -45,7 +45,24 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       bundle.gsap.ticker.add(tick);
       bundle.gsap.ticker.lagSmoothing(0);
 
+      // Handle anchor jumps with sticky navbar offset
+      const handleAnchorClick = (e: MouseEvent): void => {
+        const target = (e.target as HTMLElement)?.closest('a');
+        if (!target) return;
+        const href = target.getAttribute('href');
+        if (href?.startsWith('#') && href.length > 1) {
+          const el = document.querySelector(href);
+          if (el) {
+            e.preventDefault();
+            lenis.scrollTo(el as HTMLElement, { offset: -80 });
+            window.history.pushState(null, '', href);
+          }
+        }
+      };
+      document.addEventListener('click', handleAnchorClick);
+
       teardown = () => {
+        document.removeEventListener('click', handleAnchorClick);
         bundle.gsap.ticker.remove(tick);
         lenis.off('scroll', onScroll);
         lenis.destroy();

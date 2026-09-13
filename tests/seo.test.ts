@@ -15,23 +15,29 @@ import {
   breadcrumbSchema,
   catalogSchema,
   faqSchema,
+  foundersPersonSchema,
+  industryCollectionSchema,
   organizationSchema,
   portsSchema,
+  productDetailSchema,
   webSiteSchema,
 } from '@/components/seo/json-ld';
 import { INDUSTRIES, PORTS, REGIONS } from '@/content/taxonomy';
 import { LEGAL_DOCUMENTS } from '@/content/legal';
 import { RFQ_FAQ } from '@/content/faqs';
 import { SHIVESHWAR_CANONICAL_SENTENCE } from '@/content/company';
-import { catalogRows } from '@/lib/selectors';
+import { catalogRows, liveProducts } from '@/lib/selectors';
 
 const urls = (): string[] => sitemap().map((entry) => entry.url);
 
 describe('sitemap', () => {
-  it('lists every industry and every legal document', () => {
+  it('lists every industry, product, and legal document', () => {
     const list = urls();
     for (const industry of INDUSTRIES) {
       expect(list).toContain(`${SITE_URL}/industries/${industry.slug}`);
+    }
+    for (const product of liveProducts()) {
+      expect(list).toContain(`${SITE_URL}/products/${product.slug}`);
     }
     for (const slug of Object.keys(LEGAL_DOCUMENTS)) {
       expect(list).toContain(`${SITE_URL}/legal/${slug}`);
@@ -123,16 +129,46 @@ describe('other schema nodes', () => {
     expect(questions).toEqual(RFQ_FAQ.map((faq) => faq.question));
   });
 
-  it('the catalogue node lists every row with its HS code and no offer', () => {
+  it('the catalogue node lists every row with its HS code and valid Offer without fake price', () => {
     const rows = catalogRows();
     const schema = catalogSchema(rows, 'Catalogue');
     expect(schema.numberOfItems).toBe(rows.length);
 
     const serialized = JSON.stringify(schema);
-    expect(serialized).not.toContain('"offers"');
+    expect(serialized).toContain('"offers"');
+    expect(serialized).toContain('InStock');
     expect(serialized).not.toContain('"price"');
     expect(serialized).toContain('5209.42'); // denim, from the taxonomy
     expect(serialized).toContain('HS code');
+  });
+
+  it('founders schema emits Person nodes linked to organization', () => {
+    const schema = foundersPersonSchema();
+    const graph = schema['@graph'] as { name: string; worksFor: { '@id': string } }[];
+    expect(graph).toHaveLength(3);
+    for (const person of graph) {
+      expect(person.worksFor['@id']).toBe(`${SITE_URL}/#organization`);
+    }
+  });
+
+  it('industry schema emits CollectionPage with ItemList for live, and Service for onboarding', () => {
+    const liveInd = INDUSTRIES.find((i) => i.status === 'live')!;
+    const liveSchema = industryCollectionSchema(liveInd, [{ name: 'Test Product', slug: 'test', hsCode: '1234.56' }]);
+    expect(liveSchema['@type']).toBe('CollectionPage');
+
+    const onboardingInd = INDUSTRIES.find((i) => i.status === 'onboarding')!;
+    const onboardingSchema = industryCollectionSchema(onboardingInd, []);
+    expect(onboardingSchema['@type']).toBe('Service');
+  });
+
+  it('product detail schema generates valid Product node with Offer and no fake price', () => {
+    const row = catalogRows()[0]!;
+    const schema = productDetailSchema(row);
+    expect(schema['@type']).toBe('Product');
+    const serialized = JSON.stringify(schema);
+    expect(serialized).toContain('"offers"');
+    expect(serialized).toContain('InStock');
+    expect(serialized).not.toContain('"price"');
   });
 
   it('ports node names all three ports with their UN/LOCODEs', () => {
