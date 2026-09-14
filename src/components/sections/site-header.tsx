@@ -37,7 +37,9 @@ import { cn } from '@/lib/utils';
  * /businesses/product-exports is a lie a screen reader user will notice (P20).
  */
 function currentFor(href: string, pathname: string): 'page' | undefined {
-  return pathname.replace(/\/$/, '') === href ? 'page' : undefined;
+  const normPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+  const normHref = href === '/' ? '/' : href.replace(/\/$/, '');
+  return normPath === normHref ? 'page' : undefined;
 }
 
 export function SiteHeader() {
@@ -88,10 +90,16 @@ export function SiteHeader() {
     };
   });
 
-  /* close on navigation */
+  /* close on navigation and synchronize header height/scroll state */
   useEffect(() => {
     setOpenGroup(null);
     setMobileOpen(false);
+    if (typeof window !== 'undefined' && headerRef.current) {
+      const isScrolled = window.scrollY > 80;
+      headerRef.current.dataset.scrolled = isScrolled ? 'true' : 'false';
+      headerRef.current.style.height = isScrolled ? '64px' : '84px';
+      headerRef.current.style.setProperty('--header-h', isScrolled ? '64px' : '84px');
+    }
   }, [pathname]);
 
   const close = useCallback((): void => {
@@ -156,6 +164,7 @@ export function SiteHeader() {
   };
 
   const activeGroup = NAV_GROUPS.find((group) => group.id === openGroup) ?? null;
+  const isHome = pathname === '/';
 
   return (
     <header
@@ -165,10 +174,14 @@ export function SiteHeader() {
       className={cn(
         'fixed inset-x-0 top-0 z-50 text-ivory',
         'transition-[background-color,border-color] duration-fast ease-house',
-        'border-b border-transparent',
-        'data-[scrolled=true]:bg-espresso/95 data-[scrolled=true]:border-bronze/35',
-        'data-[scrolled=true]:backdrop-blur-md',
-        mobileOpen && 'bg-espresso border-bronze/35',
+        isHome
+          ? cn(
+              'border-b border-transparent',
+              'data-[scrolled=true]:bg-espresso/95 data-[scrolled=true]:border-bronze/35',
+              'data-[scrolled=true]:backdrop-blur-md',
+            )
+          : 'bg-espresso/95 border-b border-bronze/35 backdrop-blur-md',
+        (openGroup !== null || mobileOpen) && 'bg-espresso border-bronze/35',
       )}
       style={{ height: 84 }}
     >
