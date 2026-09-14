@@ -181,11 +181,11 @@ export function SiteHeader() {
         >
           <Link
             href="/"
-            className="rounded-sm py-2 text-ivory transition-opacity hover:opacity-80"
+            className="flex items-center rounded-sm py-1 text-ivory transition-opacity hover:opacity-80"
             aria-label="Trivoxa Group — home"
             aria-current={currentFor('/', pathname)}
           >
-            <BrandLockup size={30} />
+            <BrandLockup size={40} />
           </Link>
         </motion.div>
 

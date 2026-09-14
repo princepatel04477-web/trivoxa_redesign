@@ -25,6 +25,8 @@ export type BrandLockupProps = {
   variant?: LockupVariant;
   /** Height of the mark in px. The wordmark scales from the same grid. */
   size?: number;
+  /** Optional explicit height of the wordmark in px. Defaults to size * 0.8. */
+  wordmarkHeight?: number;
   className?: string;
   /** Accessible name. Decorative placements should pass `decorative`. */
   label?: string;
@@ -59,7 +61,7 @@ export type BrandWordmarkProps = {
   decorative?: boolean;
 };
 
-export function BrandWordmark({ height = 14, className, decorative = false, label = 'Trivoxa' }: BrandWordmarkProps) {
+export function BrandWordmark({ height = 24, className, decorative = false, label = 'Trivoxa' }: BrandWordmarkProps) {
   const width = (WORDMARK_WIDTH / WORDMARK_CAP_HEIGHT) * height;
   return (
     <svg
@@ -77,16 +79,27 @@ export function BrandWordmark({ height = 14, className, decorative = false, labe
   );
 }
 
-export function BrandLockup({ variant = 'lockup', size = 32, className, label, decorative }: BrandLockupProps) {
-  if (variant === 'mark') return <BrandMark size={size} className={className} decorative={decorative} label={label} />;
-  if (variant === 'wordmark') return <BrandWordmark height={size * 0.68} className={className} decorative={decorative} label={label} />;
+export function BrandLockup({
+  variant = 'lockup',
+  size = 36,
+  wordmarkHeight,
+  className,
+  label,
+  decorative,
+}: BrandLockupProps) {
+  const wordHeight = wordmarkHeight ?? Math.round(size * 0.8);
+  const gap = Math.round(size * 0.28);
 
-  const wordHeight = size * 0.68;
-  const gap = size * 0.32;
+  if (variant === 'mark') {
+    return <BrandMark size={size} className={className} decorative={decorative} label={label} />;
+  }
+  if (variant === 'wordmark') {
+    return <BrandWordmark height={wordHeight} className={className} decorative={decorative} label={label} />;
+  }
 
   return (
     <span
-      className={cn('inline-flex items-center', className)}
+      className={cn('inline-flex items-center shrink-0 select-none', className)}
       style={{ gap }}
       {...(decorative ? { 'aria-hidden': true } : {})}
     >
