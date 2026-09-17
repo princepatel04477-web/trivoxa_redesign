@@ -465,11 +465,11 @@ const DepthCarousel = ({
         <>
           <button
             type="button"
-            className="absolute left-4 top-1/2 z-[3000] grid h-[42px] w-[42px] -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-[rgba(18,20,26,0.55)] text-white backdrop-blur-md transition-[background,border-color,transform] duration-200 hover:border-white/40 hover:bg-[rgba(28,31,40,0.85)] active:scale-95"
+            className="absolute left-4 top-1/2 z-[3000] grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-[#3D322A] bg-[#241C18]/90 text-[#F4EFE6] backdrop-blur-md transition-all duration-200 hover:border-[#A88B68] hover:text-[#A88B68] active:scale-95 cursor-pointer shadow-lg"
             aria-label="Previous slide"
             onClick={() => navigateBy(-1)}
           >
-            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
               <path
                 d="M15 5l-7 7 7 7"
                 fill="none"
@@ -482,11 +482,11 @@ const DepthCarousel = ({
           </button>
           <button
             type="button"
-            className="absolute right-4 top-1/2 z-[3000] grid h-[42px] w-[42px] -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-[rgba(18,20,26,0.55)] text-white backdrop-blur-md transition-[background,border-color,transform] duration-200 hover:border-white/40 hover:bg-[rgba(28,31,40,0.85)] active:scale-95"
+            className="absolute right-4 top-1/2 z-[3000] grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-[#3D322A] bg-[#241C18]/90 text-[#F4EFE6] backdrop-blur-md transition-all duration-200 hover:border-[#A88B68] hover:text-[#A88B68] active:scale-95 cursor-pointer shadow-lg"
             aria-label="Next slide"
             onClick={() => navigateBy(1)}
           >
-            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
               <path
                 d="M9 5l7 7-7 7"
                 fill="none"

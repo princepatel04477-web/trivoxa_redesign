@@ -276,13 +276,14 @@ export function WhyTrivoxa() {
                 </p>
               </div>
 
-              {/* Step visual "Order 1 -> 2 -> 3 -> 5" */}
-              <div className="mt-4 flex flex-col justify-center rounded-xl border border-stone-800/50 bg-stone-900/30 p-4">
-                <div className="mb-2 flex items-center justify-between font-mono text-[11px] text-stone-400">
+              {/* Step visual "Order 1 -> 2 -> 3 -> 4 -> 5" */}
+              <div className="mt-4 flex flex-col justify-center rounded-xl border border-[#3D322A]/50 bg-[#171210]/60 p-4">
+                <div className="mb-2 flex items-center justify-between font-mono text-[11px] text-[#8C8279]">
                   <span>Order 1</span>
                   <span>Order 2</span>
                   <span>Order 3</span>
-                  <span className="font-semibold text-accent">Order 5 (Partner)</span>
+                  <span>Order 4</span>
+                  <span className="font-semibold text-[#A88B68]">Order 5 (Partner)</span>
                 </div>
                 <svg
                   ref={stepsSvgRef}
@@ -296,7 +297,7 @@ export function WhyTrivoxa() {
                     y1="16"
                     x2="304"
                     y2="16"
-                    stroke="#44403c"
+                    stroke="#3D322A"
                     strokeWidth="2"
                     strokeDasharray="4 4"
                   />
@@ -307,14 +308,15 @@ export function WhyTrivoxa() {
                     strokeWidth="3"
                     strokeLinecap="round"
                   />
-                  <circle cx="16" cy="16" r="6" fill="#1c1917" stroke="#A88B68" strokeWidth="2" />
-                  <circle cx="112" cy="16" r="6" fill="#1c1917" stroke="#A88B68" strokeWidth="2" />
-                  <circle cx="208" cy="16" r="6" fill="#1c1917" stroke="#A88B68" strokeWidth="2" />
+                  <circle cx="16" cy="16" r="5" fill="#171210" stroke="#A88B68" strokeWidth="2" />
+                  <circle cx="88" cy="16" r="5" fill="#171210" stroke="#A88B68" strokeWidth="2" />
+                  <circle cx="160" cy="16" r="5" fill="#171210" stroke="#A88B68" strokeWidth="2" />
+                  <circle cx="232" cy="16" r="5" fill="#171210" stroke="#A88B68" strokeWidth="2" />
                   <circle
                     className="dot-glow"
                     cx="304"
                     cy="16"
-                    r="8"
+                    r="7"
                     fill="#A88B68"
                     filter="drop-shadow(0 0 6px rgba(168,139,104,0.8))"
                   />

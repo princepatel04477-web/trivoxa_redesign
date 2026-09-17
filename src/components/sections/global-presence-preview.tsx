@@ -108,21 +108,6 @@ export function GlobalPresencePreview() {
     if (reducedMotion || !sectionRef.current) return;
 
     const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: 'top top',
-        end: '+=100%',
-        pin: true,
-        scrub: 1,
-        onUpdate: (self) => {
-          const idx = Math.min(
-            REGION_DATA.length - 1,
-            Math.floor(self.progress * REGION_DATA.length)
-          );
-          setActiveRegionIndex(idx);
-        },
-      });
-
       // Stats trigger on enter
       ScrollTrigger.create({
         trigger: sectionRef.current,
@@ -175,10 +160,10 @@ export function GlobalPresencePreview() {
             </div>
           </div>
 
-          <div className="grid grid-cols-12 items-center gap-12 lg:gap-16">
+          <div className="grid grid-cols-12 items-center gap-10 lg:gap-16">
             {/* Left: Globe and Route Visual */}
             <div className="col-span-12 lg:col-span-6">
-              <div className="relative aspect-square w-full max-w-[540px] overflow-hidden rounded-[28px] border border-stone-800 bg-stone-900/60 p-4">
+              <div className="relative aspect-square w-full max-w-[500px] mx-auto overflow-hidden rounded-[28px] border border-[#3D322A] bg-[#171210]/90 p-4">
                 <GlobeLoader />
 
                 {/* SVG Route Lane overlay for active region */}
@@ -204,14 +189,27 @@ export function GlobalPresencePreview() {
                   </svg>
                 </div>
 
-                <div className="absolute bottom-4 left-4 rounded-full border border-stone-800 bg-stone-950/80 px-3 py-1 font-mono text-[11px] text-accent backdrop-blur-md">
+                <div className="absolute bottom-4 left-4 rounded-full border border-[#3D322A] bg-[#171210]/90 px-3 py-1 font-mono text-[11px] text-[#A88B68] backdrop-blur-md">
                   Corridor: Surat → {activeRegion.location}
                 </div>
+              </div>
+            </div>
+
+            {/* Right: Overview, Ports & Stats */}
+            <div className="col-span-12 lg:col-span-6 flex flex-col justify-center">
+              <div>
+                <h3 className="font-serif text-2xl md:text-3xl text-[#F4EFE6] font-medium">
+                  Direct Trade Corridors
+                </h3>
+                <p className="mt-3 text-sm md:text-base leading-relaxed text-[#8C8279]">
+                  Six primary overseas destinations serviced continuously from Western India ports. 
+                  Every consignment is monitored from gate-in through customs discharge.
+                </p>
               </div>
 
               {/* Port Chips with SplitFlapText */}
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <span className="font-mono text-xs text-stone-400">Loading Hubs:</span>
+                <span className="font-mono text-xs text-[#8C8279]">Loading Hubs:</span>
                 {[
                   { code: 'INMUN', name: 'Mundra' },
                   { code: 'INIXY', name: 'Kandla' },
@@ -219,47 +217,34 @@ export function GlobalPresencePreview() {
                 ].map((port) => (
                   <div
                     key={port.code}
-                    className="flex items-center gap-2 rounded-lg border border-stone-800 bg-stone-900/80 px-3 py-1 font-mono text-xs text-stone-200"
+                    className="flex items-center gap-2 rounded-lg border border-[#3D322A] bg-[#241C18]/80 px-3 py-1.5 font-mono text-xs text-[#F4EFE6]"
                   >
-                    <span className="text-accent">
-                      <SplitFlapText text={port.code} flipDuration={0.35} />
+                    <span className="text-[#A88B68]">
+                      <SplitFlapText text={port.code} fontSize="14px" flipDuration={0.35} />
                     </span>
-                    <span className="text-stone-400">({port.name})</span>
+                    <span className="text-[#8C8279]">({port.name})</span>
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Right: 6 Region Cards as ChromaGrid */}
-            <div className="col-span-12 lg:col-span-6">
-              <div className="mb-6">
-                <ChromaGrid
-                  items={REGION_DATA}
-                  radius={300}
-                  damping={0.45}
-                  onItemHover={(idx) => setActiveRegionIndex(idx)}
-                  className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-                />
-              </div>
 
               {/* Stats Row: Regions 6 · Industries 9 · Ports 3 using Counter */}
-              <div className="mt-8 flex flex-wrap items-center justify-between gap-6 border-t border-stone-800 pt-6">
+              <div className="mt-8 flex flex-wrap items-center justify-between gap-6 border-t border-[#3D322A] pt-6">
                 <div className="flex gap-8">
                   <div>
-                    <span className="font-mono text-xs text-stone-400 uppercase">Regions</span>
-                    <div className="font-serif text-2xl text-accent">
+                    <span className="font-mono text-xs text-[#8C8279] uppercase">Regions</span>
+                    <div className="font-serif text-2xl text-[#A88B68]">
                       {statsVisible ? <Counter value={6} /> : 6}
                     </div>
                   </div>
                   <div>
-                    <span className="font-mono text-xs text-stone-400 uppercase">Industries</span>
-                    <div className="font-serif text-2xl text-accent">
+                    <span className="font-mono text-xs text-[#8C8279] uppercase">Industries</span>
+                    <div className="font-serif text-2xl text-[#A88B68]">
                       {statsVisible ? <Counter value={9} /> : 9}
                     </div>
                   </div>
                   <div>
-                    <span className="font-mono text-xs text-stone-400 uppercase">Ports</span>
-                    <div className="font-serif text-2xl text-accent">
+                    <span className="font-mono text-xs text-[#8C8279] uppercase">Ports</span>
+                    <div className="font-serif text-2xl text-[#A88B68]">
                       {statsVisible ? <Counter value={3} /> : 3}
                     </div>
                   </div>
@@ -267,7 +252,7 @@ export function GlobalPresencePreview() {
 
                 <Link
                   href="/global-presence"
-                  className="group inline-flex items-center gap-2 rounded-xl border border-accent/40 bg-accent/10 px-5 py-3 font-mono text-xs uppercase tracking-widest text-accent transition-all hover:bg-accent hover:text-stone-950"
+                  className="group inline-flex items-center gap-2 rounded-xl border border-[#A88B68]/40 bg-[#A88B68]/10 px-5 py-3 font-mono text-xs uppercase tracking-widest text-[#A88B68] transition-all hover:bg-[#A88B68] hover:text-[#171210]"
                   data-cursor="target"
                 >
                   <span>View Our Global Network</span>
@@ -277,7 +262,18 @@ export function GlobalPresencePreview() {
             </div>
           </div>
 
-          <p className="mt-8 text-center font-mono text-xs text-stone-500">
+          {/* 6 Region Cards: 3x2 desktop grid / 1 col mobile */}
+          <div className="mt-14 w-full">
+            <ChromaGrid
+              items={REGION_DATA}
+              radius={300}
+              damping={0.45}
+              onItemHover={(idx) => setActiveRegionIndex(idx)}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full"
+            />
+          </div>
+
+          <p className="mt-8 text-center font-mono text-xs text-[#8C8279]">
             Response window {numbers.responseWindow}
           </p>
         </Container>

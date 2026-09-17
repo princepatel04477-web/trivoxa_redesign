@@ -99,7 +99,7 @@ const OptionWheel = ({
   const [selectedIndex, setSelectedIndex] = useState(defaultSelected);
   const [isDragging, setIsDragging] = useState(false);
 
-  const remPx = typeof window !== 'undefined' ? parseFloat(getComputedStyle(document.documentElement).fontSize) || 16 : 16;
+  const remPx = 16;
 
   onChangeRef.current = onChange;
   cfgRef.current = {

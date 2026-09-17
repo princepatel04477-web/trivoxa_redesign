@@ -228,9 +228,9 @@ const TextPressure: React.FC<TextPressureProps> = ({
               spansRef.current[i] = el;
             }}
             data-char={char}
-            className="inline-block"
+            className={`inline-block ${char === ' ' ? 'w-[0.45em] min-w-[0.35em]' : ''}`}
           >
-            {char}
+            {char === ' ' ? '\u00A0' : char}
           </span>
         ))}
       </Tag>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, memo } from 'react';
+import { useEffect, useRef, memo, useId } from 'react';
 
 const TWO_PI = Math.PI * 2;
 
@@ -41,9 +41,9 @@ const DotField = memo(({
   glowRadius = 160,
   sparkle = false,
   waveAmplitude = 0,
-  gradientFrom = 'rgba(168, 85, 247, 0.35)',
-  gradientTo = 'rgba(180, 151, 207, 0.25)',
-  glowColor = '#120F17',
+  gradientFrom = 'rgba(168, 139, 104, 0.35)',
+  gradientTo = 'rgba(201, 174, 137, 0.25)',
+  glowColor = '#171210',
   ...rest
 }: DotFieldProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -55,10 +55,11 @@ const DotField = memo(({
   const sizeRef = useRef({ w: 0, h: 0, offsetX: 0, offsetY: 0 });
   const glowOpacity = useRef(0);
   const engagement = useRef(0);
+  const rebuildRef = useRef<(() => void) | null>(null);
   const propsRef = useRef<Record<string, unknown>>({});
   propsRef.current = { dotRadius, dotSpacing, cursorRadius, cursorForce, bulgeOnly, bulgeStrength, sparkle, waveAmplitude, gradientFrom, gradientTo };
-  const rebuildRef = useRef<(() => void) | null>(null);
-  const glowIdRef = useRef(`dot-field-glow-${Math.random().toString(36).slice(2, 9)}`);
+  const reactId = useId();
+  const glowIdRef = useRef(`dot-field-glow-${reactId.replace(/:/g, '')}`);
 
   useEffect(() => {
     const canvas = canvasRef.current;

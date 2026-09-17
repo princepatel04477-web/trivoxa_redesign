@@ -12,38 +12,51 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const reducedMotion = useReducedMotion();
 
   useEffect(() => {
-    if (reducedMotion) return;
+    const handleHash = () => {
+      if (wipeRef.current) {
+        wipeRef.current.style.display = 'none';
+      }
+    };
+    window.addEventListener('hashchange', handleHash);
+
+    if (reducedMotion) {
+      if (wipeRef.current) {
+        wipeRef.current.style.display = 'none';
+      }
+      return () => window.removeEventListener('hashchange', handleHash);
+    }
 
     const ctx = gsap.context(() => {
-      // Kill stale ScrollTriggers before transitioning in
-      ScrollTrigger.getAll().forEach((st) => st.kill());
-
       const tl = gsap.timeline({
         onComplete: () => {
+          if (wipeRef.current) {
+            wipeRef.current.style.display = 'none';
+          }
           ScrollTrigger.refresh();
         },
       });
 
-      // Wipe reveal from bottom to top
       if (wipeRef.current) {
+        wipeRef.current.style.display = 'block';
         tl.fromTo(
           wipeRef.current,
           { scaleY: 1, transformOrigin: 'top' },
-          { scaleY: 0, duration: 0.5, ease: 'trivoxa.out' }
+          { scaleY: 0, duration: 0.45, ease: 'power2.out' }
         );
       }
 
       if (containerRef.current) {
         tl.fromTo(
           containerRef.current,
-          { opacity: 0, y: 16 },
-          { opacity: 1, y: 0, duration: 0.4, ease: 'trivoxa.out' },
-          '-=0.3'
+          { opacity: 0, y: 12 },
+          { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' },
+          '-=0.25'
         );
       }
     }, containerRef);
 
     return () => {
+      window.removeEventListener('hashchange', handleHash);
       ctx.revert();
     };
   }, [pathname, reducedMotion]);

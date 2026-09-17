@@ -30,7 +30,10 @@
 
   --font-display: var(--fontstack-display, 'Instrument Serif', 'Fraunces', Georgia, serif);
   --font-body: var(--fontstack-body, 'Satoshi', 'Inter', system-ui, sans-serif);
-  --font-data: var(--fontstack-data, 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace);
+  --font-data: var(--fontstack-data, 'JetBrains Mono', 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace);
+  --font-serif: var(--fontstack-display, 'Instrument Serif', 'Fraunces', Georgia, serif);
+  --font-sans: var(--fontstack-body, 'Satoshi', 'Inter', system-ui, sans-serif);
+  --font-mono: var(--fontstack-data, 'JetBrains Mono', 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace);
 
   /*
    * Fluid type scale. Every step is a clamp() so there is exactly one scale

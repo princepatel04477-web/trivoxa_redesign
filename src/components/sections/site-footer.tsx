@@ -9,7 +9,6 @@ import { footerRegions } from '@/lib/selectors';
 import TextPressure from '@/components/reactbits/TextPressure/TextPressure';
 import GradientText from '@/components/reactbits/GradientText/GradientText';
 import ShinyText from '@/components/reactbits/ShinyText/ShinyText';
-import CurvedLoop from '@/components/reactbits/CurvedLoop/CurvedLoop';
 import DotField from '@/components/reactbits/DotField/DotField';
 import Noise from '@/components/reactbits/Noise/Noise';
 import FadeContent from '@/components/reactbits/FadeContent/FadeContent';
@@ -78,8 +77,6 @@ export function SiteFooter() {
     return () => ctx.revert();
   }, [reducedMotion]);
 
-  const regionMarqueeString = regions.map((r) => r.name).join(' · ') + ' · ';
-
   return (
     <footer
       aria-label="Global footer"
@@ -99,7 +96,7 @@ export function SiteFooter() {
       {/* HUGE TRIVOXA WORDMARK */}
       <div className="relative z-10 border-b border-stone-800/80 pt-12 pb-6">
         <Container>
-          <div className="hidden h-32 w-full md:block">
+          <div className="mt-6 hidden h-32 w-full md:block">
             <TextPressure
               text="TRIVOXA"
               fontFamily="Instrument Serif"
@@ -112,7 +109,7 @@ export function SiteFooter() {
               strokeWidth={1}
             />
           </div>
-          <div className="block py-4 text-center md:hidden">
+          <div className="mt-6 block py-4 text-center md:hidden">
             <GradientText
               colors={['#A88B68', '#F4EFE6', '#C4A47C']}
               animationSpeed={6}
@@ -365,18 +362,29 @@ export function SiteFooter() {
           </div>
         </div>
 
-        {/* Regional Links Row: CurvedLoop Marquee */}
+        {/* Regional Links Row: Clean static inline list of 6 regions */}
         <div className="mt-16 border-t border-stone-800/80 pt-6">
-          <p className="font-mono text-[11px] uppercase tracking-widest text-stone-500">
-            Regions We Serve
-          </p>
-          <div className="relative mt-2 h-16 overflow-hidden">
-            <CurvedLoop
-              marqueeText={regionMarqueeString}
-              speed={1.5}
-              curveAmount={30}
-              className="font-mono text-xs uppercase tracking-widest text-accent/80"
-            />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="font-mono text-[11px] uppercase tracking-widest text-stone-500 shrink-0">
+              Regions We Serve
+            </p>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-xs text-stone-300">
+              {regions.map((region, idx) => (
+                <React.Fragment key={region.slug}>
+                  <Link
+                    href={`/global-presence#${region.slug}`}
+                    className="transition-colors hover:text-accent"
+                  >
+                    {region.name}
+                  </Link>
+                  {idx < regions.length - 1 && (
+                    <span className="text-stone-600" aria-hidden="true">
+                      ·
+                    </span>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
           </div>
         </div>
 

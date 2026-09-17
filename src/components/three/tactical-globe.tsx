@@ -1222,7 +1222,8 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
   const { glowColor, glowIntensity, enableDrag, showLabels } = interaction;
   const loading = !feats && !err;
 
-  const uid = useRef(Math.random().toString(36).slice(2, 6)).current;
+  const reactId = React.useId();
+  const uid = reactId.replace(/:/g, '');
   const fG = 'g' + uid;
   const fL = 'l' + uid;
   const gO = 'o' + uid;

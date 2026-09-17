@@ -21,7 +21,8 @@ import { animate } from '@/lib/motion/anime';
 export function ClosingCta() {
   const router = useRouter();
   const band = proofBand();
-  const hasSlot = useWebGLSlot('laser-flow-cta');
+  const ctaSectionRef = useRef<HTMLDivElement>(null);
+  const webglSlot = useWebGLSlot('laser-flow-cta', ctaSectionRef);
   const reducedMotion = useReducedMotion();
 
   const [copied, setCopied] = useState(false);
@@ -125,56 +126,57 @@ export function ClosingCta() {
       </div>
 
       {/* START A CONVERSATION (FINAL CTA) */}
-      <Section surface="deep" className="relative py-28">
-        {/* LaserFlow WebGL Background */}
-        <div className="pointer-events-none absolute inset-0 z-0 opacity-40">
-          {hasSlot ? (
-            <LaserFlow
-              color="#A88B68"
-              flowSpeed={0.8}
-              wispIntensity={0.6}
-              horizontalBeamOffset={0}
-              verticalBeamOffset={-0.3}
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-b from-stone-900 via-stone-950 to-stone-950" />
-          )}
-        </div>
+      <div ref={ctaSectionRef}>
+        <Section surface="deep" className="relative py-28 text-left">
+          {/* LaserFlow WebGL Background */}
+          <div className="pointer-events-none absolute inset-0 z-0 opacity-40">
+            {webglSlot.hasSlot ? (
+              <LaserFlow
+                color="#A88B68"
+                flowSpeed={0.8}
+                wispIntensity={0.6}
+                horizontalBeamOffset={0}
+                verticalBeamOffset={-0.3}
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-b from-[#241C18]/80 via-[#171210] to-[#171210]" />
+            )}
+          </div>
 
-        <Container className="relative z-10">
-          <div className="grid grid-cols-12 items-end gap-12 lg:gap-16">
-            <div className="col-span-12 lg:col-span-7">
-              <p className="surface-accent text-eyebrow mb-3 tracking-widest uppercase">
-                Start a Conversation
-              </p>
+          <Container className="relative z-10">
+            <div className="grid grid-cols-12 items-end gap-12 lg:gap-16 text-left">
+              <div className="col-span-12 lg:col-span-7 text-left">
+                <p className="text-eyebrow mb-3 tracking-widest uppercase text-[#A88B68]">
+                  Start a Conversation
+                </p>
 
-              {/* Heading with ScrambleText on numbers. */}
-              <h2 className="font-serif text-3xl font-medium text-stone-100 sm:text-4xl md:text-5xl lg:max-w-[20ch]">
-                <SplitText text="Send the specification. We'll come back with " className="inline" />
-                <span ref={numbersSpanRef} className="text-accent underline decoration-accent/40">
-                  numbers.
-                </span>
-              </h2>
+                {/* Heading with ScrambleText on numbers. */}
+                <h2 className="font-serif text-3xl font-medium text-[#F4EFE6] sm:text-4xl md:text-5xl lg:max-w-[20ch] text-left">
+                  <SplitText text="Send the specification. We'll come back with " className="inline" />
+                  <span ref={numbersSpanRef} className="text-[#A88B68] underline decoration-[#A88B68]/40">
+                    numbers.
+                  </span>
+                </h2>
 
-              {/* TrueFocus highlighted keywords */}
-              <div className="mt-6">
-                <TrueFocus
-                  sentence="Grade quantity destination-port Incoterm"
-                  separator=" "
-                  blurAmount={3}
-                  borderColor="#A88B68"
-                  glowColor="rgba(168,139,104,0.4)"
-                  animationDuration={0.6}
-                  pauseBetweenAnimations={1.5}
-                />
+                {/* TrueFocus highlighted keywords */}
+                <div className="mt-6 flex justify-start">
+                  <TrueFocus
+                    sentence="Grade quantity destination-port Incoterm"
+                    separator=" "
+                    blurAmount={3}
+                    borderColor="#A88B68"
+                    glowColor="rgba(168,139,104,0.4)"
+                    animationDuration={0.6}
+                    pauseBetweenAnimations={1.5}
+                  />
+                </div>
+
+                <p className="mt-6 max-w-xl text-sm leading-relaxed text-[#8C8279] md:text-base text-left">
+                  Grade, quantity, destination port, target Incoterm. That is enough for the export
+                  desk to price a real quotation instead of a brochure answer — answered{' '}
+                  {band.responseWindow}, desk hours {band.hoursIst}.
+                </p>
               </div>
-
-              <p className="mt-6 max-w-xl text-sm leading-relaxed text-stone-300 md:text-base">
-                Grade, quantity, destination port, target Incoterm. That is enough for the export
-                desk to price a real quotation instead of a brochure answer — answered{' '}
-                {band.responseWindow}, desk hours {band.hoursIst}.
-              </p>
-            </div>
 
             {/* CTAs */}
             <div className="col-span-12 flex flex-col items-start gap-6 lg:col-span-5 lg:items-end">
@@ -208,8 +210,8 @@ export function ClosingCta() {
             </div>
           </div>
         </Container>
-      </Section>
+        </Section>
+      </div>
     </div>
   );
 }
-

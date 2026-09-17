@@ -55,17 +55,45 @@ export function WebGLBudgetProvider({ children }: { children: ReactNode }) {
  * Coordinates with an element ref to automatically claim slot when in viewport (rootMargin 200px)
  * and release when scrolled out.
  */
-export function useWebGLSlot(customId?: string) {
+export function useWebGLSlot(
+  customId?: string,
+  elementRef?: React.RefObject<HTMLElement | null>
+) {
   const autoId = useId();
   const id = customId || autoId;
   const { requestSlot, releaseSlot } = useContext(WebGLBudgetContext);
   const [hasSlot, setHasSlot] = useState(false);
 
   useEffect(() => {
-    return () => {
-      releaseSlot(id);
-    };
-  }, [id, releaseSlot]);
+    if (elementRef?.current && typeof IntersectionObserver !== 'undefined') {
+      const el = elementRef.current;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const granted = requestSlot(id);
+              setHasSlot(granted);
+            } else {
+              releaseSlot(id);
+              setHasSlot(false);
+            }
+          });
+        },
+        { rootMargin: '200px' }
+      );
+      observer.observe(el);
+      return () => {
+        observer.disconnect();
+        releaseSlot(id);
+      };
+    } else {
+      const granted = requestSlot(id);
+      setHasSlot(granted);
+      return () => {
+        releaseSlot(id);
+      };
+    }
+  }, [id, requestSlot, releaseSlot, elementRef]);
 
   const observeElement = (el: HTMLElement | null) => {
     if (!el || typeof IntersectionObserver === 'undefined') return;
@@ -86,8 +114,17 @@ export function useWebGLSlot(customId?: string) {
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      releaseSlot(id);
+    };
   };
 
-  return { hasSlot, observeElement, releaseSlot: () => releaseSlot(id) };
+  return {
+    hasSlot,
+    observeElement,
+    releaseSlot: () => releaseSlot(id),
+    // Fallback for truthiness checks if evaluated as primitive
+    valueOf: () => hasSlot,
+  };
 }

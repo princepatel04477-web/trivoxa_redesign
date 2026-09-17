@@ -175,12 +175,12 @@ const ChromaGrid: React.FC<ChromaGridProps> = ({
           onMouseMove={handleCardMove}
           onMouseEnter={() => onItemHover?.(i)}
           onClick={() => handleCardClick(c.url)}
-          className="group relative flex flex-col w-[300px] rounded-[20px] overflow-hidden border-2 border-transparent transition-colors duration-300 cursor-pointer"
+          className="group relative flex flex-col w-full max-w-[360px] mx-auto rounded-[20px] overflow-hidden border-2 border-transparent transition-colors duration-300 cursor-pointer"
           style={
             {
               '--card-border': c.borderColor || 'transparent',
               background: c.gradient,
-              '--spotlight-color': 'rgba(255,255,255,0.3)'
+              '--spotlight-color': 'rgba(168,139,104,0.3)'
             } as React.CSSProperties
           }
         >
@@ -192,13 +192,19 @@ const ChromaGrid: React.FC<ChromaGridProps> = ({
             }}
           />
           <div className="relative z-10 flex-1 p-[10px] box-border">
-            <img src={c.image} alt={c.title} loading="lazy" className="w-full h-full object-cover rounded-[10px]" />
+            <img src={c.image} alt={c.title} loading="lazy" className="w-full h-40 object-cover rounded-[10px]" />
           </div>
-          <footer className="relative z-10 p-3 text-white font-sans grid grid-cols-[1fr_auto] gap-x-3 gap-y-1">
-            <h3 className="m-0 text-[1.05rem] font-semibold">{c.title}</h3>
-            {c.handle && <span className="text-[0.95rem] opacity-80 text-right">{c.handle}</span>}
-            <p className="m-0 text-[0.85rem] opacity-85">{c.subtitle}</p>
-            {c.location && <span className="text-[0.85rem] opacity-85 text-right">{c.location}</span>}
+          <footer className="relative z-10 p-3.5 text-[#F4EFE6] font-sans flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <h3 className="m-0 text-[1.05rem] font-semibold text-[#F4EFE6]">{c.title}</h3>
+              {c.handle && <span className="font-mono text-[10px] uppercase tracking-wider text-[#A88B68]">{c.handle}</span>}
+            </div>
+            {c.location && (
+              <div className="font-mono text-xs text-[#C9AE89] font-medium">
+                {c.location}
+              </div>
+            )}
+            <p className="m-0 text-xs text-[#8C8279] leading-relaxed line-clamp-2">{c.subtitle}</p>
           </footer>
         </article>
       ))}

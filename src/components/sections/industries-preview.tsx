@@ -159,12 +159,12 @@ export function IndustriesPreview() {
             autoplayDelay={4500}
             loop
             onChange={(idx) => setActiveIndex(idx)}
-            renderItem={(rawItem, _idx: number, _isActive: boolean) => {
+            renderItem={(rawItem, _idx: number, isActive: boolean) => {
               const item = rawItem as (typeof carouselItems)[0];
               const isFurniture = item.slug === 'furniture-interiors';
               return (
                 <div
-                  className="relative h-full w-full overflow-hidden rounded-[20px] border border-stone-800 bg-stone-950"
+                  className="relative h-full w-full overflow-hidden rounded-[20px] border border-[#3D322A] bg-[#171210]"
                   data-cursor="target"
                 >
                   <Image
@@ -174,33 +174,41 @@ export function IndustriesPreview() {
                     sizes="340px"
                     className="object-cover transition-transform duration-700 hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/40 to-transparent" />
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-t from-[#171210] via-[#171210]/60 to-transparent transition-opacity duration-300 ${
+                      isActive ? 'opacity-95' : 'opacity-40'
+                    }`}
+                  />
 
-                  {/* Card overlay content */}
-                  <div className="absolute inset-x-0 bottom-0 flex flex-col p-6">
+                  {/* Card overlay content - only visible on active card */}
+                  <div
+                    className={`absolute inset-x-0 bottom-0 flex flex-col p-6 transition-opacity duration-300 ${
+                      isActive ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                    }`}
+                  >
                     {isFurniture ? (
                       <div className="mb-2 inline-flex items-center">
-                        <span className="rounded-full border border-accent/40 bg-stone-900/90 px-2.5 py-0.5 font-mono text-[10px] text-accent">
+                        <span className="rounded-full border border-[#A88B68]/40 bg-[#241C18]/90 px-2.5 py-0.5 font-mono text-[10px] text-[#A88B68]">
                           <ShinyText text="Quoted, not yet catalogued" speed={3} />
                         </span>
                       </div>
                     ) : item.status === 'onboarding' ? (
-                      <span className="mb-2 inline-block w-fit rounded-full border border-stone-700 bg-stone-900/80 px-2 py-0.5 font-mono text-[10px] text-stone-300">
+                      <span className="mb-2 inline-block w-fit rounded-full border border-[#3D322A] bg-[#241C18]/80 px-2 py-0.5 font-mono text-[10px] text-[#F4EFE6]">
                         In Onboarding
                       </span>
                     ) : null}
 
-                    <h4 className="font-serif text-xl font-medium text-stone-100 md:text-2xl">
+                    <h4 className="font-serif text-xl font-medium text-[#F4EFE6] md:text-2xl">
                       {item.title}
                     </h4>
 
-                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-stone-300">
+                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#8C8279]">
                       {item.description}
                     </p>
 
                     <Link
                       href={`/industries/${item.slug}`}
-                      className="group mt-4 inline-flex items-center gap-1.5 font-mono text-xs text-accent transition-colors hover:text-stone-100"
+                      className="group mt-4 inline-flex items-center gap-1.5 font-mono text-xs text-[#A88B68] transition-colors hover:text-[#F4EFE6]"
                     >
                       <span>Explore</span>
                       <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -246,6 +254,17 @@ export function IndustriesPreview() {
               <DecryptedText text={currentIndustry.name} speed={30} />
             </div>
           </div>
+        </div>
+
+        {/* View all 9 industries StarBorder CTA */}
+        <div className="mt-10 flex justify-center">
+          <Link href="/industries" data-cursor="target">
+            <StarBorder color="#A88B68" speed="5s">
+              <span className="font-mono text-xs uppercase tracking-wider text-[#F4EFE6] px-4 py-1 inline-block">
+                View all 9 industries →
+              </span>
+            </StarBorder>
+          </Link>
         </div>
       </Container>
     </Section>

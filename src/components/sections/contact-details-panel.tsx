@@ -89,12 +89,12 @@ export function ContactDetailsPanel() {
                 }`}
               />
             </span>
-            <span className="font-mono text-xs font-semibold tracking-wide uppercase text-stone-700">
+            <span className="font-mono text-xs font-semibold tracking-wide uppercase text-stone-700" suppressHydrationWarning>
               Desk {isOpen ? 'Open Now' : 'Closed'}
             </span>
           </div>
           {timeStr && (
-            <span className="font-mono text-xs text-[#A88B68] font-medium" data-spec>
+            <span className="font-mono text-xs text-[#A88B68] font-medium" data-spec suppressHydrationWarning>
               {timeStr}
             </span>
           )}

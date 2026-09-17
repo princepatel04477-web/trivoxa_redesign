@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { Container } from '@/components/ui/layout';
@@ -16,11 +16,12 @@ const LightRays = dynamic(() => import('@/components/reactbits/LightRays/LightRa
 });
 
 export function GroupHero() {
-  const webglSlot = useWebGLSlot('group-lightrays');
+  const sectionRef = useRef<HTMLElement>(null);
+  const webglSlot = useWebGLSlot('group-lightrays', sectionRef);
   const reducedMotion = useReducedMotion();
 
   return (
-    <section className="relative overflow-hidden bg-[#171210] py-24 sm:py-32 text-[#F4EFE6]">
+    <section ref={sectionRef} className="relative overflow-hidden bg-[#171210] py-24 sm:py-32 text-[#F4EFE6]">
       {/* LightRays WebGL background with CSS fallback */}
       <div className="absolute inset-0 pointer-events-none opacity-50">
         {webglSlot.hasSlot && !reducedMotion ? (

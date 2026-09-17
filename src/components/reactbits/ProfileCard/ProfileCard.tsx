@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 
-const DEFAULT_INNER_GRADIENT = 'linear-gradient(145deg,#60496e8c 0%,#71C4FF44 100%)';
+const DEFAULT_INNER_GRADIENT = 'linear-gradient(145deg, rgba(168,139,104,0.18) 0%, rgba(36,28,24,0.95) 100%)';
 
 const ANIMATION_CONFIG = {
   INITIAL_DURATION: 1200,
@@ -408,12 +408,12 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
       ),
       repeating-linear-gradient(
         -45deg,
-        #0e152e 0%,
-        hsl(180, 10%, 60%) 3.8%,
-        hsl(180, 29%, 66%) 4.5%,
-        hsl(180, 10%, 60%) 5.2%,
-        #0e152e 10%,
-        #0e152e 12%
+        #171210 0%,
+        rgba(168, 139, 104, 0.4) 3.8%,
+        rgba(201, 174, 137, 0.5) 4.5%,
+        rgba(168, 139, 104, 0.4) 5.2%,
+        #171210 10%,
+        #171210 12%
       ),
       radial-gradient(
         farthest-corner circle at var(--pointer-x) var(--pointer-y),
@@ -603,7 +603,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                   className="font-semibold m-0"
                   style={{
                     fontSize: 'min(5svh, 3em)',
-                    backgroundImage: 'linear-gradient(to bottom, #fff, #6f6fbe)',
+                    backgroundImage: 'linear-gradient(to bottom, #F4EFE6, #C9AE89)',
                     backgroundSize: '1em 1.5em',
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text',
@@ -623,7 +623,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                     top: '-12px',
                     fontSize: '16px',
                     margin: '0 auto',
-                    backgroundImage: 'linear-gradient(to bottom, #fff, #4a4ac0)',
+                    backgroundImage: 'linear-gradient(to bottom, #F4EFE6, #A88B68)',
                     backgroundSize: '1em 1.5em',
                     WebkitTextFillColor: 'transparent',
                     backgroundClip: 'text',

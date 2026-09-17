@@ -68,14 +68,18 @@ const TargetCursor: React.FC<TargetCursorProps> = ({
   const pathname = usePathname();
   const isLegalRoute = pathname?.startsWith('/legal');
 
-  const isMobile = useMemo(() => {
-    if (typeof window === 'undefined' || isLegalRoute) return true;
-    const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const [isDesktop, setIsDesktop] = React.useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hasFinePointer = window.matchMedia('(pointer: fine)').matches;
+    const canHover = window.matchMedia('(any-hover: hover)').matches;
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     const isSmallScreen = window.innerWidth <= 768;
-    const userAgent = navigator.userAgent || navigator.vendor || (window as unknown as { opera?: string }).opera || '';
     const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
-    const isMobileUserAgent = mobileRegex.test(userAgent.toLowerCase());
-    return (hasTouchScreen && isSmallScreen) || isMobileUserAgent;
+    const isMobileUA = mobileRegex.test((navigator.userAgent || '').toLowerCase());
+
+    setIsDesktop(hasFinePointer && canHover && !isSmallScreen && !isMobileUA && !isTouch && !isLegalRoute);
   }, [isLegalRoute]);
 
   const constants = useMemo(() => ({ borderWidth: 3, cornerSize: 12 }), []);
@@ -87,7 +91,7 @@ const TargetCursor: React.FC<TargetCursorProps> = ({
   }, []);
 
   useEffect(() => {
-    if (isMobile || !cursorRef.current) return;
+    if (!isDesktop || !cursorRef.current) return;
 
     const originalCursor = document.body.style.cursor;
     if (hideDefaultCursor) {
@@ -103,6 +107,8 @@ const TargetCursor: React.FC<TargetCursorProps> = ({
     let activeTarget: Element | null = null;
     let currentLeaveHandler: (() => void) | null = null;
     let resumeTimeout: ReturnType<typeof setTimeout> | null = null;
+    let hasMoved = false;
+    let isHiddenOverTextOrFooter = false;
 
     const cleanupTarget = (target: Element) => {
       if (currentLeaveHandler) {
@@ -113,6 +119,7 @@ const TargetCursor: React.FC<TargetCursorProps> = ({
 
     const initialOffset = getOffset();
     gsap.set(cursor, {
+      opacity: 0,
       xPercent: -50,
       yPercent: -50,
       x: window.innerWidth / 2 - initialOffset.x,
@@ -161,8 +168,54 @@ const TargetCursor: React.FC<TargetCursorProps> = ({
 
     tickerFnRef.current = tickerFn;
 
-    const moveHandler = (e: MouseEvent) => moveCursor(e.clientX, e.clientY);
+    const checkTextOrFooter = (target: Element | null) => {
+      if (!target || !cursorRef.current) return;
+      const isExplicitTarget = Boolean(target.closest(targetSelector));
+      const inFooter = Boolean(target.closest('footer'));
+      const isText = Boolean(
+        target.closest('p, h1, h2, h3, h4, h5, h6, input, textarea, code, pre, dl, dt, dd, blockquote, label')
+      );
+
+      const shouldHide = (inFooter || isText) && !isExplicitTarget;
+      if (shouldHide && !isHiddenOverTextOrFooter) {
+        isHiddenOverTextOrFooter = true;
+        gsap.to(cursorRef.current, { opacity: 0, duration: 0.15, overwrite: 'auto' });
+      } else if (!shouldHide && isHiddenOverTextOrFooter) {
+        isHiddenOverTextOrFooter = false;
+        if (hasMoved) {
+          gsap.to(cursorRef.current, { opacity: 1, duration: 0.15, overwrite: 'auto' });
+        }
+      }
+    };
+
+    const moveHandler = (e: MouseEvent) => {
+      if (!hasMoved) {
+        hasMoved = true;
+        checkTextOrFooter(e.target as Element);
+        if (!isHiddenOverTextOrFooter && cursorRef.current) {
+          gsap.to(cursorRef.current, { opacity: 1, duration: 0.15, overwrite: 'auto' });
+        }
+      } else {
+        checkTextOrFooter(e.target as Element);
+      }
+      moveCursor(e.clientX, e.clientY);
+    };
     window.addEventListener('mousemove', moveHandler);
+
+    const mouseLeaveWindow = () => {
+      if (cursorRef.current) {
+        gsap.to(cursorRef.current, { opacity: 0, duration: 0.15, overwrite: 'auto' });
+      }
+    };
+
+    const mouseEnterWindow = () => {
+      if (hasMoved && !isHiddenOverTextOrFooter && cursorRef.current) {
+        gsap.to(cursorRef.current, { opacity: 1, duration: 0.15, overwrite: 'auto' });
+      }
+    };
+
+    document.documentElement.addEventListener('mouseleave', mouseLeaveWindow);
+    document.documentElement.addEventListener('mouseenter', mouseEnterWindow);
 
     const scrollHandler = () => {
       if (!activeTarget || !cursorRef.current) return;
@@ -346,6 +399,8 @@ const TargetCursor: React.FC<TargetCursorProps> = ({
       window.removeEventListener('resize', resizeHandler);
       window.removeEventListener('mousedown', mouseDownHandler);
       window.removeEventListener('mouseup', mouseUpHandler);
+      document.documentElement.removeEventListener('mouseleave', mouseLeaveWindow);
+      document.documentElement.removeEventListener('mouseenter', mouseEnterWindow);
       if (activeTarget) {
         cleanupTarget(activeTarget);
       }
@@ -361,7 +416,7 @@ const TargetCursor: React.FC<TargetCursorProps> = ({
     moveCursor,
     constants,
     hideDefaultCursor,
-    isMobile,
+    isDesktop,
     hoverDuration,
     parallaxOn,
     cursorColor,
@@ -369,24 +424,24 @@ const TargetCursor: React.FC<TargetCursorProps> = ({
   ]);
 
   useEffect(() => {
-    if (isMobile || !cursorRef.current || !spinTl.current) return;
+    if (!isDesktop || !cursorRef.current || !spinTl.current) return;
     if (spinTl.current.isActive()) {
       spinTl.current.kill();
       spinTl.current = gsap
         .timeline({ repeat: -1 })
         .to(cursorRef.current, { rotation: '+=360', duration: spinDuration, ease: 'none' });
     }
-  }, [spinDuration, isMobile]);
+  }, [spinDuration, isDesktop]);
 
-  if (isMobile || typeof document === 'undefined') {
+  if (!isDesktop || typeof document === 'undefined') {
     return null;
   }
 
   return createPortal(
     <div
       ref={cursorRef}
-      className="fixed top-0 left-0 w-0 h-0 pointer-events-none z-[2147483647]"
-      style={{ willChange: 'transform' }}
+      className="fixed top-0 left-0 w-0 h-0 pointer-events-none z-[2147483647] opacity-0"
+      style={{ willChange: 'transform, opacity' }}
     >
       <div
         ref={dotRef}

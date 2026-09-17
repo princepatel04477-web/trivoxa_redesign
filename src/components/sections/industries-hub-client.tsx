@@ -9,8 +9,8 @@ import { SectionHeading } from '@/components/ui/typography';
 import { CAPABILITIES } from '@/content/capabilities';
 import SplitText from '@/components/reactbits/SplitText/SplitText';
 import ChromaGrid, { type ChromaItem } from '@/components/reactbits/ChromaGrid/ChromaGrid';
-import { useWebGLSlot } from '@/lib/motion/webgl-budget';
 import { useReducedMotion } from '@/lib/motion/useReducedMotion';
+import { useWebGLSlot } from '@/lib/motion/webgl-budget';
 import { gsap } from 'gsap';
 import { Flip } from 'gsap/Flip';
 
@@ -48,8 +48,9 @@ export function IndustriesHubClient({
   portsLocode,
 }: IndustriesHubClientProps) {
   const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
+  const heroSectionRef = useRef<HTMLElement>(null);
+  const webglSlot = useWebGLSlot('industries-grainient', heroSectionRef);
   const gridContainerRef = useRef<HTMLDivElement>(null);
-  const webglSlot = useWebGLSlot('industries-grainient');
   const reducedMotion = useReducedMotion();
 
   // Filter logic:
@@ -95,7 +96,7 @@ export function IndustriesHubClient({
   return (
     <>
       {/* Hero: SplitText title + Grainient background */}
-      <section className="relative overflow-hidden bg-[#171210] py-20 lg:py-28 text-[#F4EFE6]">
+      <section ref={heroSectionRef} className="relative overflow-hidden bg-[#171210] py-20 lg:py-28 text-[#F4EFE6]">
         {/* WebGL Grainient or CSS Fallback */}
         <div className="absolute inset-0 pointer-events-none opacity-40">
           {webglSlot.hasSlot && !reducedMotion ? (

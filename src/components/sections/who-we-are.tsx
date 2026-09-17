@@ -19,8 +19,9 @@ import { useReducedMotion } from '@/lib/motion/useReducedMotion';
 
 export function WhoWeAre() {
   const router = useRouter();
+  const sectionRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const hasSlot = useWebGLSlot('threads-who-we-are');
+  const webglSlot = useWebGLSlot('threads-who-we-are', sectionRef);
   const reducedMotion = useReducedMotion();
 
   // Cycling focus for the 3 inline stats
@@ -41,15 +42,15 @@ export function WhoWeAre() {
   ];
 
   return (
-    <div className="relative overflow-hidden bg-stone-950 text-stone-100">
+    <div ref={sectionRef} className="relative overflow-hidden bg-stone-950 text-stone-100">
       <Section surface="deep" className="relative py-28">
         {/* Background: Threads WebGL with budget slot */}
         <div className="pointer-events-none absolute inset-0 z-0 opacity-40">
-          {hasSlot ? (
+          {webglSlot.hasSlot && !reducedMotion ? (
             <Threads
               amplitude={1}
               distance={0}
-              enableMouseInteraction={!reducedMotion}
+              enableMouseInteraction={true}
               color={[0.66, 0.55, 0.41]}
             />
           ) : (
@@ -65,21 +66,21 @@ export function WhoWeAre() {
                 Who We Are
               </p>
 
-              {/* Desktop TextPressure / Mobile SplitText */}
+              {/* Desktop TextPressure (>= 1024px) / Mobile & Tablet SplitText (< 1024px) */}
               <h2 className="my-2">
-                <span className="hidden md:block">
+                <span className="hidden lg:block">
                   <TextPressure
                     as="span"
                     text="A Vision Beyond Business."
                     fontFamily="Instrument Serif"
-                    minFontSize={48}
+                    minFontSize={44}
                     width
                     weight
                     italic={false}
                     textColor="var(--surface-paper, #F4EFE6)"
                   />
                 </span>
-                <span className="block md:hidden">
+                <span className="block lg:hidden">
                   <SplitText
                     text="A Vision Beyond Business."
                     className="font-serif text-3xl font-medium text-stone-100 sm:text-4xl"
@@ -115,13 +116,15 @@ export function WhoWeAre() {
               </div>
 
               {/* Canonical sentence with ScrollReveal */}
-              <div className="text-base text-stone-300 md:text-lg">
+              <div className="text-[clamp(22px,2vw,32px)] leading-relaxed text-[#F4EFE6]">
                 <ScrollReveal
                   baseOpacity={0.15}
                   enableBlur={!reducedMotion}
-                  baseRotation={2}
+                  baseRotation={0}
                   blurStrength={4}
-                  textClassName="leading-relaxed"
+                  wordAnimationEnd="center center"
+                  rotationEnd="center center"
+                  textClassName="leading-relaxed font-serif text-[#F4EFE6]"
                 >
                   {SHIVESHWAR_CANONICAL_SENTENCE}
                 </ScrollReveal>

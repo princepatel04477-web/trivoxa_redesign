@@ -30,7 +30,7 @@ interface LightRaysProps {
   className?: string;
 }
 
-const DEFAULT_COLOR = '#ffffff';
+const DEFAULT_COLOR = '#A88B68';
 
 const hexToRgb = (hex: string): [number, number, number] => {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -249,9 +249,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   }
 
   float brightness = 1.0 - (coord.y / iResolution.y);
-  fragColor.x *= 0.1 + brightness * 0.8;
-  fragColor.y *= 0.3 + brightness * 0.6;
-  fragColor.z *= 0.5 + brightness * 0.5;
+  fragColor.rgb *= 0.3 + brightness * 0.7;
 
   if (saturation != 1.0) {
     float gray = dot(fragColor.rgb, vec3(0.299, 0.587, 0.114));

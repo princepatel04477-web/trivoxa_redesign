@@ -4,11 +4,10 @@
  * Regenerate with: npm run prebuild   (runs automatically before dev/build)
  *
  * Display : Instrument Serif
- * Body    : Inter  (FALLBACK — Satoshi not yet uploaded)
- * Data    : Geist Mono (variable)
+ * Body    : Satoshi
+ * Data    : JetBrains Mono (variable)
  *
- * FALLBACK — Satoshi not found in src/fonts/custom/. Inter is the fallback named in the
- * brand document. Drop Satoshi-*.woff2 into src/fonts/custom/ and rebuild to swap.
+ * Satoshi static — resolved 3 weight(s) from src/fonts/custom/.
  */
 import localFont from 'next/font/local';
 
@@ -28,9 +27,9 @@ export const displayFont = localFont({
 /** Body / UI — everything that is not a headline or a spec value. */
 export const bodyFont = localFont({
   src: [
-    { path: '../fonts/vendor/inter-latin-400-normal.woff2', weight: '400', style: 'normal' },
-    { path: '../fonts/vendor/inter-latin-500-normal.woff2', weight: '500', style: 'normal' },
-    { path: '../fonts/vendor/inter-latin-600-normal.woff2', weight: '600', style: 'normal' },
+    { path: '../fonts/custom/Satoshi-Regular.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/custom/Satoshi-Medium.woff2', weight: '500', style: 'normal' },
+    { path: '../fonts/custom/Satoshi-Bold.woff2', weight: '600', style: 'normal' },
   ],
   variable: '--fontstack-body',
   display: 'swap',
@@ -42,18 +41,25 @@ export const bodyFont = localFont({
 /** Data — HS codes, MOQs, lead times, Incoterms, port codes, cert numbers. */
 export const dataFont = localFont({
   src: [
-    { path: '../fonts/vendor/geist-mono-latin-wght-normal.woff2', weight: '100 900', style: 'normal' },
-    { path: '../fonts/vendor/geist-mono-latin-ext-wght-normal.woff2', weight: '100 900', style: 'normal' },
+    { path: '../fonts/vendor/jetbrains-mono-latin-wght-normal.woff2', weight: '100 900', style: 'normal' },
+    { path: '../fonts/vendor/jetbrains-mono-latin-ext-wght-normal.woff2', weight: '100 900', style: 'normal' },
   ],
   variable: '--fontstack-data',
   display: 'swap',
   preload: true,
-  fallback: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+  fallback: ['JetBrains Mono', 'Geist Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
   adjustFontFallback: false,
 });
 
 /** True when the real brand body face is in place. Surfaced on /styleguide. */
-export const BODY_FONT_FAMILY = "Inter";
-export const BODY_FONT_IS_FALLBACK = true;
+export const BODY_FONT_FAMILY = "Satoshi";
+export const BODY_FONT_IS_FALLBACK = false;
 
-export const fontVariables = `${displayFont.className} ${bodyFont.className} ${dataFont.className}`;
+export const fontVariables = [
+  displayFont.variable,
+  bodyFont.variable,
+  dataFont.variable,
+  displayFont.className,
+  bodyFont.className,
+  dataFont.className,
+].join(' ');

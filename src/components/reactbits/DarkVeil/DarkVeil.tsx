@@ -73,13 +73,18 @@ void main(){
     float scanline_val=sin(gl_FragCoord.y*uScanFreq)*0.5+0.5;
     col.rgb*=1.-(scanline_val*scanline_val)*uScan;
     col.rgb+=(rand(gl_FragCoord.xy+uTime)-0.5)*uNoise;
-    vec3 result=clamp(col.rgb,0.0,1.0);
+    vec3 raw = clamp(col.rgb, 0.0, 1.0);
+    float lum = dot(raw, vec3(0.299, 0.587, 0.114));
+    vec3 bg = vec3(0.090, 0.071, 0.063);
+    vec3 mid = vec3(0.141, 0.110, 0.094);
+    vec3 bronze = vec3(0.659, 0.545, 0.408);
+    vec3 bronze2 = vec3(0.788, 0.682, 0.537);
+    vec3 brandCol = mix(bg, mid, smoothstep(0.0, 0.35, lum));
+    brandCol = mix(brandCol, bronze, smoothstep(0.35, 0.75, lum));
+    brandCol = mix(brandCol, bronze2, smoothstep(0.75, 1.0, lum));
+    vec3 result = brandCol;
     if(uLightMode>0.5){
-      float energy=max(result.r,max(result.g,result.b));
-      vec3 hue=result/max(energy,0.001);
-      float coverage=smoothstep(0.08,0.82,energy);
-      vec3 ink=mix(hue*0.32,hue*0.78,smoothstep(0.0,1.0,energy));
-      result=mix(vec3(1.0),ink,coverage*0.82);
+      result=mix(vec3(0.957,0.937,0.902),bronze*0.6,smoothstep(0.1,0.9,lum));
     }
     gl_FragColor=vec4(result,1.0);
 }

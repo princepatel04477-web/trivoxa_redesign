@@ -43,7 +43,15 @@ const VENDOR_FACES = [
     from: '@fontsource/instrument-serif/files/instrument-serif-latin-ext-400-normal.woff2',
     to: 'instrument-serif-latin-ext-400-normal.woff2',
   },
-  // Data — Geist Mono variable (one file covers the whole weight axis).
+  // Data — JetBrains Mono variable + Geist Mono fallback.
+  {
+    from: '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2',
+    to: 'jetbrains-mono-latin-wght-normal.woff2',
+  },
+  {
+    from: '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-ext-wght-normal.woff2',
+    to: 'jetbrains-mono-latin-ext-wght-normal.woff2',
+  },
   {
     from: '@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2',
     to: 'geist-mono-latin-wght-normal.woff2',
@@ -146,10 +154,17 @@ function emit(): void {
     { path: '../fonts/vendor/instrument-serif-latin-ext-400-normal.woff2', weight: '400', style: 'normal' },
   ].filter((s) => existsSync(join(ROOT, 'src', 'lib', s.path)));
 
-  const monoSrcs: Src[] = [
+  const jetbrainsSrcs: Src[] = [
+    { path: '../fonts/vendor/jetbrains-mono-latin-wght-normal.woff2', weight: '100 900', style: 'normal' },
+    { path: '../fonts/vendor/jetbrains-mono-latin-ext-wght-normal.woff2', weight: '100 900', style: 'normal' },
+  ].filter((s) => existsSync(join(ROOT, 'src', 'lib', s.path)));
+
+  const geistSrcs: Src[] = [
     { path: '../fonts/vendor/geist-mono-latin-wght-normal.woff2', weight: '100 900', style: 'normal' },
     { path: '../fonts/vendor/geist-mono-latin-ext-wght-normal.woff2', weight: '100 900', style: 'normal' },
   ].filter((s) => existsSync(join(ROOT, 'src', 'lib', s.path)));
+
+  const monoSrcs: Src[] = jetbrainsSrcs.length > 0 ? jetbrainsSrcs : geistSrcs;
 
   const bodySrcs = body.srcs.filter((s) => existsSync(join(ROOT, 'src', 'lib', s.path)));
 
@@ -166,7 +181,7 @@ function emit(): void {
  *
  * Display : Instrument Serif
  * Body    : ${body.family}${body.family === 'Inter' ? '  (FALLBACK — Satoshi not yet uploaded)' : ''}
- * Data    : Geist Mono (variable)
+ * Data    : ${jetbrainsSrcs.length > 0 ? 'JetBrains Mono' : 'Geist Mono'} (variable)
  *
  * ${body.note}
  */
@@ -204,7 +219,7 @@ ${renderSrc(monoSrcs)}
   variable: '--fontstack-data',
   display: 'swap',
   preload: true,
-  fallback: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+  fallback: ['JetBrains Mono', 'Geist Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
   adjustFontFallback: false,
 });
 
@@ -212,7 +227,14 @@ ${renderSrc(monoSrcs)}
 export const BODY_FONT_FAMILY = ${JSON.stringify(body.family)};
 export const BODY_FONT_IS_FALLBACK = ${body.family !== 'Satoshi'};
 
-export const fontVariables = \`\${displayFont.className} \${bodyFont.className} \${dataFont.className}\`;
+export const fontVariables = [
+  displayFont.variable,
+  bodyFont.variable,
+  dataFont.variable,
+  displayFont.className,
+  bodyFont.className,
+  dataFont.className,
+].join(' ');
 `;
 
   mkdirSync(dirname(OUT), { recursive: true });
@@ -220,8 +242,7 @@ export const fontVariables = \`\${displayFont.className} \${bodyFont.className} 
 
   const icon = body.family === 'Satoshi' ? '✓' : '!';
   console.log(`[sync-fonts] ${icon} body face: ${body.family}${body.family === 'Satoshi' ? '' : ' (fallback — drop Satoshi into src/fonts/custom/)'}`);
-  console.log('[sync-fonts] ✓ display face: Instrument Serif');
-  console.log('[sync-fonts] ✓ data face:    Geist Mono (variable)');
+  console.log(`[sync-fonts] ✓ data face:    ${jetbrainsSrcs.length > 0 ? 'JetBrains Mono' : 'Geist Mono'} (variable)`);
 }
 
 // Keep the vendor dir honest: wipe and re-copy so stale faces never linger.

@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@fontsource-variable/geist-mono": "^5.2.5",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource/instrument-serif": "^5.2.5",
     "@fontsource/inter": "^5.3.0",
     "@gsap/react": "^2.1.2",

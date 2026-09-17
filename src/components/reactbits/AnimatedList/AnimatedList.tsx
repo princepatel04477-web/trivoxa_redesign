@@ -156,13 +156,13 @@ const AnimatedList: React.FC<AnimatedListProps> = ({
         ref={listRef}
         className={`max-h-[400px] overflow-y-auto p-4 ${
           displayScrollbar
-            ? '[&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:bg-[#120F17] [&::-webkit-scrollbar-thumb]:bg-[#222] [&::-webkit-scrollbar-thumb]:rounded-[4px]'
+            ? '[&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:bg-[#171210] [&::-webkit-scrollbar-thumb]:bg-[#3D322A] [&::-webkit-scrollbar-thumb]:rounded-[4px]'
             : 'scrollbar-hide'
         }`}
         onScroll={handleScroll}
         style={{
           scrollbarWidth: displayScrollbar ? 'thin' : 'none',
-          scrollbarColor: '#222 #120F17'
+          scrollbarColor: '#3D322A #171210'
         }}
       >
         {items.map((item, index) => (
@@ -173,8 +173,8 @@ const AnimatedList: React.FC<AnimatedListProps> = ({
             onMouseEnter={() => handleItemMouseEnter(index)}
             onClick={() => handleItemClick(item, index)}
           >
-            <div className={`p-4 bg-[#111] rounded-lg ${selectedIndex === index ? 'bg-[#222]' : ''} ${itemClassName}`}>
-              {typeof item === 'string' ? <p className="text-white m-0">{item}</p> : item}
+            <div className={`p-4 bg-[#241C18] rounded-lg ${selectedIndex === index ? 'bg-[#3D322A]' : ''} ${itemClassName}`}>
+              {typeof item === 'string' ? <p className="text-[#F4EFE6] m-0">{item}</p> : item}
             </div>
           </AnimatedItem>
         ))}
@@ -182,11 +182,11 @@ const AnimatedList: React.FC<AnimatedListProps> = ({
       {showGradients && (
         <>
           <div
-            className="absolute top-0 left-0 right-0 h-[50px] bg-gradient-to-b from-[#120F17] to-transparent pointer-events-none transition-opacity duration-300 ease"
+            className="absolute top-0 left-0 right-0 h-[50px] bg-gradient-to-b from-[#171210] to-transparent pointer-events-none transition-opacity duration-300 ease"
             style={{ opacity: topGradientOpacity }}
           ></div>
           <div
-            className="absolute bottom-0 left-0 right-0 h-[100px] bg-gradient-to-t from-[#120F17] to-transparent pointer-events-none transition-opacity duration-300 ease"
+            className="absolute bottom-0 left-0 right-0 h-[100px] bg-gradient-to-t from-[#171210] to-transparent pointer-events-none transition-opacity duration-300 ease"
             style={{ opacity: bottomGradientOpacity }}
           ></div>
         </>

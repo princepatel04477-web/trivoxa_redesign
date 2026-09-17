@@ -3,7 +3,7 @@ import { ClosingCta } from '@/components/sections/closing-cta';
 import { GlobalPresencePreview } from '@/components/sections/global-presence-preview';
 import { Hero } from '@/components/sections/hero';
 import { IndustriesPreview } from '@/components/sections/industries-preview';
-import { CareersLine, CareersPreview, InsightsPreview } from '@/components/sections/insights-careers';
+import { CareersPreview, InsightsPreview } from '@/components/sections/insights-careers';
 import { ProofBand } from '@/components/sections/proof-band';
 import { WhoWeAre } from '@/components/sections/who-we-are';
 import { WhyTrivoxa } from '@/components/sections/why-trivoxa';
@@ -58,7 +58,6 @@ export default function Home() {
       <GlobalPresencePreview />
       <InsightsPreview />
       <CareersPreview />
-      <CareersLine />
       <ClosingCta />
     </>
   );
