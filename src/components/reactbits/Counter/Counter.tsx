@@ -194,8 +194,8 @@ export default function Counter({
   return (
     <span style={{ ...defaultContainerStyle, ...containerStyle }}>
       <span style={{ ...defaultCounterStyle, ...counterStyle }}>
-        {places.map(place => (
-          <Digit key={place} place={place} value={value} height={height} digitStyle={digitStyle} />
+        {places.map((place, idx) => (
+          <Digit key={`${place}-${idx}`} place={place} value={value} height={height} digitStyle={digitStyle} />
         ))}
       </span>
       <span style={gradientContainerStyle}>
