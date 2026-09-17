@@ -6,7 +6,6 @@ import { SiteFooter } from '@/components/sections/site-footer';
 import { LenisProvider } from '@/lib/motion/lenis-provider';
 import { WebGLBudgetProvider } from '@/lib/motion/webgl-budget';
 import { Preloader } from '@/components/motion/preloader';
-import TargetCursor from '@/components/reactbits/TargetCursor/TargetCursor';
 import ClickSpark from '@/components/reactbits/ClickSpark/ClickSpark';
 import GradualBlur from '@/components/reactbits/GradualBlur/GradualBlur';
 import { BRAND } from '@/lib/tokens/colors';
@@ -66,9 +65,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <WebGLBudgetProvider>
             <LenisProvider>
               <Preloader />
-              <div className="hidden lg:block">
-                <TargetCursor targetSelector="[data-cursor='target'], button, a" cursorColor="#A88B68" cursorColorOnTarget="#F4EFE6" hideDefaultCursor={false} />
-              </div>
               <GlobalCardNav />
               <ClickSpark sparkColor="#A88B68" sparkCount={8} duration={350}>
                 <main id="main" className="isolate relative min-h-screen">
