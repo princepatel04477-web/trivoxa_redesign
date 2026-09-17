@@ -2,12 +2,23 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowUpRight, Pause, Play } from 'lucide-react';
+import {
+  ArrowUpRight,
+  Pause,
+  Play,
+  Shirt,
+  Stethoscope,
+  Building2,
+  Armchair,
+  Wheat,
+  Cog,
+  Sparkles,
+  ShoppingBag,
+  Cpu,
+} from 'lucide-react';
 import { Container, Section } from '@/components/ui/layout';
 import { INDUSTRIES } from '@/content/taxonomy';
 import DepthCarousel from '@/components/reactbits/DepthCarousel/DepthCarousel';
-import MaskedHeading from '@/components/reactbits/MaskedHeading/MaskedHeading';
 import StarBorder from '@/components/reactbits/StarBorder/StarBorder';
 import ShinyText from '@/components/reactbits/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/DecryptedText/DecryptedText';
@@ -16,6 +27,18 @@ import GradualBlur from '@/components/reactbits/GradualBlur/GradualBlur';
 import { animate } from '@/lib/motion/anime';
 import { useReducedMotion } from '@/lib/motion/useReducedMotion';
 import { gsap } from 'gsap';
+
+const INDUSTRY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  'textile-apparel': Shirt,
+  'healthcare-pharmaceuticals': Stethoscope,
+  'building-materials': Building2,
+  'furniture-interiors': Armchair,
+  'agriculture-food': Wheat,
+  'engineering-industrial': Cog,
+  'jewellery-precious-products': Sparkles,
+  'retail-consumer-goods': ShoppingBag,
+  technology: Cpu,
+};
 
 const INDUSTRY_TINTS = [
   'rgba(168, 139, 104, 0.18)',
@@ -40,8 +63,7 @@ export function IndustriesPreview() {
   const currentIndustry = INDUSTRIES[activeIndex] ?? INDUSTRIES[0]!;
 
   const carouselItems = INDUSTRIES.map((ind) => ({
-    image: `/brand/og/industry-${ind.slug}.png`,
-    alt: ind.name,
+    image: '',
     title: ind.name,
     slug: ind.slug,
     description: ind.shortDescription,
@@ -95,26 +117,16 @@ export function IndustriesPreview() {
       />
 
       <Container className="relative z-10">
-        <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
-          <div>
-            <p className="surface-accent text-eyebrow mb-3 tracking-widest uppercase">
-              Industries We Serve
-            </p>
-            <MaskedHeading
-              text="Supporting the Industries That Shape Tomorrow."
-              className="font-serif text-3xl font-medium text-stone-100 sm:text-4xl md:text-5xl"
-            />
-          </div>
-
-          <div className="flex items-center gap-4">
-            <Link href="/industries" data-cursor="target">
-              <StarBorder color="var(--color-accent, #A88B68)" speed="5s">
-                <span className="font-mono text-xs uppercase tracking-wider text-stone-100">
-                  View all 9 industries →
-                </span>
-              </StarBorder>
-            </Link>
-          </div>
+        <div className="mb-12 max-w-2xl">
+          <p className="font-mono text-xs font-semibold tracking-widest text-[#A88B68] uppercase mb-3">
+            Industries We Serve
+          </p>
+          <h2 className="font-serif text-3xl font-medium text-[#F4EFE6] sm:text-4xl md:text-5xl leading-tight">
+            Supporting the Industries That Shape Tomorrow.
+          </h2>
+          <p className="mt-3 text-sm text-[#8C8279] leading-relaxed">
+            Nine export sectors structured around verified manufacturing lineages, quality controls, and established port corridors.
+          </p>
         </div>
 
         {/* Live announcer for screen readers */}
@@ -124,7 +136,7 @@ export function IndustriesPreview() {
 
         {/* DepthCarousel Wrapper with left/right gradual blur */}
         <div
-          className="relative my-8 h-[460px] w-full md:h-[520px]"
+          className="relative my-8 h-[460px] w-full md:h-[500px]"
           role="region"
           aria-roledescription="carousel"
           onMouseEnter={() => setIsAutoplayPaused(true)}
@@ -159,58 +171,66 @@ export function IndustriesPreview() {
             autoplayDelay={4500}
             loop
             onChange={(idx) => setActiveIndex(idx)}
-            renderItem={(rawItem, _idx: number, isActive: boolean) => {
+            renderItem={(rawItem, idx: number, isActive: boolean) => {
               const item = rawItem as (typeof carouselItems)[0];
               const isFurniture = item.slug === 'furniture-interiors';
+              const IconComp = INDUSTRY_ICONS[item.slug] || Building2;
+              const numStr = String(idx + 1).padStart(2, '0');
+
               return (
                 <div
-                  className="relative h-full w-full overflow-hidden rounded-[20px] border border-[#3D322A] bg-[#171210]"
-                  data-cursor="target"
+                  className={`relative h-full w-full overflow-hidden rounded-[20px] border transition-all duration-300 flex flex-col justify-between p-7 select-none ${
+                    isActive
+                      ? 'border-[#A88B68]/60 bg-[#241C18] shadow-[0_25px_60px_rgba(0,0,0,0.85)]'
+                      : 'border-[#3D322A] bg-[#171210]'
+                  }`}
                 >
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    fill
-                    sizes="340px"
-                    className="object-cover transition-transform duration-700 hover:scale-105"
-                  />
+                  {/* Subtle radial glow */}
                   <div
-                    className={`absolute inset-0 bg-gradient-to-t from-[#171210] via-[#171210]/60 to-transparent transition-opacity duration-300 ${
-                      isActive ? 'opacity-95' : 'opacity-40'
-                    }`}
+                    className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(168,139,104,0.14),_transparent_70%)]"
+                    aria-hidden="true"
                   />
 
-                  {/* Card overlay content - only visible on active card */}
-                  <div
-                    className={`absolute inset-x-0 bottom-0 flex flex-col p-6 transition-opacity duration-300 ${
-                      isActive ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-                    }`}
-                  >
+                  {/* Top card bar: Number + Badge */}
+                  <div className="relative z-10 flex items-center justify-between">
+                    <span className="font-mono text-xs text-[#A88B68] font-bold tracking-wider">
+                      {numStr}
+                    </span>
                     {isFurniture ? (
-                      <div className="mb-2 inline-flex items-center">
-                        <span className="rounded-full border border-[#A88B68]/40 bg-[#241C18]/90 px-2.5 py-0.5 font-mono text-[10px] text-[#A88B68]">
-                          <ShinyText text="Quoted, not yet catalogued" speed={3} />
-                        </span>
-                      </div>
+                      <span className="rounded-full border border-[#A88B68]/40 bg-[#171210]/90 px-3 py-1 font-mono text-[10px] text-[#A88B68]">
+                        <ShinyText text="Quoted, not yet catalogued" speed={3} />
+                      </span>
                     ) : item.status === 'onboarding' ? (
-                      <span className="mb-2 inline-block w-fit rounded-full border border-[#3D322A] bg-[#241C18]/80 px-2 py-0.5 font-mono text-[10px] text-[#F4EFE6]">
+                      <span className="rounded-full border border-[#3D322A] bg-[#171210]/90 px-3 py-1 font-mono text-[10px] text-[#8C8279]">
                         In Onboarding
                       </span>
-                    ) : null}
+                    ) : (
+                      <span className="rounded-full border border-[#A88B68]/30 bg-[#A88B68]/10 px-3 py-1 font-mono text-[10px] text-[#C9AE89]">
+                        Live Export
+                      </span>
+                    )}
+                  </div>
 
-                    <h4 className="font-serif text-xl font-medium text-[#F4EFE6] md:text-2xl">
+                  {/* Center: Large Architectural Icon */}
+                  <div className="relative z-10 my-auto flex items-center justify-center py-6">
+                    <div className="flex size-20 items-center justify-center rounded-2xl border border-[#3D322A] bg-[#171210]/70 text-[#A88B68] shadow-inner transition-transform duration-500 hover:scale-105">
+                      <IconComp className="size-10 stroke-[1.25]" />
+                    </div>
+                  </div>
+
+                  {/* Bottom: Title, Description, Link */}
+                  <div className="relative z-10 flex flex-col">
+                    <h3 className="font-serif text-2xl font-medium text-[#F4EFE6] leading-tight">
                       {item.title}
-                    </h4>
-
-                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[#8C8279]">
+                    </h3>
+                    <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[#8C8279]">
                       {item.description}
                     </p>
-
                     <Link
                       href={`/industries/${item.slug}`}
                       className="group mt-4 inline-flex items-center gap-1.5 font-mono text-xs text-[#A88B68] transition-colors hover:text-[#F4EFE6]"
                     >
-                      <span>Explore</span>
+                      <span>Explore industry</span>
                       <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </Link>
                   </div>
