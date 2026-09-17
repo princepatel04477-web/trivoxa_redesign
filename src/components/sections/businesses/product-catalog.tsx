@@ -3,7 +3,9 @@
 import { Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { LayoutGrid, List } from 'lucide-react';
 import { CatalogTable } from '@/components/sections/businesses/catalog-table';
+import { ProductPixelGrid } from '@/components/sections/businesses/product-pixel-grid';
 import { OnboardingState } from '@/components/sections/onboarding-state';
 import { Container } from '@/components/ui/layout';
 import { Eyebrow } from '@/components/ui/typography';
@@ -43,6 +45,7 @@ export function ProductCatalog({
   const [category, setCategory] = useState(initialCategory);
   const [searchInput, setSearchInput] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -177,28 +180,61 @@ export function ProductCatalog({
           </div>
         </div>
 
-        {/* the count that always names the total — aria-live region */}
-        <p className="surface-muted mt-xl text-body-sm" aria-live="polite">
-          Showing <span className="surface-fg spec-value" data-spec>{visible.length}</span> of{' '}
-          <span className="surface-fg spec-value" data-spec>{rows.length}</span> products ·{' '}
-          <span className="surface-fg spec-value" data-spec>{liveCount}</span> live today
-          {validCategory !== 'all' || debouncedQuery ? (
-            <>
-              {' '}
-              ·{' '}
-              <button
-                type="button"
-                onClick={() => {
-                  select('all');
-                  setSearchInput('');
-                }}
-                className="link-underline text-bronze-ink font-medium"
-              >
-                Reset filters
-              </button>
-            </>
-          ) : null}
-        </p>
+        {/* the count that always names the total — aria-live region, plus View Mode Toggle */}
+        <div className="mt-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p className="surface-muted text-body-sm" aria-live="polite">
+            Showing <span className="surface-fg spec-value" data-spec>{visible.length}</span> of{' '}
+            <span className="surface-fg spec-value" data-spec>{rows.length}</span> products ·{' '}
+            <span className="surface-fg spec-value" data-spec>{liveCount}</span> live today
+            {validCategory !== 'all' || debouncedQuery ? (
+              <>
+                {' '}
+                ·{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    select('all');
+                    setSearchInput('');
+                  }}
+                  className="link-underline text-bronze-ink font-medium"
+                >
+                  Reset filters
+                </button>
+              </>
+            ) : null}
+          </p>
+
+          <div className="flex items-center gap-1 self-start sm:self-auto rounded-lg border border-stone-200 bg-stone-100 p-1">
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              aria-label="Grid view with pixel spec reveal"
+              aria-pressed={viewMode === 'grid'}
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded-md transition-colors ${
+                viewMode === 'grid'
+                  ? 'bg-[#241C18] text-[#FAF8F3] shadow-sm font-semibold'
+                  : 'text-stone-600 hover:text-stone-900'
+              }`}
+            >
+              <LayoutGrid className="size-3.5" />
+              <span>Grid (Spec Reveal)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('table')}
+              aria-label="Table view"
+              aria-pressed={viewMode === 'table'}
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded-md transition-colors ${
+                viewMode === 'table'
+                  ? 'bg-[#241C18] text-[#FAF8F3] shadow-sm font-semibold'
+                  : 'text-stone-600 hover:text-stone-900'
+              }`}
+            >
+              <List className="size-3.5" />
+              <span>Table</span>
+            </button>
+          </div>
+        </div>
 
         {visible.length === 0 ? (
           activeFacet && activeFacet.status === 'onboarding' && !debouncedQuery ? (
@@ -224,6 +260,8 @@ export function ProductCatalog({
               onClearSearch={() => setSearchInput('')}
             />
           )
+        ) : viewMode === 'grid' ? (
+          <ProductPixelGrid rows={visible} />
         ) : (
           <CatalogTable rows={visible} />
         )}

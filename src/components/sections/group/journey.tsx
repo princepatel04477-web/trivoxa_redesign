@@ -1,116 +1,147 @@
 'use client';
 
-import { useRef } from 'react';
-import { useGSAP } from '@/components/motion/use-gsap';
+import React, { useRef, useEffect } from 'react';
 import { Container, Section } from '@/components/ui/layout';
-import { Eyebrow, SectionHeading } from '@/components/ui/typography';
-import { usePrefersReducedMotion } from '@/hooks/use-prefers-reduced-motion';
+import { SectionHeading } from '@/components/ui/typography';
 import { JOURNEY } from '@/content/company';
 import { INDUSTRIES } from '@/content/taxonomy';
+import ScrollStack, { ScrollStackItem } from '@/components/reactbits/ScrollStack/ScrollStack';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useReducedMotion } from '@/lib/motion/useReducedMotion';
+
+gsap.registerPlugin(ScrollTrigger);
 
 /**
- * P11 — the journey, as a pinned reading column.
- *
- * Left: a sticky counter that changes as the visitor scrolls. Right: the five
- * steps in order. Nothing is scrubbed and nothing is hijacked — the counter is
- * a reading aid, so it follows the reader instead of driving them.
- *
- * State lives in the DOM (`data-active`, `textContent`), not in React: five
- * steps firing setState on every scroll frame is how a page like this starts
- * dropping frames on a mid-tier phone. Reduced motion gets the plain list.
+ * P11 — The journey as ScrollStack cards with a scrubbed vertical spine line.
  */
 export function GroupJourney() {
-  const scope = useRef<HTMLDivElement | null>(null);
-  const counter = useRef<HTMLSpanElement | null>(null);
-  const reduced = usePrefersReducedMotion();
+  const spineLineRef = useRef<SVGLineElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
 
-  useGSAP(
-    ({ ScrollTrigger }) => {
-      const root = scope.current;
-      if (!root) return;
+  useEffect(() => {
+    if (reducedMotion || !containerRef.current || !spineLineRef.current) return;
 
-      const steps = Array.from(root.querySelectorAll<HTMLElement>('[data-journey-step]'));
+    const st = ScrollTrigger.create({
+      trigger: containerRef.current,
+      start: 'top 70%',
+      end: 'bottom 70%',
+      scrub: 0.5,
+      onUpdate: (self) => {
+        if (spineLineRef.current) {
+          const maxLen = 300;
+          const drawLength = self.progress * maxLen;
+          spineLineRef.current.style.strokeDashoffset = `${maxLen - drawLength}`;
+        }
+      },
+    });
 
-      steps.forEach((step, index) => {
-        ScrollTrigger.create({
-          trigger: step,
-          start: 'top 60%',
-          end: 'bottom 40%',
-          onToggle: (self) => {
-            if (!self.isActive) return;
-            steps.forEach((other) => delete other.dataset.active);
-            step.dataset.active = 'true';
-            if (counter.current) counter.current.textContent = String(index + 1).padStart(2, '0');
-          },
-        });
-      });
-
-      // the hairline beside the counter fills as the journey is read
-      const fill = root.querySelector<HTMLElement>('[data-journey-fill]');
-      if (fill) {
-        ScrollTrigger.create({
-          trigger: root,
-          start: 'top 60%',
-          end: 'bottom 60%',
-          scrub: 0.4,
-          onUpdate: (self) => {
-            fill.style.transform = `scaleY(${self.progress})`;
-          },
-        });
-      }
-    },
-    { disabled: reduced, scope },
-  );
+    return () => {
+      st.kill();
+    };
+  }, [reducedMotion]);
 
   return (
-    <Section surface="dark" id="journey">
+    <Section surface="dark" id="journey" className="py-24 bg-[#171210] text-[#F4EFE6] overflow-hidden">
       <Container>
-        <div ref={scope} className="grid grid-cols-12 gap-2xl">
-          {/* sticky counter */}
-          <div className="col-span-12 lg:col-span-4">
-            <div className="lg:sticky lg:top-[120px]">
-              <SectionHeading eyebrow="The Journey" title={`From a mill in Surat to ${INDUSTRIES.length} industries.`} />
+        <div ref={containerRef} className="grid grid-cols-12 gap-12 items-start">
+          {/* Left Column: Sticky Title and Scrubbed DrawSVG Spine Line */}
+          <div className="col-span-12 lg:col-span-4 lg:sticky lg:top-32">
+            <SectionHeading
+              eyebrow="The Journey"
+              title={`From a mill in Surat to ${INDUSTRIES.length} export sectors.`}
+              lede="Our lineage began on the weaving floor. Trivoxa brings that physical manufacturing precision to international procurement."
+            />
 
-              <div className="mt-2xl hidden items-start gap-lg lg:flex" aria-hidden>
-                <span ref={counter} className="text-display-xl text-accent leading-none">
-                  01
+            {/* Scrubbed Spine Line Visual */}
+            <div className="mt-10 hidden lg:flex items-center gap-6">
+              <svg width="24" height="300" className="overflow-visible">
+                {/* Background track line */}
+                <line
+                  x1="12"
+                  y1="0"
+                  x2="12"
+                  y2="300"
+                  stroke="rgba(168, 139, 104, 0.2)"
+                  strokeWidth="2"
+                  strokeDasharray="4 4"
+                />
+                {/* Animated DrawSVG scrubbed line */}
+                <line
+                  ref={spineLineRef}
+                  x1="12"
+                  y1="0"
+                  x2="12"
+                  y2="300"
+                  stroke="#A88B68"
+                  strokeWidth="3"
+                  strokeDasharray="300"
+                  strokeDashoffset="300"
+                />
+                {/* Accent node dot at top */}
+                <circle cx="12" cy="6" r="4" fill="#A88B68" />
+              </svg>
+
+              <div className="flex flex-col gap-1">
+                <span className="font-mono text-xs uppercase tracking-widest text-[#A88B68]">
+                  Evolution
                 </span>
-                <div className="surface-hairline relative h-24 w-px overflow-hidden">
-                  <span
-                    data-journey-fill
-                    className="bg-bronze absolute inset-0 origin-top"
-                    style={{ transform: 'scaleY(0)' }}
-                  />
-                </div>
-                <Eyebrow tick={false} className="surface-faint">
-                  {JOURNEY.length} steps
-                </Eyebrow>
+                <span className="font-serif text-2xl font-bold text-[#F4EFE6]">
+                  1998 → 2026+
+                </span>
+                <span className="text-xs text-[#F4EFE6]/60">
+                  5 defined developmental eras
+                </span>
               </div>
             </div>
           </div>
 
-          {/* steps */}
-          <ol className="col-span-12 flex flex-col lg:col-span-8">
-            {JOURNEY.map((item) => (
-              <li
-                key={item.step}
-                data-journey-step
-                data-step={item.step}
-                className="surface-hairline group grid grid-cols-12 gap-md border-t py-2xl transition-colors duration-base ease-house last:border-b data-[active=true]:border-bronze/60"
-              >
-                <div className="surface-faint spec-value col-span-2 flex flex-col gap-0.5 text-body-sm group-data-[active=true]:text-accent" data-spec>
-                  <span>{String(item.step).padStart(2, '0')}</span>
-                  <span className="text-body-xs opacity-75">{item.year}</span>
-                </div>
-                <div className="col-span-10 flex flex-col gap-sm">
-                  <h3 className="text-heading-lg transition-colors duration-base ease-house group-data-[active=true]:text-accent">
-                    {item.title}
-                  </h3>
-                  <p className="surface-muted text-body-md max-w-[58ch]">{item.body}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
+          {/* Right Column: ScrollStack Timeline Cards */}
+          <div className="col-span-12 lg:col-span-8">
+            <ScrollStack
+              useWindowScroll={true}
+              itemDistance={90}
+              itemScale={0.03}
+              blurAmount={1}
+              className="w-full"
+            >
+              {JOURNEY.map((item) => (
+                <ScrollStackItem
+                  key={item.step}
+                  itemClassName="bg-[#241C18] border border-[#A88B68]/30 p-8 sm:p-10 rounded-[28px] text-[#F4EFE6] shadow-2xl flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between border-b border-[#A88B68]/20 pb-4 mb-4">
+                      <span className="inline-block rounded-full border border-[#A88B68]/40 bg-[#171210] px-3 py-1 font-mono text-xs text-[#A88B68]">
+                        Milestone 0{item.step}
+                      </span>
+                      <span className="font-mono text-sm font-semibold text-[#A88B68]">
+                        {item.year}
+                      </span>
+                    </div>
+
+                    <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[#F4EFE6] mt-2">
+                      {item.title}
+                    </h3>
+
+                    <p className="mt-4 text-base sm:text-lg text-[#F4EFE6]/80 leading-relaxed max-w-[62ch]">
+                      {item.body}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-[#A88B68]/15 flex items-center justify-between">
+                    <span className="font-mono text-xs text-[#A88B68]/70">
+                      Trivoxa Corporate Heritage
+                    </span>
+                    <span className="font-mono text-xs text-[#F4EFE6]/40">
+                      Phase {item.step} of 5
+                    </span>
+                  </div>
+                </ScrollStackItem>
+              ))}
+            </ScrollStack>
+          </div>
         </div>
       </Container>
     </Section>

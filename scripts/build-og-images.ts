@@ -12,7 +12,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { BRAND } from '../src/lib/tokens/colors';
-import { MARK_VIEWBOX, markPathData } from '../src/lib/brand/wordmark-paths';
+import { markPathData } from '../src/lib/brand/wordmark-paths';
 import { INDUSTRIES, PRODUCTS } from '../src/content/taxonomy';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');

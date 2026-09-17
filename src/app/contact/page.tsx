@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
 import { PageHero } from '@/components/sections/page-hero';
 import { ContactForm } from '@/components/forms/contact-form';
+import { ContactDetailsPanel } from '@/components/sections/contact-details-panel';
 import { Accordion } from '@/components/ui/accordion';
 import { ButtonLink } from '@/components/ui/button';
 import { ArrowLink } from '@/components/ui/link';
 import { Container, HairlineRow, Section } from '@/components/ui/layout';
-import { Eyebrow, Prose, SectionHeading } from '@/components/ui/typography';
+import { Prose, SectionHeading } from '@/components/ui/typography';
 import { CONTACT_FAQ, INQUIRY_TYPES } from '@/content/faqs';
-import { COMPANY, LEADERSHIP } from '@/content/company';
+import { COMPANY } from '@/content/company';
 import { CONTACT } from '@/content/taxonomy';
 import { JsonLd, faqSchema } from '@/components/seo/json-ld';
 
@@ -33,13 +34,6 @@ export const metadata: Metadata = {
  * that belongs to a namesake company in Delhi (ADR 018).
  */
 export default function ContactPage() {
-  const aliases = [
-    { label: 'Everything else', value: CONTACT.general, note: 'Read by the founders.' },
-    { label: 'Commercial & quotations', value: CONTACT.sales, note: 'The export desk.' },
-    { label: 'Careers', value: CONTACT.careers, note: 'Speculative applications welcome.' },
-    { label: 'Partnerships & distribution', value: CONTACT.partnerships, note: 'Market partnerships.' },
-  ];
-
   return (
     <>
       <PageHero
@@ -66,123 +60,7 @@ export default function ContactPage() {
             </div>
 
             <aside className="col-span-12 flex flex-col gap-xl lg:col-span-5">
-              <div>
-                <Eyebrow tick={false} className="surface-faint">
-                  Mailboxes
-                </Eyebrow>
-                <ul className="mt-md flex flex-col">
-                  {aliases.map((alias) => (
-                    <li
-                      key={alias.value}
-                      className="surface-hairline flex items-baseline justify-between gap-md border-b py-md first:border-t"
-                    >
-                      <span className="flex flex-col">
-                        <span className="surface-faint text-body-sm">{alias.label}</span>
-                        <a
-                          href={`mailto:${alias.value}`}
-                          className="link-underline text-bronze-ink text-body-md font-medium"
-                        >
-                          {alias.value}
-                        </a>
-                      </span>
-                      <span className="surface-muted text-right text-body-sm">{alias.note}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <Eyebrow tick={false} className="surface-faint">
-                  The founders, directly
-                </Eyebrow>
-                <ul className="mt-md flex flex-col">
-                  {LEADERSHIP.map((leader) => (
-                    <li
-                      key={leader.email}
-                      className="surface-hairline flex items-baseline justify-between gap-md border-b py-md first:border-t"
-                    >
-                      <span className="surface-fg text-body-md">{leader.name}</span>
-                      <a
-                        href={`mailto:${leader.email}`}
-                        className="link-underline surface-muted hover:text-bronze-ink text-body-sm"
-                      >
-                        {leader.email}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="surface-raised surface-hairline flex flex-col gap-md border p-lg">
-                <div>
-                  <p className="surface-faint spec-value uppercase" data-spec>
-                    Registered office
-                  </p>
-                  <p className="surface-fg mt-xs text-body-md">{CONTACT.registeredOffice}</p>
-                </div>
-
-                <div>
-                  <p className="surface-faint spec-value uppercase" data-spec>
-                    Registered entity number
-                  </p>
-                  <p className="surface-muted mt-xs text-body-sm">
-                    {CONTACT.registeredEntityNumber ??
-                      'Not yet published. We will print it here the moment the founders release it — we would rather show the gap than print a registration that belongs to a different company.'}
-                  </p>
-                </div>
-
-                <div id="callback" className="scroll-mt-24">
-                  <p className="surface-faint spec-value uppercase" data-spec>
-                    Telephone
-                  </p>
-                  {CONTACT.phoneNumbers.length > 0 ? (
-                    <ul className="mt-xs flex flex-col">
-                      {CONTACT.phoneNumbers.map((number) => (
-                        <li key={number} className="surface-fg spec-value text-body-md" data-spec>
-                          {number}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="surface-muted mt-xs text-body-sm">
-                      No published line — we will not print a number we cannot guarantee is answered
-                      by someone who knows your enquiry. Ask for a callback in the form and we call
-                      you within the response window.
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <p className="surface-faint spec-value uppercase" data-spec>
-                    Hours
-                  </p>
-                  <p className="surface-fg spec-value mt-xs text-body-md" data-spec>
-                    {CONTACT.hoursIst} · {CONTACT.timezoneLabel}
-                  </p>
-                </div>
-              </div>
-
-              {CONTACT.socials.length > 0 ? (
-                <div>
-                  <Eyebrow tick={false} className="surface-faint">
-                    Elsewhere
-                  </Eyebrow>
-                  <ul className="mt-md flex flex-wrap gap-lg">
-                    {CONTACT.socials.map((social) => (
-                      <li key={social.href}>
-                        <a
-                          href={social.href}
-                          target="_blank"
-                          rel="noreferrer noopener"
-                          className="link-underline surface-muted hover:text-bronze-ink text-body-sm"
-                        >
-                          {social.label}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
+              <ContactDetailsPanel />
             </aside>
           </div>
         </Container>

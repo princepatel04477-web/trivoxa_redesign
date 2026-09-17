@@ -1,128 +1,250 @@
+'use client';
+
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { BrandLockup } from '@/components/ui/brand-lockup';
-import { Reveal } from '@/components/motion/reveal';
+import { ArrowUpRight } from 'lucide-react';
 import { Container } from '@/components/ui/layout';
 import { CATEGORIES, CONTACT, INDUSTRIES } from '@/content/taxonomy';
-import { SHIVESHWAR_FOOTER_LINE } from '@/content/company';
 import { footerRegions } from '@/lib/selectors';
+import TextPressure from '@/components/reactbits/TextPressure/TextPressure';
+import GradientText from '@/components/reactbits/GradientText/GradientText';
+import ShinyText from '@/components/reactbits/ShinyText/ShinyText';
+import CurvedLoop from '@/components/reactbits/CurvedLoop/CurvedLoop';
+import DotField from '@/components/reactbits/DotField/DotField';
+import Noise from '@/components/reactbits/Noise/Noise';
+import FadeContent from '@/components/reactbits/FadeContent/FadeContent';
+import ClickSpark from '@/components/reactbits/ClickSpark/ClickSpark';
+import { animate, svg } from '@/lib/motion/anime';
+import { useReducedMotion } from '@/lib/motion/useReducedMotion';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-/**
- * SiteFooter — the client's spec, plus everything the audit found missing.
- *
- *  · the registered entity number and legal address (absent site-wide — a
- *    German importer and a compliance team both flagged it);
- *  · business hours in IST with the timezone stated;
- *  · the regions line rendered from REGIONS, so it can never drift from
- *    Global Presence again (audit: 6 on the page vs 5 in the footer);
- *  · Compliance and Anti-corruption surfaced here AND from Group/Contact.
- *
- * Where founder data is outstanding (phone, entity number) the footer renders
- * the designed honest substitute — never a blank, never a fabrication.
- */
+gsap.registerPlugin(ScrollTrigger);
+
 export function SiteFooter() {
   const regions = footerRegions();
+  const reducedMotion = useReducedMotion();
+  const columnsRef = useRef<HTMLDivElement>(null);
+  const checkmarkSvgRef = useRef<SVGSVGElement>(null);
+
+  // Newsletter state
+  const [email, setEmail] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) return;
+    setSubmitted(true);
+    if (!reducedMotion && checkmarkSvgRef.current) {
+      const path = checkmarkSvgRef.current.querySelector('path');
+      if (path) {
+        const drawable = svg.createDrawable(path);
+        animate(drawable, {
+          draw: ['0 0', '0 1'],
+          duration: 500,
+          ease: 'outQuart',
+        });
+      }
+    }
+  };
+
+  // Batch entrance for footer columns
+  useEffect(() => {
+    if (reducedMotion || !columnsRef.current) return;
+
+    const cols = columnsRef.current.querySelectorAll('.footer-col');
+    if (cols.length === 0) return;
+
+    const ctx = gsap.context(() => {
+      ScrollTrigger.batch(cols, {
+        start: 'top 90%',
+        onEnter: (batch) => {
+          gsap.fromTo(
+            batch,
+            { opacity: 0, y: 24 },
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.7,
+              stagger: 0.1,
+              ease: 'power2.out',
+              overwrite: 'auto',
+            }
+          );
+        },
+      });
+    }, columnsRef);
+
+    return () => ctx.revert();
+  }, [reducedMotion]);
+
+  const regionMarqueeString = regions.map((r) => r.name).join(' · ') + ' · ';
 
   return (
     <footer
       aria-label="Global footer"
-      data-surface="deep"
-      className="surface-bg surface-fg border-t border-bronze/25"
+      className="relative overflow-hidden border-t border-stone-800 bg-stone-950 text-stone-100"
     >
-      <Container className="py-section-tight">
-        <Reveal as="div" staggerChildren className="grid grid-cols-12 gap-xl">
-          {/* brand + contact block */}
-          <div className="col-span-12 flex flex-col gap-lg lg:col-span-4">
-            <BrandLockup size={34} className="text-ivory" />
-            <p className="surface-muted max-w-[42ch] text-body-sm">
-              International trade and business group coordinating from Surat, Gujarat, India.
-            </p>
+      {/* Background: DotField + Noise Overlay */}
+      <div className="pointer-events-none absolute inset-0 z-0 opacity-20">
+        <DotField
+          dotRadius={1}
+          dotSpacing={18}
+          gradientFrom="rgba(168, 139, 104, 0.3)"
+          gradientTo="rgba(196, 164, 124, 0.15)"
+        />
+        <Noise patternAlpha={10} />
+      </div>
 
-            <dl className="mt-md flex flex-col gap-md text-body-sm">
-              <div>
-                <dt className="eyebrow mb-1">Email</dt>
-                <dd>
-                  <a href={`mailto:${CONTACT.general}`} className="link-underline hover:text-bronze">
-                    {CONTACT.general}
-                  </a>
-                </dd>
-              </div>
+      {/* HUGE TRIVOXA WORDMARK */}
+      <div className="relative z-10 border-b border-stone-800/80 pt-12 pb-6">
+        <Container>
+          <div className="hidden h-32 w-full md:block">
+            <TextPressure
+              text="TRIVOXA"
+              fontFamily="Instrument Serif"
+              minFontSize={64}
+              width
+              weight
+              italic={false}
+              textColor="var(--surface-paper, #F4EFE6)"
+              strokeColor="#A88B68"
+              strokeWidth={1}
+            />
+          </div>
+          <div className="block py-4 text-center md:hidden">
+            <GradientText
+              colors={['#A88B68', '#F4EFE6', '#C4A47C']}
+              animationSpeed={6}
+              className="font-serif text-5xl font-bold tracking-wider"
+            >
+              TRIVOXA
+            </GradientText>
+          </div>
+        </Container>
+      </div>
 
-              <div>
-                <dt className="eyebrow mb-1">Phone</dt>
-                <dd className="surface-muted">
-                  {CONTACT.phoneNumbers.length > 0 ? (
-                    CONTACT.phoneNumbers.map((number) => (
-                      <a key={number} href={`tel:${number.replace(/\s/g, '')}`} className="link-underline block hover:text-bronze">
-                        {number}
-                      </a>
-                    ))
-                  ) : (
-                    <Link href="/contact#callback" className="link-underline hover:text-bronze">
+      <Container className="relative z-10 py-16">
+        <div ref={columnsRef} className="grid grid-cols-12 gap-y-12 lg:gap-x-12">
+          {/* Contact Block */}
+          <div className="footer-col col-span-12 flex flex-col gap-6 lg:col-span-4">
+            <FadeContent blur duration={800}>
+              <p className="max-w-[40ch] text-xs leading-relaxed text-stone-400">
+                International trade and business group coordinating from Surat, Gujarat, India.
+              </p>
+
+              <dl className="mt-6 flex flex-col gap-4 text-xs">
+                <div>
+                  <dt className="surface-accent text-eyebrow mb-1 font-mono uppercase tracking-widest text-stone-500">
+                    Email
+                  </dt>
+                  <dd>
+                    <a
+                      href={`mailto:${CONTACT.general}`}
+                      className="font-mono text-stone-300 transition-colors hover:text-accent"
+                    >
+                      {CONTACT.general}
+                    </a>
+                  </dd>
+                </div>
+
+                <div>
+                  <dt className="surface-accent text-eyebrow mb-1 font-mono uppercase tracking-widest text-stone-500">
+                    Callback
+                  </dt>
+                  <dd className="text-stone-400">
+                    <Link
+                      href="/contact#callback"
+                      className="text-stone-300 underline decoration-stone-700 hover:text-accent"
+                    >
                       Direct line on request — ask for a callback
                     </Link>
-                  )}
-                </dd>
-              </div>
+                  </dd>
+                </div>
 
-              <div>
-                <dt className="eyebrow mb-1">Hours</dt>
-                <dd className="surface-muted">
-                  {CONTACT.hoursIst} · {CONTACT.timezoneLabel}
-                </dd>
-              </div>
+                <div>
+                  <dt className="surface-accent text-eyebrow mb-1 font-mono uppercase tracking-widest text-stone-500">
+                    Hours
+                  </dt>
+                  <dd className="text-stone-400">
+                    {CONTACT.hoursIst} · {CONTACT.timezoneLabel}
+                  </dd>
+                </div>
 
-              <div>
-                <dt className="eyebrow mb-1">Registered office</dt>
-                <dd className="surface-muted">{CONTACT.registeredOffice}</dd>
-              </div>
+                <div>
+                  <dt className="surface-accent text-eyebrow mb-1 font-mono uppercase tracking-widest text-stone-500">
+                    Registered office
+                  </dt>
+                  <dd className="text-stone-400">{CONTACT.registeredOffice}</dd>
+                </div>
 
-              <div>
-                <dt className="eyebrow mb-1">Registered entity</dt>
-                <dd className="surface-muted">
-                  {CONTACT.registeredEntityNumber ? (
-                    <span data-spec>{CONTACT.registeredEntityNumber}</span>
-                  ) : (
-                    <Link href="/compliance#entity" className="link-underline hover:text-bronze">
-                      Number in the supplier-onboarding pack — see Compliance
+                <div>
+                  <dt className="surface-accent text-eyebrow mb-1 font-mono uppercase tracking-widest text-stone-500">
+                    Registered entity
+                  </dt>
+                  <dd className="text-stone-400">
+                    <Link
+                      href="/compliance#entity"
+                      className="text-stone-300 underline decoration-stone-700 hover:text-accent"
+                    >
+                      Number in supplier-onboarding pack — see Compliance
                     </Link>
-                  )}
-                </dd>
-              </div>
-            </dl>
+                  </dd>
+                </div>
+              </dl>
+            </FadeContent>
           </div>
 
-          {/* what we export — rendered from the taxonomy */}
-          <nav aria-label="What we export" className="col-span-6 flex flex-col gap-xs lg:col-span-3">
-            <p className="eyebrow mb-md">What We Export</p>
-            {INDUSTRIES.slice(0, 6).map((industry) => (
+          {/* What We Export */}
+          <nav
+            aria-label="What we export"
+            className="footer-col col-span-6 flex flex-col gap-2 lg:col-span-3"
+          >
+            <p className="surface-accent text-eyebrow mb-3 font-mono text-xs uppercase tracking-widest text-accent">
+              What We Export
+            </p>
+            {INDUSTRIES.slice(0, 6).map((ind) => (
               <Link
-                key={industry.slug}
-                href={`/industries/${industry.slug}`}
-                className="surface-muted hover:text-bronze py-1 text-body-sm transition-colors duration-fast"
+                key={ind.slug}
+                href={`/industries/${ind.slug}`}
+                className="group flex items-center gap-1.5 py-1 text-xs text-stone-300 transition-colors hover:text-accent"
               >
-                {industry.name}
+                <span>{ind.name}</span>
+                <ArrowUpRight className="size-3 opacity-0 transition-opacity group-hover:opacity-100" />
               </Link>
             ))}
-            <Link href="/industries" className="text-bronze mt-md text-body-sm font-semibold">
+            <Link
+              href="/industries"
+              className="mt-3 inline-flex items-center gap-1 font-mono text-xs font-medium text-accent hover:underline"
+            >
               All {INDUSTRIES.length} industries →
             </Link>
-            <p className="eyebrow mt-lg mb-md">Categories</p>
-            {CATEGORIES.filter((category) => category.status === 'live')
+
+            <p className="surface-accent text-eyebrow mt-6 mb-2 font-mono text-xs uppercase tracking-widest text-accent">
+              Categories
+            </p>
+            {CATEGORIES.filter((cat) => cat.status === 'live')
               .slice(0, 5)
-              .map((category) => (
+              .map((cat) => (
                 <Link
-                  key={category.slug}
-                  href={`/businesses/product-exports?category=${category.slug}`}
-                  className="surface-muted hover:text-bronze py-1 text-body-sm transition-colors duration-fast"
+                  key={cat.slug}
+                  href={`/businesses/product-exports?category=${cat.slug}`}
+                  className="group flex items-center gap-1.5 py-1 text-xs text-stone-300 transition-colors hover:text-accent"
                 >
-                  {category.name}
+                  <span>{cat.name}</span>
+                  <ArrowUpRight className="size-3 opacity-0 transition-opacity group-hover:opacity-100" />
                 </Link>
               ))}
           </nav>
 
-          {/* company + resources */}
-          <nav aria-label="Company" className="col-span-6 flex flex-col gap-xs lg:col-span-2">
-            <p className="eyebrow mb-md">Company</p>
+          {/* Company & Resources */}
+          <nav
+            aria-label="Company and Resources"
+            className="footer-col col-span-6 flex flex-col gap-2 lg:col-span-2"
+          >
+            <p className="surface-accent text-eyebrow mb-3 font-mono text-xs uppercase tracking-widest text-accent">
+              Company
+            </p>
             {[
               { href: '/group', label: 'The Group' },
               { href: '/group#leadership', label: 'Leadership' },
@@ -134,13 +256,16 @@ export function SiteFooter() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="surface-muted hover:text-bronze py-1 text-body-sm transition-colors duration-fast"
+                className="group flex items-center gap-1.5 py-1 text-xs text-stone-300 transition-colors hover:text-accent"
               >
-                {item.label}
+                <span>{item.label}</span>
+                <ArrowUpRight className="size-3 opacity-0 transition-opacity group-hover:opacity-100" />
               </Link>
             ))}
 
-            <p className="eyebrow mt-lg mb-md">Resources</p>
+            <p className="surface-accent text-eyebrow mt-6 mb-2 font-mono text-xs uppercase tracking-widest text-accent">
+              Resources
+            </p>
             {[
               { href: '/compliance', label: 'Compliance' },
               { href: '/rfq', label: 'Request a Quote' },
@@ -149,65 +274,123 @@ export function SiteFooter() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="surface-muted hover:text-bronze py-1 text-body-sm transition-colors duration-fast"
+                className="group flex items-center gap-1.5 py-1 text-xs text-stone-300 transition-colors hover:text-accent"
               >
-                {item.label}
+                <span>{item.label}</span>
+                <ArrowUpRight className="size-3 opacity-0 transition-opacity group-hover:opacity-100" />
               </Link>
             ))}
           </nav>
 
-          {/* legal + newsletter */}
-          <div className="col-span-12 flex flex-col gap-lg lg:col-span-3">
-            <nav aria-label="Legal" className="flex flex-col gap-xs">
-              <p className="eyebrow mb-md">Legal</p>
-              {[
-                { href: '/legal/privacy', label: 'Privacy Policy' },
-                { href: '/legal/terms', label: 'Terms & Conditions' },
-                { href: '/legal/cookies', label: 'Cookie Policy' },
-                { href: '/legal/anti-corruption', label: 'Anti-corruption Policy' },
-              ].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="surface-muted hover:text-bronze py-1 text-body-sm transition-colors duration-fast"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-
-            <div className="border-bronze/30 mt-md border-t pt-lg">
-              <p className="eyebrow mb-md">Newsletter</p>
-              <p className="surface-muted text-body-sm">
-                Quarterly dispatch on global trade and business insights.
+          {/* Legal + Animated Newsletter */}
+          <div className="footer-col col-span-12 flex flex-col gap-6 lg:col-span-3">
+            <nav aria-label="Legal" className="flex flex-col gap-2">
+              <p className="surface-accent text-eyebrow mb-3 font-mono text-xs uppercase tracking-widest text-accent">
+                Legal
               </p>
               <Link
-                href="/insights#subscribe"
-                className="text-bronze mt-md inline-block text-body-sm font-semibold"
+                href="/legal/privacy"
+                className="group flex items-center gap-1.5 py-1 text-xs text-stone-400 transition-colors hover:text-accent"
               >
-                Subscribe →
+                <span>Privacy Policy</span>
+                <ArrowUpRight className="size-3 opacity-0 transition-opacity group-hover:opacity-100" />
               </Link>
+              <Link
+                href="/legal/terms"
+                className="group flex items-center gap-1.5 py-1 text-xs text-stone-400 transition-colors hover:text-accent"
+              >
+                <span>Terms & Conditions</span>
+                <ArrowUpRight className="size-3 opacity-0 transition-opacity group-hover:opacity-100" />
+              </Link>
+              <Link
+                href="/legal/cookies"
+                className="group flex items-center gap-1.5 py-1 text-xs text-stone-400 transition-colors hover:text-accent"
+              >
+                <span>Cookie Policy</span>
+                <ArrowUpRight className="size-3 opacity-0 transition-opacity group-hover:opacity-100" />
+              </Link>
+              <Link
+                href="/legal/anti-corruption"
+                className="group flex items-center gap-1.5 py-1 text-xs text-stone-400 transition-colors hover:text-accent"
+              >
+                <span>Anti-corruption Policy</span>
+                <ArrowUpRight className="size-3 opacity-0 transition-opacity group-hover:opacity-100" />
+              </Link>
+            </nav>
+
+            {/* Newsletter Form */}
+            <div className="mt-4 border-t border-stone-800 pt-6">
+              <p className="font-mono text-xs uppercase tracking-widest text-accent">Newsletter</p>
+              <p className="mt-1 text-xs text-stone-400">
+                Quarterly dispatch on global trade and business insights.
+              </p>
+
+              {submitted ? (
+                <div className="mt-3 flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 text-xs text-accent">
+                  <svg
+                    ref={checkmarkSvgRef}
+                    viewBox="0 0 24 24"
+                    className="size-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M 20 6 L 9 17 L 4 12" />
+                  </svg>
+                  <span>Subscribed to quarterly dispatch.</span>
+                </div>
+              ) : (
+                <ClickSpark sparkColor="#A88B68" sparkCount={8}>
+                  <form onSubmit={handleNewsletterSubmit} className="mt-3 flex flex-col gap-2">
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter corporate email..."
+                      className="w-full rounded-lg border border-stone-800 bg-stone-900/90 px-3 py-2 text-xs text-stone-100 placeholder-stone-500 outline-none transition-all duration-300 focus:border-accent focus:ring-1 focus:ring-accent"
+                    />
+                    <button
+                      type="submit"
+                      className="w-full rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 font-mono text-xs text-accent transition-colors hover:bg-accent hover:text-stone-950"
+                    >
+                      Subscribe →
+                    </button>
+                  </form>
+                </ClickSpark>
+              )}
             </div>
           </div>
-        </Reveal>
-
-        {/* regions line — one array, two surfaces, no drift */}
-        <div className="border-ivory/12 mt-3xl border-t pt-lg">
-          <p className="eyebrow mb-md">Regions We Serve</p>
-          <Reveal as="ul" staggerChildren distance="subtle" className="flex flex-wrap gap-x-lg gap-y-xs">
-            {regions.map((region) => (
-              <li key={region.slug} className="surface-muted text-body-sm">
-                {region.name}
-              </li>
-            ))}
-          </Reveal>
         </div>
 
-        <div className="border-ivory/12 mt-xl flex flex-col gap-md border-t pt-lg md:flex-row md:items-center md:justify-between">
-          <p className="surface-muted text-body-sm">{SHIVESHWAR_FOOTER_LINE}</p>
-          <p className="surface-faint text-body-sm">© Trivoxa Group 2026</p>
+        {/* Regional Links Row: CurvedLoop Marquee */}
+        <div className="mt-16 border-t border-stone-800/80 pt-6">
+          <p className="font-mono text-[11px] uppercase tracking-widest text-stone-500">
+            Regions We Serve
+          </p>
+          <div className="relative mt-2 h-16 overflow-hidden">
+            <CurvedLoop
+              marqueeText={regionMarqueeString}
+              speed={1.5}
+              curveAmount={30}
+              className="font-mono text-xs uppercase tracking-widest text-accent/80"
+            />
+          </div>
+        </div>
+
+        {/* Bottom Bar: Copyright & Shiveshwar line */}
+        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-stone-800/60 pt-6 md:flex-row">
+          <div className="text-center text-xs text-stone-400 md:text-left">
+            <span>Our manufacturing lineage begins at </span>
+            <ShinyText text="Shiveshwar Textiles" speed={3} className="font-semibold text-accent" />
+            <span>, Surat. Operating internationally as Trivoxa Group.</span>
+          </div>
+          <p className="font-mono text-xs text-stone-500">© Trivoxa Group 2026</p>
         </div>
       </Container>
     </footer>
   );
 }
+

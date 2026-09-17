@@ -2,18 +2,17 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PageHero } from '@/components/sections/page-hero';
-import { Reveal } from '@/components/motion/reveal';
 import { ButtonLink } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ArrowLink } from '@/components/ui/link';
 import { StatusBadge } from '@/components/ui/badge';
-import { Container, HairlineRow, Section } from '@/components/ui/layout';
+import { Container, Section } from '@/components/ui/layout';
 import { Eyebrow, Prose, SectionHeading } from '@/components/ui/typography';
 import { JsonLd, productDetailSchema } from '@/components/seo/json-ld';
 import { buildRouteMetadata } from '@/lib/seo/metadata';
 import { getProductDetail, getRelatedProducts } from '@/content/product-details';
 import { CATEGORIES, INDUSTRIES, PORTS, PRODUCTS } from '@/content/taxonomy';
-import { catalogRows, type CatalogRow } from '@/lib/selectors';
+import { catalogRows } from '@/lib/selectors';
 
 export function generateStaticParams() {
   return PRODUCTS.filter((p) => p.status === 'live').map((product) => ({

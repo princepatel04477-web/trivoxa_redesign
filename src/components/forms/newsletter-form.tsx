@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/field';
 import { Prose } from '@/components/ui/typography';
-import { CONTACT } from '@/content/taxonomy';
 
 export function NewsletterForm() {
   const [email, setEmail] = useState('');

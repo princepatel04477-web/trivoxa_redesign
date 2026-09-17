@@ -1,12 +1,14 @@
-import { Suspense } from 'react';
 import type { Metadata, Viewport } from 'next';
 import { fontVariables } from '@/lib/fonts.generated';
 import { PerfTierProvider } from '@/lib/perf-tier';
-import { SiteHeader } from '@/components/sections/site-header';
+import { GlobalCardNav } from '@/components/sections/global-cardnav';
 import { SiteFooter } from '@/components/sections/site-footer';
-import { SmoothScroll } from '@/components/motion/smooth-scroll';
-import { ScrollProgress } from '@/components/motion/scroll-progress';
-import { RouteProgress } from '@/components/motion/route-progress';
+import { LenisProvider } from '@/lib/motion/lenis-provider';
+import { WebGLBudgetProvider } from '@/lib/motion/webgl-budget';
+import { Preloader } from '@/components/motion/preloader';
+import TargetCursor from '@/components/reactbits/TargetCursor/TargetCursor';
+import ClickSpark from '@/components/reactbits/ClickSpark/ClickSpark';
+import GradualBlur from '@/components/reactbits/GradualBlur/GradualBlur';
 import { BRAND } from '@/lib/tokens/colors';
 import { JsonLd, organizationSchema, webSiteSchema } from '@/components/seo/json-ld';
 import './globals.css';
@@ -54,24 +56,29 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={fontVariables} data-surface="light" suppressHydrationWarning>
-      <body className="surface-bg surface-fg antialiased">
+      <body className="surface-bg surface-fg antialiased selection:bg-[#A88B68] selection:text-[#F4EFE6]">
         <a href="#main" className="skip-link">
           Skip to content
         </a>
         <JsonLd data={organizationSchema()} />
         <JsonLd data={webSiteSchema()} />
         <PerfTierProvider>
-          <SmoothScroll>
-            <Suspense fallback={null}>
-              <RouteProgress />
-            </Suspense>
-            <ScrollProgress />
-            <SiteHeader />
-            <main id="main" className="isolate">
-              {children}
-            </main>
-            <SiteFooter />
-          </SmoothScroll>
+          <WebGLBudgetProvider>
+            <LenisProvider>
+              <Preloader />
+              <div className="hidden lg:block">
+                <TargetCursor targetSelector="[data-cursor='target'], button, a" cursorColor="#A88B68" cursorColorOnTarget="#F4EFE6" hideDefaultCursor={false} />
+              </div>
+              <GlobalCardNav />
+              <ClickSpark sparkColor="#A88B68" sparkCount={8} duration={350}>
+                <main id="main" className="isolate relative min-h-screen">
+                  {children}
+                </main>
+              </ClickSpark>
+              <SiteFooter />
+              <GradualBlur position="bottom" height="6rem" strength={2} zIndex={40} />
+            </LenisProvider>
+          </WebGLBudgetProvider>
         </PerfTierProvider>
       </body>
     </html>

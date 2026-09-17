@@ -3,36 +3,22 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { gsap } from 'gsap';
+import { animate } from '@/lib/motion/anime';
 import { Input, Select, Textarea } from '@/components/ui/field';
 import { Eyebrow, Prose } from '@/components/ui/typography';
-import { CATEGORIES, CONTACT, INDUSTRIES, PRODUCTS } from '@/content/taxonomy';
+import { CATEGORIES, CONTACT, INDUSTRIES, PRODUCTS, PORTS } from '@/content/taxonomy';
 import { track } from '@/lib/analytics/events';
 import { focusFirstInvalid } from '@/lib/forms/focus-first-invalid';
 import { composeEnquiry, type Enquiry } from '@/lib/forms/mailto';
 import { HONEYPOT_FIELD, RfqSubmissionSchema } from '@/lib/forms/schema';
 import type { SubmissionResult } from '@/lib/forms/transport';
+import OptionWheel from '@/components/reactbits/OptionWheel/OptionWheel';
+import SpecularButton from '@/components/reactbits/SpecularButton/SpecularButton';
+import ClickSpark from '@/components/reactbits/ClickSpark/ClickSpark';
+import CountUp from '@/components/reactbits/CountUp/CountUp';
 
-/**
- * P16 — the RFQ form. The single commercial conversion on the site.
- *
- * Three design decisions worth defending:
- *
- *  1. It asks for the four things that make a quotation real — grade, quantity,
- *     destination and target Incoterm — and says so in the hint text, because
- *     the alternative is a vague enquiry and a week of email tennis.
- *  2. Industry and category are ONE taxonomy, and the category list narrows to
- *     the chosen industry. A buyer cannot select a combination that does not
- *     exist, which is the form-level version of the drift the audit found.
- *  3. Submission composes a structured mailto (src/lib/forms/mailto.ts) and
- *     SHOWS the buyer what was composed. There is no backend in this repo, and
- *     a form that posts nowhere is a lie with a button on it. P21 swaps the
- *     transport behind the same handler.
- *
- * `?product=`, `?category=` and `?path=` arrive pre-filled from catalogue rows,
- * industry pages and the compliance audit CTA — the context travels with the
- * buyer instead of being retyped.
- */
+const INCOTERMS = ['EXW', 'FOB', 'CFR', 'CIF', 'DAP', 'DDP'];
 
 const REFERRAL_OPTIONS = [
   { value: '', label: 'Prefer not to say' },
@@ -44,8 +30,23 @@ const REFERRAL_OPTIONS = [
   { value: 'other', label: 'Other' },
 ];
 
-/** Concrete field shape — a `Record<string, string>` would make every read
- *  `string | undefined` under `noUncheckedIndexedAccess`. */
+const SUGGESTED_PORTS = [
+  'Nhava Sheva (JNPT), India [INNSA]',
+  'Mundra, India [INMUN]',
+  'Kandla, India [INIXY]',
+  'Jebel Ali, UAE [AEJEA]',
+  'Rotterdam, Netherlands [NLRTM]',
+  'Hamburg, Germany [DEHAM]',
+  'Singapore, Singapore [SGSIN]',
+  'Antwerp, Belgium [BEANR]',
+  'Felixstowe, UK [GBFXT]',
+  'Los Angeles, USA [USLAX]',
+  'New York, USA [USNYC]',
+  'Dammam, Saudi Arabia [SADMM]',
+  'Mombasa, Kenya [KEMBA]',
+  'Durban, South Africa [ZADUR]',
+];
+
 type FormState = {
   fullName: string;
   companyName: string;
@@ -64,6 +65,7 @@ export type RfqPrefill = {
   category?: string;
   division?: string;
   path?: string;
+  industry?: string;
 };
 
 export function PathNote({ title, body }: { title: string; body: string }) {
@@ -102,12 +104,28 @@ export function RfqPathNote() {
 export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
   const searchParams = useSearchParams();
   const paramCategory = searchParams.get('category') ?? prefill?.category ?? '';
+  const paramIndustry = searchParams.get('industry') ?? prefill?.industry ?? '';
   const paramProduct = searchParams.get('product') ?? prefill?.product ?? '';
   const paramDivision = searchParams.get('division') ?? prefill?.division ?? '';
   const paramPath = searchParams.get('path') ?? prefill?.path ?? '';
 
   const [mountTime] = useState<number>(() => Date.now());
   const [prefillChip, setPrefillChip] = useState<string | null>(null);
+
+  // Stepper state: 1 Product & Industry -> 2 Grade / Specification -> 3 Quantity & Destination Port -> 4 Incoterm & Timeline -> 5 Contact & Review
+  const [currentStep, setCurrentStep] = useState<number>(1);
+
+  // Sub-fields for specific step-by-step inputs that synthesize into standard requirement
+  const [gradeSpec, setGradeSpec] = useState<string>('');
+  const [quantity, setQuantity] = useState<string>('');
+  const [targetIncoterm, setTargetIncoterm] = useState<string>('CIF');
+  const [targetTimeline, setTargetTimeline] = useState<string>('Standard (30–45 days)');
+  const [additionalNotes, setAdditionalNotes] = useState<string>('');
+
+  // Port suggestions state with Anime.js
+  const [portFilter, setPortFilter] = useState<string>('');
+  const [showPortSuggestions, setShowPortSuggestions] = useState<boolean>(false);
+  const portSuggestionsRef = useRef<HTMLUListElement | null>(null);
 
   const [values, setValues] = useState<FormState>(() => {
     let initialCategory = '';
@@ -138,6 +156,13 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
           const firstCat = CATEGORIES.find((c) => c.industrySlug === indObj.slug);
           if (firstCat) initialCategory = firstCat.slug;
         }
+      }
+    } else if (paramIndustry) {
+      const indObj = INDUSTRIES.find((i) => i.slug === paramIndustry);
+      if (indObj) {
+        initialIndustry = indObj.slug;
+        const firstCat = CATEGORIES.find((c) => c.industrySlug === indObj.slug);
+        if (firstCat) initialCategory = firstCat.slug;
       }
     }
 
@@ -172,11 +197,36 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [fallbackMailto, setFallbackMailto] = useState<string | null>(null);
   const [sent, setSent] = useState<SubmissionResult | 'nothing' | null>(null);
-  const formRef = useRef<HTMLFormElement | null>(null);
 
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const stepContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Sync synthesized requirement if user edited granular steps
+  useEffect(() => {
+    if (gradeSpec || quantity || targetIncoterm || targetTimeline) {
+      const synthesized = [
+        values.product ? `Product: ${values.product}` : '',
+        gradeSpec ? `Grade/Specification: ${gradeSpec}` : '',
+        quantity ? `Target Quantity: ${quantity}` : '',
+        values.destination ? `Destination Port: ${values.destination}` : '',
+        targetIncoterm ? `Target Incoterm: ${targetIncoterm}` : '',
+        targetTimeline ? `Delivery Timeline: ${targetTimeline}` : '',
+        additionalNotes ? `Additional Market Specifications: ${additionalNotes}` : '',
+      ]
+        .filter(Boolean)
+        .join(' · ');
+
+      if (synthesized.length >= 20) {
+        setValues((v) => ({ ...v, requirement: synthesized }));
+      }
+    }
+  }, [gradeSpec, quantity, targetIncoterm, targetTimeline, additionalNotes, values.product, values.destination]);
+
+  // Initial chips
   useEffect(() => {
     const pProd = searchParams.get('product');
     const pCat = searchParams.get('category');
+    const pInd = searchParams.get('industry');
     const pPath = searchParams.get('path');
 
     if (pProd) {
@@ -187,7 +237,13 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
     } else if (pCat) {
       const match = CATEGORIES.find((c) => c.slug === pCat) || INDUSTRIES.find((i) => i.slug === pCat);
       if (match) {
+        setPrefillChip(`Prefilled from category: ${match.name}`);
+      }
+    } else if (pInd) {
+      const match = INDUSTRIES.find((i) => i.slug === pInd);
+      if (match) {
         setPrefillChip(`Prefilled from industry: ${match.name}`);
+        setValues((v) => ({ ...v, industry: match.slug }));
       }
     } else if (pPath === 'sample') {
       setPrefillChip('Prefilled: Sample Request route');
@@ -195,6 +251,22 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
       setPrefillChip('Prefilled: Factory Audit route');
     }
   }, [searchParams]);
+
+  // Anime.js Port Suggestions list animation
+  useEffect(() => {
+    if (showPortSuggestions && portSuggestionsRef.current) {
+      const items = portSuggestionsRef.current.querySelectorAll('li');
+      if (items.length > 0) {
+        animate(items, {
+          opacity: [0, 1],
+          translateY: [-8, 0],
+          delay: (_el, i) => (i ?? 0) * 35,
+          duration: 250,
+          easing: 'outQuad',
+        });
+      }
+    }
+  }, [showPortSuggestions, portFilter]);
 
   const set = (key: keyof FormState, value: string): void => {
     setValues((current) => {
@@ -259,6 +331,67 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
     return true;
   };
 
+  // Shake animation using Anime.js on validation errors
+  const triggerErrorShake = (element: HTMLElement | null) => {
+    if (!element) return;
+    animate(element, {
+      translateX: [0, -12, 10, -8, 6, -3, 0],
+      duration: 500,
+      easing: 'inOutQuad',
+    });
+  };
+
+  // GSAP 0.5s x-slide + fade transition for Stepper steps
+  const goToStep = (nextStep: number) => {
+    if (nextStep < 1 || nextStep > 5) return;
+    const isForward = nextStep > currentStep;
+
+    if (stepContainerRef.current) {
+      gsap.to(stepContainerRef.current, {
+        opacity: 0,
+        x: isForward ? -30 : 30,
+        duration: 0.25,
+        ease: 'power2.in',
+        onComplete: () => {
+          setCurrentStep(nextStep);
+          gsap.fromTo(
+            stepContainerRef.current,
+            { opacity: 0, x: isForward ? 30 : -30 },
+            { opacity: 1, x: 0, duration: 0.25, ease: 'power2.out' },
+          );
+        },
+      });
+    } else {
+      setCurrentStep(nextStep);
+    }
+  };
+
+  // Step-specific validation checks before stepping forward
+  const handleStepNext = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    if (currentStep === 1) {
+      if (!values.industry && !values.product) {
+        setErrors((prev) => ({ ...prev, industry: 'Please select an industry tile or enter a product.' }));
+        triggerErrorShake(stepContainerRef.current);
+        return;
+      }
+    }
+    if (currentStep === 2) {
+      if (!gradeSpec && (!values.requirement || values.requirement.length < 5)) {
+        setErrors((prev) => ({ ...prev, gradeSpec: 'Please enter grade or specification requirements.' }));
+        triggerErrorShake(stepContainerRef.current);
+        return;
+      }
+    }
+    if (currentStep === 3) {
+      if (!values.destination) {
+        setErrors((prev) => ({ ...prev, destination: 'Destination country or port is recommended for pricing.' }));
+      }
+    }
+    setErrors({});
+    goToStep(currentStep + 1);
+  };
+
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     setSubmissionError(null);
@@ -271,6 +404,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
     }
 
     if (!validateAll()) {
+      triggerErrorShake(formRef.current);
       focusFirstInvalid(formRef.current);
       return;
     }
@@ -297,6 +431,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
         { label: 'Email', value: values.email },
         { label: 'Phone', value: values.phone },
         { label: 'Destination', value: values.destination },
+        { label: 'Target Incoterm', value: targetIncoterm },
         { label: 'Industry', value: industryObj?.name ?? '' },
         { label: 'Category', value: categoryObj?.name ?? '' },
         { label: 'Product of interest', value: values.product },
@@ -335,6 +470,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
       if (!response.ok || !outcome.ok) {
         if (outcome.errors) {
           setErrors(outcome.errors);
+          triggerErrorShake(formRef.current);
           focusFirstInvalid(formRef.current);
         }
         setSubmissionError(
@@ -379,10 +515,22 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
     );
   }
 
+  const stepTitles = [
+    '1. Product & Industry',
+    '2. Specification',
+    '3. Quantity & Port',
+    '4. Incoterm & Timeline',
+    '5. Contact & Review',
+  ];
+
+  const filteredPortSuggestions = SUGGESTED_PORTS.filter(
+    (p) => !portFilter || p.toLowerCase().includes(portFilter.toLowerCase()),
+  );
+
   return (
     <form ref={formRef} onSubmit={(e) => void onSubmit(e)} noValidate className="flex flex-col gap-lg">
       {prefillChip ? (
-        <div className="border-bronze/50 surface-raised flex items-center justify-between gap-md border px-md py-sm text-body-sm">
+        <div className="border-bronze/50 surface-raised flex items-center justify-between gap-md border px-md py-sm text-body-sm rounded-lg">
           <span className="surface-fg font-medium">{prefillChip}</span>
           <button
             type="button"
@@ -395,8 +543,39 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
         </div>
       ) : null}
 
+      {/* Stepper Progress Bar */}
+      <div className="surface-raised surface-hairline border rounded-2xl p-4 sm:p-5">
+        <div className="flex items-center justify-between text-xs font-mono mb-3">
+          <span className="text-[#A88B68] font-semibold uppercase tracking-wider">
+            Step {currentStep} of 5 — {stepTitles[currentStep - 1]}
+          </span>
+          <span className="surface-faint">{Math.round((currentStep / 5) * 100)}% complete</span>
+        </div>
+        <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+          {[1, 2, 3, 4, 5].map((step) => {
+            const isDone = step < currentStep;
+            const isCurrent = step === currentStep;
+            return (
+              <button
+                key={step}
+                type="button"
+                onClick={() => (step < currentStep ? goToStep(step) : undefined)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  isDone
+                    ? 'bg-[#A88B68] cursor-pointer'
+                    : isCurrent
+                      ? 'bg-stone-900 ring-2 ring-[#A88B68]/50'
+                      : 'bg-stone-200 cursor-not-allowed'
+                }`}
+                aria-label={`Jump to step ${step}: ${stepTitles[step - 1]}`}
+              />
+            );
+          })}
+        </div>
+      </div>
+
       {submissionError ? (
-        <div role="alert" className="border-accent/60 bg-accent/10 flex flex-col gap-sm border p-md text-body-sm">
+        <div role="alert" className="border-accent/60 bg-accent/10 flex flex-col gap-sm border p-md text-body-sm rounded-xl">
           <p className="font-medium text-accent">{submissionError}</p>
           {fallbackMailto ? (
             <p className="surface-fg text-body-xs">
@@ -409,88 +588,374 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
         </div>
       ) : null}
 
-      <div className="grid grid-cols-12 gap-md">
-        <Input
-          className="col-span-12 sm:col-span-6"
-          label="Full name"
-          required
-          autoComplete="name"
-          value={values.fullName}
-          error={touched.fullName ? errors.fullName : undefined}
-          onBlur={() => validateField('fullName')}
-          onChange={(event) => set('fullName', event.target.value)}
-          disabled={isSubmitting}
-        />
-        <Input
-          className="col-span-12 sm:col-span-6"
-          label="Company"
-          required
-          autoComplete="organization"
-          value={values.companyName}
-          error={touched.companyName ? errors.companyName : undefined}
-          onBlur={() => validateField('companyName')}
-          onChange={(event) => set('companyName', event.target.value)}
-          disabled={isSubmitting}
-        />
-        <Input
-          className="col-span-12 sm:col-span-6"
-          label="Email"
-          type="email"
-          required
-          autoComplete="email"
-          value={values.email}
-          error={touched.email ? errors.email : undefined}
-          onBlur={() => validateField('email')}
-          onChange={(event) => set('email', event.target.value)}
-          disabled={isSubmitting}
-        />
-        <Input
-          className="col-span-12 sm:col-span-6"
-          label="Phone"
-          type="tel"
-          hint="Optional — include the country code."
-          autoComplete="tel"
-          value={values.phone}
-          error={touched.phone ? errors.phone : undefined}
-          onBlur={() => validateField('phone')}
-          onChange={(event) => set('phone', event.target.value)}
-          disabled={isSubmitting}
-        />
-        <Input
-          className="col-span-12 sm:col-span-6"
-          label="Destination"
-          hint="Country, and the port if you know it."
-          value={values.destination}
-          onChange={(event) => set('destination', event.target.value)}
-          disabled={isSubmitting}
-        />
-        <Select
-          className="col-span-12 sm:col-span-6"
-          label="Industry"
-          options={[
-            { value: '', label: 'Select an industry (optional)' },
-            ...INDUSTRIES.map((industry) => ({ value: industry.slug, label: industry.name })),
-          ]}
-          value={values.industry}
-          onChange={(event) => set('industry', event.target.value)}
-          disabled={isSubmitting}
-        />
-        <Select
-          className="col-span-12 sm:col-span-6"
-          label="Category"
-          options={categoryOptions}
-          value={values.category}
-          onChange={(event) => set('category', event.target.value)}
-          disabled={isSubmitting}
-        />
-        <Input
-          className="col-span-12 sm:col-span-6"
-          label="Product or service of interest"
-          list="rfq-products"
-          value={values.product}
-          onChange={(event) => set('product', event.target.value)}
-          disabled={isSubmitting}
-        />
+      {/* Animated Step Container */}
+      <div ref={stepContainerRef} className="min-h-[360px] flex flex-col justify-between">
+        {/* STEP 1: Product & Industry */}
+        {currentStep === 1 && (
+          <div className="flex flex-col gap-6">
+            <div>
+              <h3 className="font-serif text-2xl font-bold text-stone-900">Select Industry & Sourcing Domain</h3>
+              <p className="text-body-sm surface-muted mt-1">
+                Choose the export division matching your sourcing contract. Selecting a sector loads verified HS codes and export standards.
+              </p>
+            </div>
+
+            {/* ChromaGrid-styled 9 Tiles */}
+            <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5" role="radiogroup" aria-label="Select Industry">
+              {INDUSTRIES.map((ind) => {
+                const isSelected = values.industry === ind.slug;
+                return (
+                  <button
+                    key={ind.slug}
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    onClick={() => {
+                      set('industry', ind.slug);
+                      const cat = CATEGORIES.find((c) => c.industrySlug === ind.slug);
+                      if (cat) set('category', cat.slug);
+                    }}
+                    className={`relative p-3.5 sm:p-4 rounded-xl text-left border transition-all duration-200 flex flex-col justify-between min-h-[90px] sm:min-h-[105px] ${
+                      isSelected
+                        ? 'bg-[#241C18] text-[#F4EFE6] border-[#A88B68] shadow-md ring-2 ring-[#A88B68]/30'
+                        : 'bg-white/80 hover:bg-stone-50 border-stone-200/80 text-stone-900'
+                    }`}
+                  >
+                    <div>
+                      <span
+                        className={`block font-mono text-[10px] uppercase tracking-wider ${
+                          isSelected ? 'text-[#C4A47C]' : 'text-stone-500'
+                        }`}
+                      >
+                        {ind.slug === 'technology' ? 'Service Export' : 'Product Export'}
+                      </span>
+                      <strong className="block text-sm sm:text-base font-serif font-bold mt-1 leading-snug">
+                        {ind.name}
+                      </strong>
+                    </div>
+                    <div className="flex items-center justify-between mt-2 pt-1 border-t border-current/10 text-[11px] font-mono">
+                      <span>{ind.status === 'live' ? 'Live Catalogue' : 'Onboarding'}</span>
+                      {isSelected && <span aria-hidden="true">✓</span>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="grid grid-cols-12 gap-md pt-2">
+              <Select
+                className="col-span-12 sm:col-span-6"
+                label="Narrow Category"
+                options={categoryOptions}
+                value={values.category}
+                onChange={(event) => set('category', event.target.value)}
+                disabled={isSubmitting}
+              />
+              <Input
+                className="col-span-12 sm:col-span-6"
+                label="Specific Product of Interest"
+                list="rfq-products"
+                placeholder="e.g. Suiting Fabric, Grey Fabric, Basmati Rice"
+                value={values.product}
+                onChange={(event) => set('product', event.target.value)}
+                disabled={isSubmitting}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2: Grade / Specification */}
+        {currentStep === 2 && (
+          <div className="flex flex-col gap-6">
+            <div>
+              <h3 className="font-serif text-2xl font-bold text-stone-900">Grade & Material Specification</h3>
+              <p className="text-body-sm surface-muted mt-1">
+                State exact technical grades (e.g. GSM/count for textiles, ASTM/ISO standard, 1121 steam for rice, purity %).
+              </p>
+            </div>
+
+            <Textarea
+              label="Grade / Technical Parameters"
+              required
+              rows={4}
+              placeholder="e.g. 100% Cotton 30s Combed Compact, 140 GSM, Width 58 inches, Piece dyed, Shrinkage < 3%"
+              value={gradeSpec}
+              onChange={(e) => setGradeSpec(e.target.value)}
+              hint="Be as specific as possible. Our technical export desk directly evaluates feasibility."
+            />
+
+            <Textarea
+              label="Compliance & Certification Demanded"
+              rows={3}
+              placeholder="e.g. OEKO-TEX Standard 100, GOTS organic certificate, FDA registration, REACH compliance statement"
+              value={additionalNotes}
+              onChange={(e) => setAdditionalNotes(e.target.value)}
+              hint="List any destination customs test protocols or third-party audits required (SGS / Intertek)."
+            />
+          </div>
+        )}
+
+        {/* STEP 3: Quantity & Destination Port */}
+        {currentStep === 3 && (
+          <div className="flex flex-col gap-6">
+            <div>
+              <h3 className="font-serif text-2xl font-bold text-stone-900">Order Quantity & Destination Port</h3>
+              <p className="text-body-sm surface-muted mt-1">
+                Enter target commercial volume and delivery port. Our Surat desk calculates freight routes from Mundra, Kandla or Nhava Sheva.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-12 gap-md">
+              <Input
+                className="col-span-12 sm:col-span-6"
+                label="Target Order Volume / Quantity"
+                placeholder="e.g. 1 x 20ft FCL (approx 18 MT) or 10,000 meters"
+                required
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                hint="Unit price scales with full container loads (FCL) vs LCL."
+              />
+
+              <div className="col-span-12 sm:col-span-6 relative">
+                <Input
+                  label="Destination Port & Country"
+                  placeholder="e.g. Jebel Ali, Rotterdam, Los Angeles"
+                  value={values.destination}
+                  onChange={(e) => {
+                    set('destination', e.target.value);
+                    setPortFilter(e.target.value);
+                    setShowPortSuggestions(true);
+                  }}
+                  onFocus={() => setShowPortSuggestions(true)}
+                  hint="Type port name or 5-letter UN/LOCODE."
+                />
+
+                {/* Animated suggestions popup via Anime.js */}
+                {showPortSuggestions && filteredPortSuggestions.length > 0 && (
+                  <ul
+                    ref={portSuggestionsRef}
+                    className="absolute z-50 left-0 right-0 top-[102%] mt-1 max-h-48 overflow-y-auto rounded-xl border border-stone-300 bg-white/95 backdrop-blur-md p-1.5 shadow-xl font-mono text-xs text-stone-800"
+                  >
+                    {filteredPortSuggestions.slice(0, 6).map((port) => (
+                      <li
+                        key={port}
+                        onClick={() => {
+                          set('destination', port);
+                          setShowPortSuggestions(false);
+                        }}
+                        className="cursor-pointer rounded-lg px-3 py-2 hover:bg-stone-100 hover:text-stone-950 transition-colors flex items-center justify-between"
+                      >
+                        <span>{port}</span>
+                        <span className="text-[#A88B68] text-[10px]">Select ↵</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Port Chips from Taxonomy */}
+            <div className="p-4 rounded-xl bg-stone-50 border border-stone-200">
+              <span className="font-mono text-xs text-[#A88B68] uppercase tracking-wider block mb-2">
+                Common Loading Ports from Gujarat Belt:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {PORTS.map((p) => (
+                  <button
+                    key={p.slug}
+                    type="button"
+                    onClick={() => {
+                      set('destination', `${p.name} [${p.locode}]`);
+                      setShowPortSuggestions(false);
+                    }}
+                    className="font-mono text-xs px-2.5 py-1 rounded-md border border-stone-300 bg-white hover:border-[#A88B68] hover:text-[#A88B68] transition-colors"
+                  >
+                    {p.name} ({p.locode})
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 4: Incoterm & Timeline */}
+        {currentStep === 4 && (
+          <div className="flex flex-col gap-6">
+            <div>
+              <h3 className="font-serif text-2xl font-bold text-stone-900">Target Incoterm & Delivery Schedule</h3>
+              <p className="text-body-sm surface-muted mt-1">
+                Select your contract terms. FOB/CIF from Western India ports are our standard operating baselines.
+              </p>
+            </div>
+
+            {/* OptionWheel with native fallback */}
+            <div className="grid grid-cols-12 gap-6 items-center">
+              <div className="col-span-12 sm:col-span-7">
+                <div className="h-44 rounded-2xl border border-stone-200 bg-white/60 p-2 overflow-hidden shadow-inner flex flex-col justify-center">
+                  <span className="font-mono text-[10px] text-stone-500 uppercase tracking-wider px-3 mb-1">
+                    Scroll or drag to set Incoterm:
+                  </span>
+                  <div className="h-32 w-full">
+                    <OptionWheel
+                      items={INCOTERMS}
+                      defaultSelected={INCOTERMS.indexOf(targetIncoterm) !== -1 ? INCOTERMS.indexOf(targetIncoterm) : 3}
+                      onChange={(_idx, item) => setTargetIncoterm(item)}
+                      activeColor="#241C18"
+                      textColor="#A88B68"
+                      fontSize={1.4}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-span-12 sm:col-span-5 flex flex-col gap-4">
+                {/* Accessible native select fallback */}
+                <Select
+                  label="Incoterm (Select fallback)"
+                  options={INCOTERMS.map((term) => ({ value: term, label: term }))}
+                  value={targetIncoterm}
+                  onChange={(e) => setTargetIncoterm(e.target.value)}
+                  hint="EXW (Factory gate), FOB (Port), CFR (Freight), CIF (Insurance & Freight), DAP, DDP"
+                />
+
+                <Select
+                  label="Target Delivery Lead Time"
+                  options={[
+                    { value: 'Urgent (15–20 days)', label: 'Urgent (15–20 days air / express)' },
+                    { value: 'Standard (30–45 days)', label: 'Standard (30–45 days sea freight)' },
+                    { value: 'Flexible / Recurring contracts', label: 'Flexible / Recurring supply agreement' },
+                  ]}
+                  value={targetTimeline}
+                  onChange={(e) => setTargetTimeline(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 5: Contact & Review */}
+        {currentStep === 5 && (
+          <div className="flex flex-col gap-6">
+            <div>
+              <h3 className="font-serif text-2xl font-bold text-stone-900">Contact Details & Final Review</h3>
+              <p className="text-body-sm surface-muted mt-1">
+                Where should the export desk send the formal commercial quotation and proforma documentation?
+              </p>
+            </div>
+
+            <div className="grid grid-cols-12 gap-md">
+              <Input
+                className="col-span-12 sm:col-span-6"
+                label="Full name"
+                required
+                autoComplete="name"
+                value={values.fullName}
+                error={touched.fullName ? errors.fullName : undefined}
+                onBlur={() => validateField('fullName')}
+                onChange={(event) => set('fullName', event.target.value)}
+                disabled={isSubmitting}
+              />
+              <Input
+                className="col-span-12 sm:col-span-6"
+                label="Company"
+                required
+                autoComplete="organization"
+                value={values.companyName}
+                error={touched.companyName ? errors.companyName : undefined}
+                onBlur={() => validateField('companyName')}
+                onChange={(event) => set('companyName', event.target.value)}
+                disabled={isSubmitting}
+              />
+              <Input
+                className="col-span-12 sm:col-span-6"
+                label="Work Email"
+                type="email"
+                required
+                autoComplete="email"
+                value={values.email}
+                error={touched.email ? errors.email : undefined}
+                onBlur={() => validateField('email')}
+                onChange={(event) => set('email', event.target.value)}
+                disabled={isSubmitting}
+              />
+              <Input
+                className="col-span-12 sm:col-span-6"
+                label="Phone (with country code)"
+                type="tel"
+                autoComplete="tel"
+                value={values.phone}
+                error={touched.phone ? errors.phone : undefined}
+                onBlur={() => validateField('phone')}
+                onChange={(event) => set('phone', event.target.value)}
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <Textarea
+              label="Synthesized Requirement & Notes"
+              required
+              rows={4}
+              value={values.requirement}
+              error={touched.requirement ? errors.requirement : undefined}
+              onBlur={() => validateField('requirement')}
+              onChange={(event) => set('requirement', event.target.value)}
+              disabled={isSubmitting}
+              hint="You can review and refine this composite specification before transmitting."
+            />
+
+            <Select
+              label="How did you hear about Trivoxa Group?"
+              options={REFERRAL_OPTIONS}
+              value={values.referral}
+              onChange={(event) => set('referral', event.target.value)}
+              disabled={isSubmitting}
+            />
+          </div>
+        )}
+
+        {/* Stepper Navigation Actions */}
+        <div className="mt-8 pt-6 border-t border-stone-200/80 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            {currentStep > 1 && (
+              <button
+                type="button"
+                onClick={() => goToStep(currentStep - 1)}
+                className="font-mono text-xs uppercase px-4 py-2.5 rounded-lg border border-stone-300 text-stone-700 hover:bg-stone-100 transition-colors"
+              >
+                ← Back
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3">
+            {currentStep < 5 ? (
+              <button
+                type="button"
+                onClick={handleStepNext}
+                className="font-mono text-xs uppercase font-semibold px-6 py-3 rounded-lg bg-stone-900 text-white hover:bg-stone-800 transition-colors shadow-sm"
+              >
+                Continue to Step {currentStep + 1} →
+              </button>
+            ) : (
+              <ClickSpark sparkColor="#A88B68" sparkCount={12} duration={400}>
+                <SpecularButton
+                  type="submit"
+                  size="md"
+                  disabled={isSubmitting}
+                  radius={12}
+                  tint="#A88B68"
+                  tintOpacity={0.15}
+                  lineColor="#A88B68"
+                  textColor="#F4EFE6"
+                  baseColor="#241C18"
+                  className="bg-[#241C18] text-[#F4EFE6] px-8 py-3.5 font-medium"
+                >
+                  {isSubmitting ? 'Transmitting to Export Desk...' : 'Transmit RFQ to Export Desk →'}
+                </SpecularButton>
+              </ClickSpark>
+            )}
+          </div>
+        </div>
       </div>
 
       <datalist id="rfq-products">
@@ -499,27 +964,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
         ))}
       </datalist>
 
-      <Textarea
-        label="Requirement"
-        required
-        rows={6}
-        hint="Grade or specification, quantity, destination port, target Incoterm (EXW / FOB / CIF / DDP) and any certification your market requires."
-        value={values.requirement}
-        error={touched.requirement ? errors.requirement : undefined}
-        onBlur={() => validateField('requirement')}
-        onChange={(event) => set('requirement', event.target.value)}
-        disabled={isSubmitting}
-      />
-
-      <Select
-        label="How did you hear about us?"
-        options={REFERRAL_OPTIONS}
-        value={values.referral}
-        onChange={(event) => set('referral', event.target.value)}
-        disabled={isSubmitting}
-      />
-
-      {/* honeypot — off-screen, not display:none, and never labelled */}
+      {/* honeypot */}
       <div className="absolute -left-[9999px] top-0" aria-hidden>
         <Input
           label="Company website URL"
@@ -530,19 +975,14 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
         />
       </div>
 
-      <div className="mt-md flex flex-wrap items-center gap-lg">
-        <Button type="submit" size="lg" arrow disabled={isSubmitting}>
-          {isSubmitting ? 'Sending to export desk...' : 'Send the enquiry'}
-        </Button>
-        <Prose className="text-body-sm">
-          <p className="surface-muted max-w-[46ch]">
-            Enquiries are received securely by our export desk and processed in accordance with our{' '}
-            <Link href="/legal/privacy" className="link-underline text-bronze-ink">
-              Privacy Policy
-            </Link>.
-          </p>
-        </Prose>
-      </div>
+      <Prose className="text-body-xs mt-2">
+        <p className="surface-muted max-w-[50ch]">
+          Enquiries are received securely by our export desk and processed in accordance with our{' '}
+          <Link href="/legal/privacy" className="link-underline text-bronze-ink">
+            Privacy Policy
+          </Link>.
+        </p>
+      </Prose>
     </form>
   );
 }
@@ -551,43 +991,79 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
 
 function SentPanel({ href, reference }: { href: string; reference?: string }) {
   const headingRef = useRef<HTMLHeadingElement | null>(null);
+  const checkRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
-    // The form has been replaced by this panel, so nothing persists that a live
-    // region could have been attached to — and a region inserted together with
-    // the change is not reliably announced. Focus is: the heading is read out
-    // the moment the buyer submits (P20).
     headingRef.current?.focus();
+
+    // Anime.js draw SVG check
+    if (checkRef.current) {
+      const path = checkRef.current.querySelector('path');
+      if (path) {
+        animate(path, {
+          strokeDashoffset: [100, 0],
+          duration: 900,
+          easing: 'easeOutQuad',
+        });
+      }
+    }
   }, []);
 
   return (
-    <div role="status" className="border-bronze/50 surface-raised flex flex-col gap-md border p-xl">
-      <Eyebrow tick={false} className="surface-faint">
-        Enquiry received
-      </Eyebrow>
-      <h2 ref={headingRef} tabIndex={-1} className="text-heading-lg max-w-[28ch] rounded-sm">
-        {reference
-          ? `Enquiry received — reference ${reference}. The desk replies ${CONTACT.responseWindow}.`
-          : `Your mail client has the enquiry — send it and the desk replies ${CONTACT.responseWindow}.`}
-      </h2>
-      <Prose className="text-body-md">
-        <p className="surface-muted max-w-[62ch]">
+    <ClickSpark sparkColor="#A88B68" sparkCount={16} duration={500}>
+      <div role="status" className="border-bronze/50 surface-raised flex flex-col gap-md border p-xl rounded-2xl shadow-xl bg-white">
+        <div className="flex items-center gap-3">
+          <svg
+            ref={checkRef}
+            className="w-8 h-8 text-emerald-600 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeDasharray="100"
+              strokeDashoffset="100"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+          <Eyebrow tick={false} className="surface-faint text-emerald-700 font-semibold">
+            Enquiry Received & Verified
+          </Eyebrow>
+        </div>
+
+        <h2 ref={headingRef} tabIndex={-1} className="text-heading-lg max-w-[32ch] rounded-sm font-serif">
           {reference
-            ? 'A confirmation email with your specification details has been sent to your address. Our export desk in Surat reviews specifications Monday to Saturday, 10:00–19:00 IST.'
-            : 'If nothing opened, use the link below or write to us directly. Either route reaches the same three people.'}
-        </p>
-      </Prose>
-      <div className="mt-sm flex flex-wrap gap-md">
-        {href ? (
-          <a href={href} className="link-underline text-bronze-ink text-body-md font-medium">
-            Open the enquiry again →
+            ? `Enquiry received — reference ${reference}.`
+            : `Your mail client has the enquiry.`}
+        </h2>
+
+        <div className="font-mono text-sm text-[#A88B68] font-semibold bg-[#241C18] text-[#F4EFE6] px-4 py-2.5 rounded-xl inline-block max-w-fit">
+          Answered within <CountUp to={24} duration={1.5} className="text-xl font-bold text-[#C4A47C]" /> business hours (IST)
+        </div>
+
+        <Prose className="text-body-md">
+          <p className="surface-muted max-w-[62ch] leading-relaxed">
+            {reference
+              ? 'A confirmation email with your specification details has been sent to your address. Our export desk in Surat reviews specifications Monday to Saturday, 10:00–19:00 IST.'
+              : 'If nothing opened, use the link below or write to us directly. Either route reaches the same three people.'}
+          </p>
+        </Prose>
+
+        <div className="mt-sm flex flex-wrap gap-md pt-2 border-t border-stone-200">
+          {href ? (
+            <a href={href} className="link-underline text-bronze-ink text-body-md font-medium">
+              Open the enquiry again →
+            </a>
+          ) : null}
+          <a href={`mailto:${CONTACT.sales}`} className="link-underline text-bronze-ink text-body-md font-medium">
+            {CONTACT.sales}
           </a>
-        ) : null}
-        <a href={`mailto:${CONTACT.sales}`} className="link-underline text-bronze-ink text-body-md font-medium">
-          {CONTACT.sales}
-        </a>
+        </div>
       </div>
-    </div>
+    </ClickSpark>
   );
 }
 

@@ -1,5 +1,5 @@
-﻿import Image from 'next/image';
-import { IMAGE_MANIFEST, resolveImageFile, type ImageManifestEntry } from '@/content/images';
+import Image from 'next/image';
+import { resolveImageFile } from '@/content/images';
 import { PendingPhotograph } from '@/components/ui/pending-photograph';
 import { cn } from '@/lib/utils';
 

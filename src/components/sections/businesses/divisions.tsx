@@ -1,5 +1,7 @@
+'use client';
+
+import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
-import { Reveal } from '@/components/motion/reveal';
 import { ButtonLink } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Container, Section } from '@/components/ui/layout';
@@ -7,15 +9,10 @@ import { Prose, SectionHeading } from '@/components/ui/typography';
 import { CATEGORIES, DIVISIONS, INDUSTRIES } from '@/content/taxonomy';
 import { SERVICES } from '@/content/process';
 import { proofBand } from '@/lib/selectors';
+import AccordionGallery, { type AccordionGalleryItem } from '@/components/reactbits/AccordionGallery/AccordionGallery';
 
 /**
- * P12 — the two divisions, in full.
- *
- * Rendered from `DIVISIONS` so a third division is a data edit (ADR 025). Each
- * card carries the concrete inventory behind it — live categories and industry
- * count for products, the six service lines for services — because "built on
- * the same operating principles" is exactly the kind of sentence the audit
- * called abstraction stacking unless something checkable sits under it.
+ * P10 — The two divisions, with AccordionGallery hover expansion.
  */
 export function Divisions() {
   const product = DIVISIONS.find((division) => division.slug === 'product-exports');
@@ -23,8 +20,23 @@ export function Divisions() {
   const liveCategories = CATEGORIES.filter((category) => category.status === 'live');
   const liveProducts = proofBand().liveProductCount;
 
+  const galleryItems: AccordionGalleryItem[] = [
+    {
+      image: '/brand/og/product-cotton-denim-fabric.png',
+      label: 'Product Exports',
+      link: '/businesses/product-exports',
+      alt: 'Trivoxa Product Exports',
+    },
+    {
+      image: '/brand/og/technology-digital-property.png',
+      label: 'Service Exports',
+      link: '/businesses/service-exports',
+      alt: 'Trivoxa Service Exports',
+    },
+  ];
+
   return (
-    <Section surface="light">
+    <Section surface="light" className="py-16">
       <Container>
         <SectionHeading
           eyebrow="Divisions"
@@ -32,11 +44,25 @@ export function Divisions() {
           lede="Product Exports ships physical goods against written specifications. Service Exports delivers professional services through the group's dedicated technology property."
         />
 
-        <Reveal staggerChildren className="mt-3xl grid grid-cols-12 gap-lg">
+        {/* AccordionGallery Visual Preview */}
+        <div className="mt-10 mb-12 w-full">
+          <AccordionGallery
+            items={galleryItems}
+            height={460}
+            trigger="hover"
+            accentColor="#A88B68"
+            orientation="horizontal"
+            radius={20}
+            expandRatio={0.65}
+          />
+        </div>
+
+        {/* Detailed Two-Division Cards */}
+        <div className="grid grid-cols-12 gap-8">
           {product ? (
             <Card trace className="col-span-12 flex flex-col gap-lg p-xl lg:col-span-6">
               <div className="flex flex-col gap-xs">
-                <h3 className="text-display-sm">{product.name}</h3>
+                <h3 className="text-display-sm font-serif">{product.name}</h3>
                 <Prose className="text-body-md">
                   <p className="surface-muted">{product.description}</p>
                 </Prose>
@@ -52,7 +78,7 @@ export function Divisions() {
                     <dt className="surface-faint spec-value uppercase" data-spec>
                       {item.label}
                     </dt>
-                    <dd className="surface-fg text-heading-lg mt-xs">{item.value}</dd>
+                    <dd className="surface-fg text-heading-lg mt-xs font-serif font-bold">{item.value}</dd>
                   </div>
                 ))}
               </dl>
@@ -83,7 +109,7 @@ export function Divisions() {
             <Card trace className="col-span-12 flex flex-col gap-lg p-xl lg:col-span-6">
               <div className="flex flex-col gap-xs">
                 <div className="flex flex-wrap items-baseline justify-between gap-md">
-                  <h3 className="text-display-sm">{service.name}</h3>
+                  <h3 className="text-display-sm font-serif">{service.name}</h3>
                   {service.externalHref && service.externalLabel ? (
                     <a
                       href={service.externalHref}
@@ -119,10 +145,19 @@ export function Divisions() {
                 <ButtonLink href="/businesses/service-exports" arrow>
                   Service lines & engagement
                 </ButtonLink>
+                {service.externalHref ? (
+                  <ButtonLink
+                    href={service.externalHref}
+                    external
+                    variant="secondary"
+                  >
+                    digital.trivoxagroup.com ↗
+                  </ButtonLink>
+                ) : null}
               </div>
             </Card>
           ) : null}
-        </Reveal>
+        </div>
       </Container>
     </Section>
   );

@@ -1,77 +1,60 @@
+'use client';
+
+import React from 'react';
 import { Mail } from 'lucide-react';
-import { Reveal } from '@/components/motion/reveal';
-import { Card } from '@/components/ui/card';
 import { Container, Section } from '@/components/ui/layout';
-import { Prose, SectionHeading } from '@/components/ui/typography';
+import { SectionHeading } from '@/components/ui/typography';
 import { LEADERSHIP } from '@/content/company';
+import ProfileCard from '@/components/reactbits/ProfileCard/ProfileCard';
 
 /**
- * P11 — leadership.
- *
- * Real names, real roles, group-domain aliases only (never personal inboxes),
- * and the founders' own words. No stock portraits and no invented
- * credentials: until photography exists, each card carries a monogram set in a
- * bronze hairline, which is a treatment rather than a placeholder pretending
- * to be a photograph.
+ * P11 — Leadership section featuring interactive ProfileCards with 3D tilt.
  */
 export function GroupLeadership() {
   return (
-    <Section surface="light" id="leadership" className="scroll-mt-24">
+    <Section surface="light" id="leadership" className="scroll-mt-24 py-24">
       <Container>
         <SectionHeading
           eyebrow="Leadership"
           title="Three founders, one operating discipline."
-          lede="Reachable directly, on group-domain addresses, because a supplier you cannot email is a supplier you cannot audit."
+          lede="Reachable directly on group-domain addresses — because a supplier you cannot email is a supplier you cannot audit."
         />
 
-        <Reveal staggerChildren className="mt-3xl grid grid-cols-12 gap-md">
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
           {LEADERSHIP.map((leader) => (
-            <Card
-              key={leader.email}
-              trace
-              className="col-span-12 flex flex-col gap-lg p-xl md:col-span-4"
-            >
-              <Monogram name={leader.name} />
+            <div key={leader.email} className="w-full max-w-[360px] flex flex-col items-center">
+              <ProfileCard
+                name={leader.name}
+                title={leader.role}
+                handle={leader.email}
+                status="Active Partner"
+                enableTilt={true}
+                behindGlowEnabled={true}
+                behindGlowColor="rgba(168, 139, 104, 0.4)"
+                innerGradient="linear-gradient(145deg, rgba(168,139,104,0.18) 0%, rgba(36,28,24,0.95) 100%)"
+                contactText="Send Direct Mail"
+                onContactClick={() => {
+                  window.location.href = `mailto:${leader.email}`;
+                }}
+                className="w-full"
+              />
 
-              <div className="flex flex-col gap-1">
-                <h3 className="text-heading-lg">{leader.name}</h3>
-                <p className="surface-faint spec-value uppercase" data-spec>
-                  {leader.role}
-                </p>
+              {/* Founder quote message */}
+              <div className="mt-4 p-4 rounded-xl bg-stone-100/80 border border-stone-200 text-stone-700 text-xs leading-relaxed text-center w-full">
+                &ldquo;{leader.message}&rdquo;
               </div>
-
-              <Prose className="text-body-md">
-                <p className="surface-muted">{leader.message}</p>
-              </Prose>
 
               <a
                 href={`mailto:${leader.email}`}
-                className="link-underline text-bronze-ink mt-auto inline-flex items-center gap-2 text-body-sm font-medium"
+                className="mt-3 inline-flex items-center gap-1.5 font-mono text-xs text-[#A88B68] hover:text-[#241C18] transition-colors"
               >
-                <Mail aria-hidden size={14} />
-                {leader.email}
+                <Mail size={13} />
+                <span>{leader.email}</span>
               </a>
-            </Card>
+            </div>
           ))}
-        </Reveal>
+        </div>
       </Container>
     </Section>
-  );
-}
-
-function Monogram({ name }: { name: string }) {
-  const initials = name
-    .split(' ')
-    .slice(0, 2)
-    .map((part) => part[0] ?? '')
-    .join('');
-
-  return (
-    <span
-      aria-hidden
-      className="border-bronze/50 surface-fg text-heading-lg flex size-16 items-center justify-center border"
-    >
-      {initials}
-    </span>
   );
 }

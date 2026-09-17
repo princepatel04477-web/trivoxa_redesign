@@ -37,8 +37,7 @@ import {
   REGIONS,
 } from '../src/content/taxonomy';
 import { LEADERSHIP, SHIVESHWAR_CANONICAL_SENTENCE } from '../src/content/company';
-import type { ZodType } from 'zod';
-import { z } from 'zod';
+import type { z } from 'zod';
 
 import {
   CategorySchema,

@@ -8,39 +8,68 @@ import {
 } from '@/components/sections/hero-entrance-timeline';
 import { ButtonLink } from '@/components/ui/button';
 import { SHIVESHWAR_CANONICAL_SENTENCE } from '@/content/company';
+import ScrollExpand from '@/components/reactbits/ScrollExpand/ScrollExpand';
+import DecryptedText from '@/components/reactbits/DecryptedText/DecryptedText';
+import RotatingText from '@/components/reactbits/RotatingText/RotatingText';
+import Magnet from '@/components/reactbits/Magnet/Magnet';
+import DarkVeil from '@/components/reactbits/DarkVeil/DarkVeil';
+import Noise from '@/components/reactbits/Noise/Noise';
+import { useWebGLSlot } from '@/lib/motion/webgl-budget';
+import { useReducedMotion } from '@/lib/motion/useReducedMotion';
 
-/**
- * P6 · Hero — Sovereign, Rigorous, Architectural.
- *
- * Content is structured to guarantee perfect vertical clearance below the fixed
- * header on all viewports (laptops, standard monitors, 4K, and mobile).
- *
- * Text reveals are orchestrated by GSAP & Anime.js:
- *  1. Eyebrow hairline extends and text slides up from mask
- *  2. Headline words rise with 3D perspective from overflow masks
- *  3. Lede copy fades & glides up
- *  4. CTAs enter with tactile spring
- *  5. Proof ribbon docks with industrial port and SLA specifications
- */
 export function Hero() {
+  const reducedMotion = useReducedMotion();
+  const hasDarkVeilSlot = useWebGLSlot('hero-darkveil');
+
   return (
     <section
       id="hero"
       data-surface="deep"
       className="surface-bg surface-fg relative flex min-h-[100svh] flex-col justify-center overflow-hidden pt-28 pb-16 sm:pt-32 sm:pb-20 lg:pt-36 lg:pb-24"
     >
+      {/* Background WebGL / Token Fallback */}
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+        {hasDarkVeilSlot ? (
+          <DarkVeil
+            hueShift={10}
+            noiseIntensity={0.03}
+            scanlineIntensity={0.02}
+            speed={0.4}
+            className="w-full h-full opacity-60"
+          />
+        ) : (
+          <div className="relative w-full h-full bg-gradient-to-b from-[#171210] via-[#241C18] to-[#171210]">
+            <Noise patternSize={200} patternAlpha={10} />
+          </div>
+        )}
+      </div>
+
       <EagleLoader />
 
       {/* legibility veil — the particles never fight the type */}
       <div
         aria-hidden
-        className="from-espresso-deep/90 via-espresso-deep/45 to-espresso-deep/90 pointer-events-none absolute inset-0 bg-gradient-to-b"
+        className="from-espresso-deep/90 via-espresso-deep/45 to-espresso-deep/90 pointer-events-none absolute inset-0 bg-gradient-to-b z-[2]"
       />
 
       <div className="container-content relative z-10 py-4 sm:py-6 lg:py-8">
-        <HeroEntranceTimeline>
-          <HeroContent />
-        </HeroEntranceTimeline>
+        <ScrollExpand
+          mediaType="image"
+          src="/brand/eagle-poster.webp"
+          poster="/brand/eagle-poster.webp"
+          alt="Trivoxa Global Operations and Textile Manufacturing"
+          startWidth={reducedMotion ? 100 : 42}
+          startHeight={58}
+          startRadius={24}
+          endRadius={0}
+          scrollDistance={1.2}
+          useWindowScroll={true}
+          className="w-full"
+        >
+          <HeroEntranceTimeline>
+            <HeroContent />
+          </HeroEntranceTimeline>
+        </ScrollExpand>
       </div>
     </section>
   );
@@ -65,7 +94,12 @@ function HeroContent() {
             className="hero-eyebrow-rule bg-bronze inline-block h-[3px] w-6 shrink-0 origin-left"
           />
           <span className="hero-eyebrow-text inline-block">
-            International Trade &amp; Business Group
+            <DecryptedText
+              text="SURAT · GLOBAL HQ"
+              animateOn="view"
+              speed={40}
+              className="text-xs sm:text-sm font-semibold tracking-widest text-[#A88B68] uppercase font-mono"
+            />
           </span>
         </p>
       </div>
@@ -80,6 +114,16 @@ function HeroContent() {
         Building the Future of Global Commerce.
       </KineticTextReveal>
 
+      {/* Rotating Industries Pill */}
+      <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#A88B68]/30 bg-[#241C18]/80 text-xs sm:text-sm text-[#A88B68]">
+        <span className="text-[#F4EFE6]/70 uppercase tracking-wider font-mono text-[10px]">Export Sectors:</span>
+        <RotatingText
+          texts={['Textiles & Apparel', 'Pharmaceuticals', 'Building Materials', 'Agri & Food', 'Engineering Hardware']}
+          rotationInterval={2400}
+          mainClassName="font-medium text-[#F4EFE6]"
+        />
+      </div>
+
       {/* Lede Paragraph */}
       <p className="hero-lede surface-muted text-body-lg sm:text-body-xl max-w-[42rem] lg:max-w-[48rem] leading-relaxed">
         Sourcing, manufacturing partnerships and professional services for international
@@ -89,12 +133,14 @@ function HeroContent() {
       {/* Call to Actions */}
       <div className="mt-sm flex flex-wrap items-center gap-md sm:gap-lg">
         <div className="hero-cta">
-          <ButtonLink href="/rfq" size="lg" arrow>
-            Request a Quote
-          </ButtonLink>
+          <Magnet magnetStrength={0.25} padding={40}>
+            <ButtonLink href="/rfq" size="lg" arrow data-cursor="target">
+              Request a Quote
+            </ButtonLink>
+          </Magnet>
         </div>
         <div className="hero-cta">
-          <ButtonLink href="/businesses" size="lg" variant="secondary">
+          <ButtonLink href="/businesses" size="lg" variant="secondary" data-cursor="target">
             Explore What We Export
           </ButtonLink>
         </div>
