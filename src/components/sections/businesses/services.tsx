@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React from 'react';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
@@ -40,7 +41,7 @@ export function ServiceLines() {
         />
 
         {/* ScrollStack Container */}
-        <div className="mt-12 w-full max-w-4xl mx-auto">
+        <div className="mt-12 w-full max-w-[56rem] mx-auto">
           <ScrollStack
             useWindowScroll={true}
             itemDistance={100}
@@ -51,38 +52,38 @@ export function ServiceLines() {
             {SERVICES.map((service, index) => (
               <ScrollStackItem
                 key={service.slug}
-                itemClassName="bg-[#171210] border border-[#A88B68]/30 p-8 sm:p-10 rounded-[28px] text-[#F4EFE6] shadow-2xl flex flex-col justify-between"
+                itemClassName="bg-espresso-deep border border-bronze/30 p-8 sm:p-10 rounded-[28px] text-ivory shadow-2xl flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-center justify-between border-b border-[#A88B68]/20 pb-4 mb-6">
-                    <span className="font-mono text-xs text-[#A88B68] uppercase tracking-widest">
+                  <div className="flex items-center justify-between border-b border-bronze/20 pb-4 mb-6">
+                    <span className="font-mono text-xs text-bronze uppercase tracking-widest">
                       Service Line 0{index + 1}
                     </span>
-                    <span className="font-mono text-xs text-[#F4EFE6]/60">
+                    <span className="font-mono text-xs text-ivory/60">
                       Trivoxa Digital
                     </span>
                   </div>
 
-                  <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[#F4EFE6]">
+                  <h3 className="font-serif text-2xl sm:text-3xl font-bold text-ivory">
                     {service.name}
                   </h3>
 
-                  <p className="mt-3 text-sm sm:text-base text-[#F4EFE6]/80 leading-relaxed max-w-[64ch]">
+                  <p className="mt-3 text-sm sm:text-base text-ivory/80 leading-relaxed max-w-[64ch]">
                     {service.summary}
                   </p>
                 </div>
 
-                <div className="mt-6 pt-6 border-t border-[#A88B68]/20">
-                  <p className="font-mono text-xs text-[#A88B68] mb-2 uppercase tracking-wider">
+                <div className="mt-6 pt-6 border-t border-bronze/20">
+                  <p className="font-mono text-xs text-bronze mb-2 uppercase tracking-wider">
                     Core Deliverables
                   </p>
                   <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {service.deliverables.map((deliverable) => (
                       <li
                         key={deliverable}
-                        className="text-xs text-[#F4EFE6]/70 flex items-center gap-2"
+                        className="text-xs text-ivory/70 flex items-center gap-2"
                       >
-                        <span className="size-1 rounded-full bg-[#A88B68] shrink-0" />
+                        <span className="size-1 rounded-full bg-bronze shrink-0" />
                         <span>{deliverable}</span>
                       </li>
                     ))}
@@ -93,18 +94,18 @@ export function ServiceLines() {
 
             {/* Final Card: Dedicated Property CTA */}
             <ScrollStackItem
-              itemClassName="bg-gradient-to-br from-[#241C18] via-[#171210] to-[#171210] border-2 border-[#A88B68] p-8 sm:p-12 rounded-[28px] text-[#F4EFE6] shadow-2xl flex flex-col justify-between"
+              itemClassName="bg-gradient-to-br from-espresso via-espresso-deep to-espresso-deep border-2 border-bronze p-8 sm:p-12 rounded-[28px] text-ivory shadow-2xl flex flex-col justify-between"
             >
               <div>
-                <span className="font-mono text-xs text-[#A88B68] uppercase tracking-widest block mb-3">
+                <span className="font-mono text-xs text-bronze uppercase tracking-widest block mb-3">
                   Dedicated Digital Operating Property
                 </span>
-                <h3 className="font-serif text-3xl sm:text-4xl font-bold text-[#F4EFE6]">
+                <h3 className="font-serif text-3xl sm:text-4xl font-bold text-ivory">
                   Ready to scope a software or digital systems project?
                 </h3>
-                <p className="mt-4 text-base text-[#F4EFE6]/80 leading-relaxed max-w-[62ch]">
+                <p className="mt-4 text-base text-ivory/80 leading-relaxed max-w-[62ch]">
                   Visit our dedicated technology property at{' '}
-                  <ShinyText text="digital.trivoxagroup.com" speed={3} className="font-bold text-[#A88B68]" />{' '}
+                  <ShinyText text="digital.trivoxagroup.com" speed={3} className="font-bold text-bronze" />{' '}
                   for case studies, live staging demos, and engineering team profiles.
                 </p>
               </div>
@@ -117,8 +118,8 @@ export function ServiceLines() {
                   className="inline-block"
                 >
                   <StarBorder
-                    color="#A88B68"
-                    className="font-mono text-xs uppercase tracking-wider font-semibold text-[#F4EFE6]"
+                    color={BRAND.bronze.hex}
+                    className="font-mono text-xs uppercase tracking-wider font-semibold text-ivory"
                   >
                     Visit digital.trivoxagroup.com ↗
                   </StarBorder>
@@ -126,7 +127,7 @@ export function ServiceLines() {
 
                 <Link
                   href="/rfq?division=service-exports"
-                  className="font-mono text-xs text-[#A88B68] hover:text-[#F4EFE6] underline px-4 py-2"
+                  className="font-mono text-xs text-bronze hover:text-ivory underline px-4 py-2"
                 >
                   Or submit brief via Group RFQ →
                 </Link>

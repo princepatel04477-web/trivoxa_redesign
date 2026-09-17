@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React, { useEffect, useState, useMemo } from 'react';
 import GlassSurface from '@/components/reactbits/GlassSurface/GlassSurface';
 import DecryptedText from '@/components/reactbits/DecryptedText/DecryptedText';
@@ -94,7 +95,7 @@ export function ContactDetailsPanel() {
             </span>
           </div>
           {timeStr && (
-            <span className="font-mono text-xs text-[#A88B68] font-medium" data-spec suppressHydrationWarning>
+            <span className="font-mono text-xs text-bronze font-medium" data-spec suppressHydrationWarning>
               {timeStr}
             </span>
           )}
@@ -184,23 +185,23 @@ export function ContactDetailsPanel() {
 
           {/* #callback highlighted with ElectricBorder */}
           <div id="callback" className="scroll-mt-24 pt-2">
-            <ElectricBorder color="#A88B68" speed={0.8} chaos={0.08} borderRadius={12}>
-              <div className="p-4 bg-[#241C18] text-[#F4EFE6] rounded-xl">
-                <p className="spec-value uppercase text-xs text-[#C4A47C]" data-spec>
+            <ElectricBorder color={BRAND.bronze.hex} speed={0.8} chaos={0.08} borderRadius={12}>
+              <div className="p-4 bg-espresso text-ivory rounded-xl">
+                <p className="spec-value uppercase text-xs text-bronze" data-spec>
                   Telephone & Callback
                 </p>
                 {CONTACT.phoneNumbers.length > 0 ? (
                   <ul className="mt-2 flex flex-col">
                     {CONTACT.phoneNumbers.map((number) => (
-                      <li key={number} className="spec-value text-body-sm text-[#F4EFE6]" data-spec>
+                      <li key={number} className="spec-value text-body-sm text-ivory" data-spec>
                         {number}
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <p className="mt-1.5 text-body-xs text-[#F4EFE6]/80 leading-relaxed">
+                  <p className="mt-1.5 text-body-xs text-ivory/80 leading-relaxed">
                     No published public line — we will not print a number we cannot guarantee is answered
-                    by someone who knows your enquiry. Select <strong className="text-[#C4A47C]">Callback</strong> in the form and we call
+                    by someone who knows your enquiry. Select <strong className="text-bronze">Callback</strong> in the form and we call
                     you within the response window.
                   </p>
                 )}

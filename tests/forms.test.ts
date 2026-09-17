@@ -2,8 +2,9 @@
  * P21 acceptance: the enquiry transport seam and the analytics bus.
  *
  * These tests pin the two things that must not drift silently:
- *  · what a submission actually does today (compose a mailto — nothing stored),
- *    including the sentence the UI uses to disclose it;
+ *  · the fallback path when /functions/api/* can't be reached (compose a
+ *    mailto locally — nothing stored, nothing lost), and the bot screens the
+ *    Pages Functions apply before ever touching Supabase or Resend;
  *  · that every commercial event is emitted through one typed bus, and that the
  *    declared event map and the exported name list agree.
  */
@@ -17,7 +18,8 @@ import {
   type AnalyticsEventMap,
 } from '@/lib/analytics/events';
 import { HONEYPOT_FIELD, composeEnquiry, isBot } from '@/lib/forms/mailto';
-import { mailtoTransport, submitThroughTransport, transport } from '@/lib/forms/transport';
+import { generateReference } from '../functions/_lib/reference';
+import { isTimeTrapTripped } from '../functions/_lib/http';
 
 const enquiry = {
   to: 'sales@trivoxagroup.com',
@@ -29,39 +31,33 @@ const enquiry = {
   ],
 };
 
-describe('transport seam', () => {
-  it('the active transport is the mailto transport', () => {
-    expect(transport).toBe(mailtoTransport);
-    expect(transport.id).toBe('mailto');
-  });
-
-  it('its disclosure says what really happens — no claim of storage', () => {
-    expect(transport.disclosure).toMatch(/mail client/i);
-    expect(transport.disclosure).toMatch(/nothing is stored/i);
-    expect(transport.disclosure).not.toMatch(/we (?:have )?(?:saved|stored|received)/i);
-  });
-
-  it('submits to a mailto href carrying only the fields that were filled in', async () => {
-    const result = await submitThroughTransport(enquiry, {
-      name: 'rfq_compose',
-      payload: { division: 'product-exports' },
-    });
-
-    expect(result.kind).toBe('mailto');
-    if (result.kind !== 'mailto') return;
-    expect(result.href.startsWith('mailto:sales@trivoxagroup.com?subject=')).toBe(true);
-    expect(decodeURIComponent(result.href)).toContain('Jane Buyer');
+describe('mailto fallback', () => {
+  it('composeEnquiry is the single place a mailto is built, carrying only filled-in fields', () => {
+    const href = composeEnquiry(enquiry);
+    expect(href.startsWith('mailto:sales@trivoxagroup.com?subject=')).toBe(true);
+    expect(decodeURIComponent(href)).toContain('Jane Buyer');
     // An empty phone number must not appear as "Phone:" noise in the message.
-    expect(decodeURIComponent(result.href)).not.toContain('Phone:');
-  });
-
-  it('composeEnquiry is the single place a mailto is built', () => {
-    expect(composeEnquiry(enquiry)).toMatch(/^mailto:/);
+    expect(decodeURIComponent(href)).not.toContain('Phone:');
   });
 
   it('a filled honeypot is detected and produces no message', () => {
     expect(isBot({ [HONEYPOT_FIELD]: '' })).toBe(false);
     expect(isBot({ [HONEYPOT_FIELD]: 'http://spam.example' })).toBe(true);
+  });
+});
+
+describe('Pages Function bot screens (functions/_lib)', () => {
+  it('flags a submission that arrives implausibly fast after the form mounted', () => {
+    expect(isTimeTrapTripped(Date.now())).toBe(true);
+    expect(isTimeTrapTripped(Date.now() - 5000)).toBe(false);
+    expect(isTimeTrapTripped(undefined)).toBe(false);
+  });
+
+  it('generates a reference in the TRV-<PREFIX>-<ID> shape the desk quotes back', () => {
+    expect(generateReference('RFQ')).toMatch(/^TRV-RFQ-[0-9A-F]{10}$/);
+    expect(generateReference('CNT')).toMatch(/^TRV-CNT-[0-9A-F]{10}$/);
+    // Not a constant — two calls must not collide.
+    expect(generateReference('RFQ')).not.toBe(generateReference('RFQ'));
   });
 });
 

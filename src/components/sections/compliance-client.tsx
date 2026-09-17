@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React from 'react';
 import Link from 'next/link';
 import { Container, HairlineRow } from '@/components/ui/layout';
@@ -18,24 +19,24 @@ export function ComplianceClient() {
   const inProgress = CERTIFICATIONS.filter((cert) => cert.status === 'in-progress');
 
   const inProgressItems = inProgress.map((cert) => (
-    <div key={cert.slug} className="flex items-start justify-between gap-4 p-4 rounded-xl bg-[#241C18] border border-[#A88B68]/30 text-[#F4EFE6]">
+    <div key={cert.slug} className="flex items-start justify-between gap-4 p-4 rounded-xl bg-espresso border border-bronze/30 text-ivory">
       <div className="flex items-start gap-3">
         <span className="relative flex h-3 w-3 mt-1.5 shrink-0">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A88B68] opacity-75" />
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-[#A88B68]" />
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-bronze opacity-75" />
+          <span className="relative inline-flex rounded-full h-3 w-3 bg-bronze" />
         </span>
         <div>
-          <h4 className="font-serif text-lg font-bold text-[#F4EFE6]">{cert.name}</h4>
-          <p className="text-xs text-[#F4EFE6]/70 mt-0.5">{cert.fullName}</p>
-          <p className="font-mono text-[11px] text-[#A88B68] mt-1">{cert.issuingAuthority}</p>
+          <h4 className="font-serif text-lg font-bold text-ivory">{cert.name}</h4>
+          <p className="text-xs text-ivory/70 mt-0.5">{cert.fullName}</p>
+          <p className="font-mono text-[11px] text-bronze mt-1">{cert.issuingAuthority}</p>
         </div>
       </div>
       <div className="text-right shrink-0">
-        <span className="inline-block rounded-md border border-[#A88B68]/40 bg-[#171210] px-2.5 py-1 font-mono text-xs text-[#A88B68] font-semibold">
+        <span className="inline-block rounded-md border border-bronze/40 bg-espresso-deep px-2.5 py-1 font-mono text-xs text-bronze font-semibold">
           {cert.targetQuarter ?? 'Targeted'}
         </span>
         {cert.targetNote && (
-          <p className="text-[10px] text-[#F4EFE6]/50 mt-1 max-w-[18ch] truncate">
+          <p className="text-[10px] text-ivory/50 mt-1 max-w-[18ch] truncate">
             {cert.targetNote}
           </p>
         )}
@@ -45,35 +46,35 @@ export function ComplianceClient() {
 
   // Folder document packets
   const corporateDocs = [
-    <div key="iec" className="p-3 text-xs text-[#171210] font-mono">
+    <div key="iec" className="p-3 text-xs text-espresso-deep font-mono">
       <strong className="block text-sm font-bold text-stone-900">IEC Registration</strong>
       <span>Directorate General of Foreign Trade (DGFT)</span>
-      <span className="block mt-1 font-semibold text-[#A88B68]">Active · Verified on customs gate</span>
+      <span className="block mt-1 font-semibold text-bronze">Active · Verified on customs gate</span>
     </div>,
-    <div key="gst" className="p-3 text-xs text-[#171210] font-mono">
+    <div key="gst" className="p-3 text-xs text-espresso-deep font-mono">
       <strong className="block text-sm font-bold text-stone-900">GST Registration</strong>
       <span>Government of Gujarat, Commercial Taxes</span>
-      <span className="block mt-1 font-semibold text-[#A88B68]">Active · Verified entity</span>
+      <span className="block mt-1 font-semibold text-bronze">Active · Verified entity</span>
     </div>,
-    <div key="pan" className="p-3 text-xs text-[#171210] font-mono">
+    <div key="pan" className="p-3 text-xs text-espresso-deep font-mono">
       <strong className="block text-sm font-bold text-stone-900">Tax Identity (PAN)</strong>
       <span>Income Tax Department of India</span>
-      <span className="block mt-1 font-semibold text-[#A88B68]">Trivoxa Corporate Entity</span>
+      <span className="block mt-1 font-semibold text-bronze">Trivoxa Corporate Entity</span>
     </div>,
   ];
 
   const exportBoardDocs = [
-    <div key="fieo" className="p-3 text-xs text-[#171210] font-mono">
+    <div key="fieo" className="p-3 text-xs text-espresso-deep font-mono">
       <strong className="block text-sm font-bold text-stone-900">FIEO Registration</strong>
       <span>Federation of Indian Export Organisations</span>
       <span className="block mt-1 text-amber-700">In Progress · Target 2026-Q3</span>
     </div>,
-    <div key="apeda" className="p-3 text-xs text-[#171210] font-mono">
+    <div key="apeda" className="p-3 text-xs text-espresso-deep font-mono">
       <strong className="block text-sm font-bold text-stone-900">APEDA Certificate</strong>
       <span>Agricultural & Processed Food Products</span>
       <span className="block mt-1 text-amber-700">In Progress · Target 2026-Q4</span>
     </div>,
-    <div key="spices" className="p-3 text-xs text-[#171210] font-mono">
+    <div key="spices" className="p-3 text-xs text-espresso-deep font-mono">
       <strong className="block text-sm font-bold text-stone-900">Spices Board India</strong>
       <span>Ministry of Commerce and Industry</span>
       <span className="block mt-1 text-amber-700">In Progress · Target 2026-Q4</span>
@@ -81,17 +82,17 @@ export function ComplianceClient() {
   ];
 
   const qualityDocs = [
-    <div key="iso" className="p-3 text-xs text-[#171210] font-mono">
+    <div key="iso" className="p-3 text-xs text-espresso-deep font-mono">
       <strong className="block text-sm font-bold text-stone-900">ISO 9001:2015 QMS</strong>
       <span>Quality Management Systems Audit</span>
       <span className="block mt-1 text-amber-700">Audit Scheduled 2027-Q1</span>
     </div>,
-    <div key="ce" className="p-3 text-xs text-[#171210] font-mono">
+    <div key="ce" className="p-3 text-xs text-espresso-deep font-mono">
       <strong className="block text-sm font-bold text-stone-900">CE Declaration Dossier</strong>
       <span>European Conformity Technical File</span>
       <span className="block mt-1 text-amber-700">Target 2027-Q2</span>
     </div>,
-    <div key="gmp" className="p-3 text-xs text-[#171210] font-mono">
+    <div key="gmp" className="p-3 text-xs text-espresso-deep font-mono">
       <strong className="block text-sm font-bold text-stone-900">WHO-GMP Facility Status</strong>
       <span>Pharma Sourcing Protocol</span>
       <span className="block mt-1 text-amber-700">Target 2027-Q3</span>
@@ -117,19 +118,19 @@ export function ComplianceClient() {
   return (
     <div className="relative w-full">
       {/* 1. Hero */}
-      <section className="bg-[#171210] py-20 text-[#F4EFE6] border-b border-[#A88B68]/20">
+      <section className="bg-espresso-deep py-20 text-ivory border-b border-bronze/20">
         <Container>
-          <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-2 font-mono text-xs text-[#A88B68]">
+          <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-2 font-mono text-xs text-bronze">
             <Link href="/" className="hover:underline">Home</Link>
             <span>/</span>
-            <span className="text-[#F4EFE6]/80">Compliance</span>
+            <span className="text-ivory/80">Compliance</span>
           </nav>
 
-          <p className="font-mono text-xs uppercase tracking-widest text-[#A88B68] mb-3">
+          <p className="font-mono text-xs uppercase tracking-widest text-bronze mb-3">
             Public Regulatory Register
           </p>
 
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-[#F4EFE6] max-w-4xl">
+          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-ivory max-w-[56rem]">
             <SplitText
               text="What we hold, what we are applying for, and when."
               tag="span"
@@ -138,26 +139,26 @@ export function ComplianceClient() {
             />
           </h1>
 
-          <p className="mt-6 max-w-3xl text-base sm:text-lg text-[#F4EFE6]/80 leading-relaxed font-sans">
+          <p className="mt-6 max-w-[48rem] text-base sm:text-lg text-ivory/80 leading-relaxed font-sans">
             Every credential on this page has an issuing authority, and every one we do not yet hold has a published target. Where a destination market requires something we cannot document, we say so at quotation stage — not at customs.
           </p>
 
-          <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-[#A88B68]/20 pt-6">
+          <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-bronze/20 pt-6">
             <div>
-              <p className="font-mono text-xs text-[#A88B68]">Active Credentials</p>
-              <p className="font-serif text-2xl font-bold text-[#F4EFE6]">{active.length}</p>
+              <p className="font-mono text-xs text-bronze">Active Credentials</p>
+              <p className="font-serif text-2xl font-bold text-ivory">{active.length}</p>
             </div>
             <div>
-              <p className="font-mono text-xs text-[#A88B68]">Applications in Progress</p>
-              <p className="font-serif text-2xl font-bold text-[#F4EFE6]">{inProgress.length}</p>
+              <p className="font-mono text-xs text-bronze">Applications in Progress</p>
+              <p className="font-serif text-2xl font-bold text-ivory">{inProgress.length}</p>
             </div>
             <div>
-              <p className="font-mono text-xs text-[#A88B68]">Next Target Date</p>
-              <p className="font-serif text-2xl font-bold text-[#F4EFE6]">2026-Q3</p>
+              <p className="font-mono text-xs text-bronze">Next Target Date</p>
+              <p className="font-serif text-2xl font-bold text-ivory">2026-Q3</p>
             </div>
             <div>
-              <p className="font-mono text-xs text-[#A88B68]">Entity Registration</p>
-              <p className="font-serif text-2xl font-bold text-[#F4EFE6]">Surat, Gujarat</p>
+              <p className="font-mono text-xs text-bronze">Entity Registration</p>
+              <p className="font-serif text-2xl font-bold text-ivory">Surat, Gujarat</p>
             </div>
           </div>
         </Container>
@@ -169,14 +170,14 @@ export function ComplianceClient() {
           {/* Sticky LineSidebar Table of Contents (Desktop) */}
           <aside className="hidden lg:block lg:col-span-3">
             <div className="sticky top-28 p-4 rounded-2xl bg-stone-50 border border-stone-200">
-              <span className="font-mono text-xs uppercase tracking-widest text-[#A88B68] block mb-4">
+              <span className="font-mono text-xs uppercase tracking-widest text-bronze block mb-4">
                 Contents
               </span>
               <LineSidebar
                 items={tocItems}
-                accentColor="#A88B68"
-                textColor="#241C18"
-                markerColor="#C4A47C"
+                accentColor={BRAND.bronze.hex}
+                textColor={BRAND.espresso.hex}
+                markerColor={BRAND.bronze.hex}
                 onItemClick={handleTocClick}
                 fontSize={12}
                 proximityRadius={80}
@@ -204,7 +205,7 @@ export function ComplianceClient() {
                     { label: 'Group established', value: `${COMPANY.founded.year}` },
                   ].map((item) => (
                     <div key={item.label} className="py-3 flex flex-col gap-1">
-                      <dt className="text-[#A88B68] uppercase font-semibold">{item.label}</dt>
+                      <dt className="text-bronze uppercase font-semibold">{item.label}</dt>
                       <dd className="text-stone-900 font-sans text-sm">{item.value}</dd>
                     </div>
                   ))}
@@ -212,7 +213,7 @@ export function ComplianceClient() {
 
                 <div className="flex flex-col justify-between p-6 rounded-2xl bg-stone-50 border border-stone-200">
                   <div>
-                    <Eyebrow tick={false} className="text-[#A88B68]">
+                    <Eyebrow tick={false} className="text-bronze">
                       Parent Company Heritage
                     </Eyebrow>
                     <p className="mt-3 text-sm text-stone-700 leading-relaxed font-sans">
@@ -256,7 +257,7 @@ export function ComplianceClient() {
                       <h3 className="font-serif text-2xl font-bold text-stone-900">{cert.name}</h3>
                       <p className="text-sm text-stone-600 mt-1">{cert.fullName}</p>
                     </div>
-                    <p className="mt-6 font-mono text-xs text-[#A88B68]">
+                    <p className="mt-6 font-mono text-xs text-bronze">
                       Authority: {cert.issuingAuthority}
                     </p>
                   </div>
@@ -266,7 +267,7 @@ export function ComplianceClient() {
 
             {/* Section C: In-Progress Credentials with AnimatedList */}
             <section id="in-progress" className="scroll-mt-28">
-              <div className="p-8 rounded-2xl bg-[#171210] text-[#F4EFE6] border border-[#A88B68]/40">
+              <div className="p-8 rounded-2xl bg-espresso-deep text-ivory border border-bronze/40">
                 <SectionHeading
                   eyebrow="In Progress Register"
                   title={`${inProgress.length} applications with published target quarters.`}
@@ -294,7 +295,7 @@ export function ComplianceClient() {
                 {/* Folder 1: Corporate Entity */}
                 <div className="flex flex-col items-center text-center">
                   <Folder
-                    color="#A88B68"
+                    color={BRAND.bronze.hex}
                     size={1.1}
                     items={corporateDocs}
                     className="cursor-pointer"
@@ -305,7 +306,7 @@ export function ComplianceClient() {
                   <p className="font-mono text-xs text-stone-500 mt-1">
                     IEC, GST & Incorporation (3 Docs)
                   </p>
-                  <span className="font-mono text-[10px] text-[#A88B68] mt-2">
+                  <span className="font-mono text-[10px] text-bronze mt-2">
                     Click to expand papers
                   </span>
                 </div>
@@ -313,7 +314,7 @@ export function ComplianceClient() {
                 {/* Folder 2: Export Boards */}
                 <div className="flex flex-col items-center text-center">
                   <Folder
-                    color="#C4A47C"
+                    color={BRAND.bronze.hex}
                     size={1.1}
                     items={exportBoardDocs}
                     className="cursor-pointer"
@@ -324,7 +325,7 @@ export function ComplianceClient() {
                   <p className="font-mono text-xs text-stone-500 mt-1">
                     FIEO, APEDA & Spices Board (3 Docs)
                   </p>
-                  <span className="font-mono text-[10px] text-[#A88B68] mt-2">
+                  <span className="font-mono text-[10px] text-bronze mt-2">
                     Click to expand papers
                   </span>
                 </div>
@@ -332,7 +333,7 @@ export function ComplianceClient() {
                 {/* Folder 3: Quality & CE */}
                 <div className="flex flex-col items-center text-center">
                   <Folder
-                    color="#8C7355"
+                    color={BRAND.bronzeInk.hex}
                     size={1.1}
                     items={qualityDocs}
                     className="cursor-pointer"
@@ -343,7 +344,7 @@ export function ComplianceClient() {
                   <p className="font-mono text-xs text-stone-500 mt-1">
                     ISO 9001, CE & WHO-GMP (3 Docs)
                   </p>
-                  <span className="font-mono text-[10px] text-[#A88B68] mt-2">
+                  <span className="font-mono text-[10px] text-bronze mt-2">
                     Click to expand papers
                   </span>
                 </div>
@@ -355,7 +356,7 @@ export function ComplianceClient() {
               <h3 className="font-serif text-2xl font-bold text-stone-900">
                 Independent Third-Party Audits
               </h3>
-              <p className="mt-3 text-sm text-stone-600 leading-relaxed max-w-3xl">
+              <p className="mt-3 text-sm text-stone-600 leading-relaxed max-w-[48rem]">
                 We accommodate buyer-nominated audits (SGS, Intertek, Bureau Veritas, TÜV) at partner factories across Surat and Gujarat clusters. Audit dates and technical files must be coordinated at least 14 days prior to container loading.
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-4">

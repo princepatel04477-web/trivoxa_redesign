@@ -271,7 +271,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<Pa
                   Parent Industry
                 </span>
                 <h3 className="surface-fg text-body-xl font-medium">{industry.name}</h3>
-                <p className="surface-muted text-body-sm max-w-2xl">{industry.shortDescription}</p>
+                <p className="surface-muted text-body-sm max-w-[42rem]">{industry.shortDescription}</p>
               </div>
               <ArrowLink href={`/industries/${industry.slug}`} className="text-body-md whitespace-nowrap">
                 View all {industry.name} lines
@@ -326,7 +326,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<Pa
       <Section surface="deep" className="border-t surface-hairline">
         <Container>
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-xl">
-            <div className="flex flex-col gap-sm max-w-2xl">
+            <div className="flex flex-col gap-sm max-w-[42rem]">
               <Eyebrow>Direct Trade Enquiry</Eyebrow>
               <h2 className="text-display-md text-ivory font-serif">
                 Request a formal quotation for {product.name}.

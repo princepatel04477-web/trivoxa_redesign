@@ -928,12 +928,23 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
   const countryIndex = useMemo(() => {
     if (!feats) return [];
     const out: CountryRecord[] = [];
+    // Features with no entry in CD (small/unrecognized territories) all fall
+    // back to their padded numeric id, and more than one can share the same
+    // raw id (several legitimately use 0) — that collided as a duplicate
+    // React key and a clobbered ref in ghostPathRefs/pathRefs (both Maps
+    // keyed by id). Disambiguating here keeps `name` exactly as it was; only
+    // the id used for React keys and ref lookups gets a uniqueness suffix.
+    const seenIds = new Map<string, number>();
     for (const f of feats) {
       const pad3 = String(f.id).padStart(3, '0');
       const e = CD[pad3];
       const a3 = e ? e[0] : pad3;
       const nm = e ? e[1] : a3;
       if (a3 === 'ATA') continue;
+
+      const seenCount = seenIds.get(a3) ?? 0;
+      seenIds.set(a3, seenCount + 1);
+      const uniqueId = seenCount === 0 ? a3 : `${a3}-${seenCount}`;
 
       const rings: [number, number][][] = [];
       let minLng = Infinity,
@@ -959,7 +970,7 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
         }
       }
       out.push({
-        id: a3,
+        id: uniqueId,
         name: nm,
         type: f.type,
         coords: f.coords,

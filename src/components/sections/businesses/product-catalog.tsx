@@ -145,7 +145,7 @@ export function ProductCatalog({
           </div>
 
           {/* Search bar */}
-          <div className="relative max-w-md">
+          <div className="relative max-w-[28rem]">
             <label htmlFor="catalog-search" className="sr-only">
               Filter catalogue by product name or HS code
             </label>
@@ -212,7 +212,7 @@ export function ProductCatalog({
               aria-pressed={viewMode === 'grid'}
               className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded-md transition-colors ${
                 viewMode === 'grid'
-                  ? 'bg-[#241C18] text-[#FAF8F3] shadow-sm font-semibold'
+                  ? 'bg-espresso text-ivory-soft shadow-sm font-semibold'
                   : 'text-stone-600 hover:text-stone-900'
               }`}
             >
@@ -226,7 +226,7 @@ export function ProductCatalog({
               aria-pressed={viewMode === 'table'}
               className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono rounded-md transition-colors ${
                 viewMode === 'table'
-                  ? 'bg-[#241C18] text-[#FAF8F3] shadow-sm font-semibold'
+                  ? 'bg-espresso text-ivory-soft shadow-sm font-semibold'
                   : 'text-stone-600 hover:text-stone-900'
               }`}
             >

@@ -6,8 +6,6 @@ import { SiteFooter } from '@/components/sections/site-footer';
 import { LenisProvider } from '@/lib/motion/lenis-provider';
 import { WebGLBudgetProvider } from '@/lib/motion/webgl-budget';
 import { Preloader } from '@/components/motion/preloader';
-import ClickSpark from '@/components/reactbits/ClickSpark/ClickSpark';
-import GradualBlur from '@/components/reactbits/GradualBlur/GradualBlur';
 import { BRAND } from '@/lib/tokens/colors';
 import { JsonLd, organizationSchema, webSiteSchema } from '@/components/seo/json-ld';
 import './globals.css';
@@ -55,7 +53,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={fontVariables} data-surface="light" suppressHydrationWarning>
-      <body className="surface-bg surface-fg antialiased selection:bg-[#A88B68] selection:text-[#F4EFE6]">
+      <body className="surface-bg surface-fg antialiased">
         <a href="#main" className="skip-link">
           Skip to content
         </a>
@@ -66,13 +64,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <LenisProvider>
               <Preloader />
               <GlobalCardNav />
-              <ClickSpark sparkColor="#A88B68" sparkCount={8} duration={350}>
-                <main id="main" className="isolate relative min-h-screen">
-                  {children}
-                </main>
-              </ClickSpark>
+              <main id="main" className="isolate relative min-h-screen">
+                {children}
+              </main>
               <SiteFooter />
-              <GradualBlur position="bottom" height="6rem" strength={2} zIndex={40} />
             </LenisProvider>
           </WebGLBudgetProvider>
         </PerfTierProvider>

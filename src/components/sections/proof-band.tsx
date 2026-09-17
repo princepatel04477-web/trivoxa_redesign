@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React, { useRef } from 'react';
 import Link from 'next/link';
 import { Container, Section } from '@/components/ui/layout';
@@ -33,21 +34,21 @@ export function ProofBand() {
   const webglSlot = useWebGLSlot('proofband-radar', sectionRef);
 
   const complianceChips = [
-    { node: <span className="px-3 py-1.5 rounded-full border border-[#A88B68]/30 bg-[#241C18]/80 text-xs font-mono font-medium text-[#F4EFE6]">IEC · 0824001234</span> },
-    { node: <span className="px-3 py-1.5 rounded-full border border-[#A88B68]/30 bg-[#241C18]/80 text-xs font-mono font-medium text-[#F4EFE6]">GST · 24AAACT8924F1ZW</span> },
-    { node: <span className="px-3 py-1.5 rounded-full border border-[#A88B68]/30 bg-[#241C18]/80 text-xs font-mono font-medium text-[#F4EFE6]">COO · Certificate of Origin</span> },
-    { node: <span className="px-3 py-1.5 rounded-full border border-[#A88B68]/30 bg-[#241C18]/80 text-xs font-mono font-medium text-[#F4EFE6]">Phytosanitary Certification</span> },
-    { node: <span className="px-3 py-1.5 rounded-full border border-[#A88B68]/30 bg-[#241C18]/80 text-xs font-mono font-medium text-[#F4EFE6]">MTC · Material Test Certificates</span> },
-    { node: <span className="px-3 py-1.5 rounded-full border border-[#A88B68]/30 bg-[#241C18]/80 text-xs font-mono font-medium text-[#F4EFE6]">FOB · CIF · DAP Incoterms</span> },
+    { node: <span className="px-3 py-1.5 rounded-full border border-bronze/30 bg-espresso/80 text-xs font-mono font-medium text-ivory">IEC · 0824001234</span> },
+    { node: <span className="px-3 py-1.5 rounded-full border border-bronze/30 bg-espresso/80 text-xs font-mono font-medium text-ivory">GST · 24AAACT8924F1ZW</span> },
+    { node: <span className="px-3 py-1.5 rounded-full border border-bronze/30 bg-espresso/80 text-xs font-mono font-medium text-ivory">COO · Certificate of Origin</span> },
+    { node: <span className="px-3 py-1.5 rounded-full border border-bronze/30 bg-espresso/80 text-xs font-mono font-medium text-ivory">Phytosanitary Certification</span> },
+    { node: <span className="px-3 py-1.5 rounded-full border border-bronze/30 bg-espresso/80 text-xs font-mono font-medium text-ivory">MTC · Material Test Certificates</span> },
+    { node: <span className="px-3 py-1.5 rounded-full border border-bronze/30 bg-espresso/80 text-xs font-mono font-medium text-ivory">FOB · CIF · DAP Incoterms</span> },
   ];
 
   return (
     <div ref={sectionRef}>
-      <Section surface="deep" tight className="relative overflow-hidden border-t border-[#A88B68]/25 py-12 md:py-16">
+      <Section surface="deep" tight className="relative overflow-hidden border-t border-bronze/25 py-12 md:py-16">
         {/* Background Radar WebGL */}
         <div className="absolute inset-0 pointer-events-none z-0 opacity-20" aria-hidden="true">
           {webglSlot.hasSlot ? (
-            <Radar color="#A88B68" speed={0.8} ringCount={4} spokeCount={6} />
+            <Radar color={BRAND.bronze.hex} speed={0.8} ringCount={4} spokeCount={6} />
           ) : null}
         </div>
 
@@ -57,24 +58,24 @@ export function ProofBand() {
               text="Operational Reality. Proven Trade Lines."
               tag="h2"
               align="left"
-              className="text-2xl md:text-3xl font-serif text-[#F4EFE6]"
+              className="text-2xl md:text-3xl font-serif text-ivory"
             />
           </div>
 
           <div className="grid grid-cols-12 gap-6 lg:gap-8">
             {/* Ports Column */}
             <div className="col-span-12 lg:col-span-5 flex flex-col gap-4">
-              <p className="eyebrow text-[#A88B68]">Export Ports</p>
+              <p className="eyebrow text-bronze">Export Ports</p>
               <div className="flex flex-col gap-3">
                 {PORTS.map((port) => (
                   <SpotlightCard
                     key={port.slug}
                     spotlightColor="rgba(168, 139, 104, 0.25)"
-                    className="!p-4 !bg-[#171210]/90 !border-[#3D322A] hover:!border-[#A88B68]/60 transition-all rounded-xl"
+                    className="!p-4 !bg-espresso-deep/90 !border hover:!border-bronze/60 transition-all rounded-xl"
                   >
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-body-md font-semibold text-[#F4EFE6]">{port.name}</span>
+                        <span className="text-body-md font-semibold text-ivory">{port.name}</span>
                         <div className="shrink-0">
                           <SplitFlapText
                             text={port.locode.replace(/\s+/g, '').slice(0, 5)}
@@ -85,7 +86,7 @@ export function ProofBand() {
                           />
                         </div>
                       </div>
-                      <span className="text-body-sm text-[#8C8279] leading-snug">{port.reason}</span>
+                      <span className="text-body-sm surface-faint leading-snug">{port.reason}</span>
                     </div>
                   </SpotlightCard>
                 ))}
@@ -93,47 +94,47 @@ export function ProofBand() {
             </div>
 
             {/* Published Catalog Column */}
-            <div className="col-span-12 lg:col-span-4 flex flex-col justify-between gap-6 lg:border-l lg:border-[#A88B68]/20 lg:pl-8">
-              <BorderGlow glowColor="40 80 80" borderRadius={16} className="p-6 bg-[#171210]/80 border border-[#A88B68]/20">
-                <p className="eyebrow mb-2 text-[#A88B68]">Published Catalog</p>
+            <div className="col-span-12 lg:col-span-4 flex flex-col justify-between gap-6 lg:border-l lg:border-bronze/20 lg:pl-8">
+              <BorderGlow glowColor="40 80 80" borderRadius={16} className="p-6 bg-espresso-deep/80 border border-bronze/20">
+                <p className="eyebrow mb-2 text-bronze">Published Catalog</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-display-md leading-none font-serif text-3xl font-bold text-[#F4EFE6]">
+                  <span className="text-display-md leading-none font-serif text-3xl font-bold text-ivory">
                     <Counter value={band.liveProductCount} fontSize={32} />
                   </span>
-                  <span className="text-heading-md font-medium text-[#F4EFE6]/70"> products</span>
+                  <span className="text-heading-md font-medium text-ivory/70"> products</span>
                 </div>
-                <p className="surface-muted mt-2 text-body-sm leading-relaxed text-[#F4EFE6]/70">
+                <p className="surface-muted mt-2 text-body-sm leading-relaxed text-ivory/70">
                   across {band.liveCategoryCount} live categories, each quoted with HS code, MOQ, lead time and Incoterms.
                 </p>
               </BorderGlow>
 
-              <ElectricBorder color="#A88B68" chaos={0.3} borderRadius={16} className="p-6 bg-[#171210]/90 border border-[#A88B68]/40">
-                <p className="eyebrow mb-2 text-[#A88B68]">Response Window</p>
+              <ElectricBorder color={BRAND.bronze.hex} chaos={0.3} borderRadius={16} className="p-6 bg-espresso-deep/90 border border-bronze/40">
+                <p className="eyebrow mb-2 text-bronze">Response Window</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-display-md leading-none font-serif text-3xl font-bold text-[#F4EFE6]">
+                  <span className="text-display-md leading-none font-serif text-3xl font-bold text-ivory">
                     <Counter value={24} fontSize={32} />
                   </span>
-                  <span className="text-heading-md font-medium text-[#A88B68]"> business hours</span>
+                  <span className="text-heading-md font-medium text-bronze"> business hours</span>
                 </div>
-                <p className="surface-muted mt-2 text-body-sm text-[#F4EFE6]/70">
+                <p className="surface-muted mt-2 text-body-sm text-ivory/70">
                   {band.hoursIst} · {band.timezoneLabel}
                 </p>
               </ElectricBorder>
             </div>
 
             {/* Compliance Posture Column */}
-            <div className="col-span-12 lg:col-span-3 flex flex-col justify-between gap-4 lg:border-l lg:border-[#A88B68]/20 lg:pl-8">
-              <div className="p-6 rounded-2xl bg-[#171210]/80 border border-[#A88B68]/20 flex flex-col h-full justify-between">
+            <div className="col-span-12 lg:col-span-3 flex flex-col justify-between gap-4 lg:border-l lg:border-bronze/20 lg:pl-8">
+              <div className="p-6 rounded-2xl bg-espresso-deep/80 border border-bronze/20 flex flex-col h-full justify-between">
                 <div>
-                  <p className="eyebrow mb-3 text-[#A88B68]">Compliance Posture</p>
-                  <p className="text-body-md text-[#F4EFE6]/90 leading-relaxed">
+                  <p className="eyebrow mb-3 text-bronze">Compliance Posture</p>
+                  <p className="text-body-md text-ivory/90 leading-relaxed">
                     {active.map((c) => c.name).join(' and ')} active.{' '}
                     {inProgress.map((c) => c.name).join(', ')} in progress with target dates published.
                   </p>
                 </div>
                 <Link
                   href="/compliance"
-                  className="link-underline text-[#A88B68] hover:text-[#F4EFE6] mt-6 inline-flex items-center gap-1 text-body-sm font-semibold transition-colors"
+                  className="link-underline text-bronze hover:text-ivory mt-6 inline-flex items-center gap-1 text-body-sm font-semibold transition-colors"
                 >
                   Read the certification register →
                 </Link>
@@ -142,7 +143,7 @@ export function ProofBand() {
           </div>
 
           {/* Trade Marks LogoLoop */}
-          <div className="mt-12 pt-6 border-t border-[#A88B68]/20">
+          <div className="mt-12 pt-6 border-t border-bronze/20">
             <LogoLoop logos={complianceChips} speed={40} direction="left" />
           </div>
         </Container>

@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Container, Section } from '@/components/ui/layout';
@@ -126,15 +127,15 @@ export function GlobalPresenceFull() {
       {/* 1. Full-Page 300vh Pinned Globe Scrub Section */}
       <section
         ref={containerRef}
-        className="relative h-screen w-full overflow-hidden bg-[#171210] text-[#F4EFE6] flex flex-col justify-between"
+        className="relative h-screen w-full overflow-hidden bg-espresso-deep text-ivory flex flex-col justify-between"
       >
         {/* Subtle Topography SVG Overlay */}
         <div className="pointer-events-none absolute inset-0 opacity-15">
           <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="full-presence-topo" width="60" height="60" patternUnits="userSpaceOnUse">
-                <path d="M 0 30 Q 15 10, 30 30 T 60 30" fill="none" stroke="#A88B68" strokeWidth="0.75" />
-                <path d="M 0 45 Q 15 25, 30 45 T 60 45" fill="none" stroke="#A88B68" strokeWidth="0.5" />
+                <path d="M 0 30 Q 15 10, 30 30 T 60 30" fill="none" stroke={BRAND.bronze.hex} strokeWidth="0.75" />
+                <path d="M 0 45 Q 15 25, 30 45 T 60 45" fill="none" stroke={BRAND.bronze.hex} strokeWidth="0.5" />
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#full-presence-topo)" />
@@ -144,14 +145,14 @@ export function GlobalPresenceFull() {
         {/* Top Header Bar */}
         <div className="relative z-10 w-full pt-8 sm:pt-12">
           <Container>
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#A88B68]/20 pb-6">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-bronze/20 pb-6">
               <div>
-                <nav aria-label="Breadcrumb" className="mb-2 flex items-center gap-2 font-mono text-xs text-[#A88B68]">
+                <nav aria-label="Breadcrumb" className="mb-2 flex items-center gap-2 font-mono text-xs text-bronze">
                   <Link href="/" className="hover:underline">Home</Link>
                   <span>/</span>
-                  <span className="text-[#F4EFE6]/80">Global Presence</span>
+                  <span className="text-ivory/80">Global Presence</span>
                 </nav>
-                <h1 className="font-serif text-3xl sm:text-5xl font-bold text-[#F4EFE6]">
+                <h1 className="font-serif text-3xl sm:text-5xl font-bold text-ivory">
                   <SplitText
                     text="A Global Perspective. A Local Understanding."
                     tag="span"
@@ -163,18 +164,18 @@ export function GlobalPresenceFull() {
                   <ShinyText
                     text="The corridors we actually operate in — not live shipment tracking."
                     speed={4}
-                    className="text-xs sm:text-sm text-[#A88B68]"
+                    className="text-xs sm:text-sm text-bronze"
                   />
                 </div>
               </div>
 
               {/* UN/LOCODE Loading Port Chips */}
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-xs text-[#A88B68] uppercase">Loading Ports:</span>
+                <span className="font-mono text-xs text-bronze uppercase">Loading Ports:</span>
                 {ports.map((p) => (
                   <span
                     key={p.locode}
-                    className="rounded border border-[#A88B68]/30 bg-[#241C18]/80 px-2 py-0.5 font-mono text-xs text-[#F4EFE6]"
+                    className="rounded border border-bronze/30 bg-espresso/80 px-2 py-0.5 font-mono text-xs text-ivory"
                   >
                     <SplitFlapText text={p.locode} flipDuration={0.4} />
                   </span>
@@ -199,30 +200,30 @@ export function GlobalPresenceFull() {
               <div className="col-span-12 lg:col-span-5 flex flex-col justify-center">
                 <SpotlightCard
                   spotlightColor="rgba(168, 139, 104, 0.25)"
-                  className="p-8 rounded-[24px] bg-[#171210]/90 border border-[#A88B68]/40 text-[#F4EFE6] shadow-2xl"
+                  className="p-8 rounded-[24px] bg-espresso-deep/90 border border-bronze/40 text-ivory shadow-2xl"
                 >
-                  <div className="flex items-center justify-between border-b border-[#A88B68]/20 pb-3 mb-4">
-                    <span className="font-mono text-xs uppercase tracking-widest text-[#A88B68]">
+                  <div className="flex items-center justify-between border-b border-bronze/20 pb-3 mb-4">
+                    <span className="font-mono text-xs uppercase tracking-widest text-bronze">
                       Region 0{activeRegionIndex + 1} of 06
                     </span>
-                    <span className="font-mono text-xs font-semibold text-[#F4EFE6] bg-[#241C18] px-2.5 py-1 rounded border border-[#A88B68]/30">
+                    <span className="font-mono text-xs font-semibold text-ivory bg-espresso px-2.5 py-1 rounded border border-bronze/30">
                       Hub: {currentRegion.hubPort} ({currentRegion.locode})
                     </span>
                   </div>
 
-                  <h3 className="font-serif text-3xl font-bold text-[#F4EFE6]">
+                  <h3 className="font-serif text-3xl font-bold text-ivory">
                     {currentRegion.title}
                   </h3>
-                  <p className="mt-2 text-sm text-[#A88B68] font-medium">
+                  <p className="mt-2 text-sm text-bronze font-medium">
                     {currentRegion.subtitle}
                   </p>
-                  <p className="mt-3 text-xs sm:text-sm text-[#F4EFE6]/70 leading-relaxed">
+                  <p className="mt-3 text-xs sm:text-sm text-ivory/70 leading-relaxed">
                     {currentRegion.marketFocus}
                   </p>
 
                   {/* Lane Route SVG */}
-                  <div className="mt-6 pt-4 border-t border-[#A88B68]/20">
-                    <div className="flex items-center justify-between font-mono text-[11px] text-[#A88B68] mb-1">
+                  <div className="mt-6 pt-4 border-t border-bronze/20">
+                    <div className="flex items-center justify-between font-mono text-[11px] text-bronze mb-1">
                       <span>Surat / Mundra (IN)</span>
                       <span>{currentRegion.hubPort} ({currentRegion.locode})</span>
                     </div>
@@ -238,35 +239,35 @@ export function GlobalPresenceFull() {
                         ref={pathRef}
                         d={currentRegion.lanePath}
                         fill="none"
-                        stroke="#A88B68"
+                        stroke={BRAND.bronze.hex}
                         strokeWidth="2.5"
                         strokeDasharray="400"
                         strokeDashoffset="0"
                         className="transition-all duration-300"
                       />
-                      <circle cx="30" cy="50" r="4" fill="#A88B68" />
-                      <circle cx="320" cy="20" r="4" fill="#C4A47C" />
+                      <circle cx="30" cy="50" r="4" fill={BRAND.bronze.hex} />
+                      <circle cx="320" cy="20" r="4" fill={BRAND.bronze.hex} />
                     </svg>
                   </div>
                 </SpotlightCard>
 
                 {/* Counter Stats Bar */}
-                <div className="mt-6 grid grid-cols-3 gap-3 border-t border-[#A88B68]/20 pt-4 text-center">
-                  <div className="p-2 rounded-lg bg-[#241C18]/60 border border-[#A88B68]/20">
-                    <p className="font-mono text-[11px] text-[#A88B68]">Regions</p>
-                    <p className="font-serif text-xl font-bold text-[#F4EFE6]">
+                <div className="mt-6 grid grid-cols-3 gap-3 border-t border-bronze/20 pt-4 text-center">
+                  <div className="p-2 rounded-lg bg-espresso/60 border border-bronze/20">
+                    <p className="font-mono text-[11px] text-bronze">Regions</p>
+                    <p className="font-serif text-xl font-bold text-ivory">
                       <Counter value={numbers.regions} fontSize={20} />
                     </p>
                   </div>
-                  <div className="p-2 rounded-lg bg-[#241C18]/60 border border-[#A88B68]/20">
-                    <p className="font-mono text-[11px] text-[#A88B68]">Industries</p>
-                    <p className="font-serif text-xl font-bold text-[#F4EFE6]">
+                  <div className="p-2 rounded-lg bg-espresso/60 border border-bronze/20">
+                    <p className="font-mono text-[11px] text-bronze">Industries</p>
+                    <p className="font-serif text-xl font-bold text-ivory">
                       <Counter value={numbers.industries} fontSize={20} />
                     </p>
                   </div>
-                  <div className="p-2 rounded-lg bg-[#241C18]/60 border border-[#A88B68]/20">
-                    <p className="font-mono text-[11px] text-[#A88B68]">Ports</p>
-                    <p className="font-serif text-xl font-bold text-[#F4EFE6]">
+                  <div className="p-2 rounded-lg bg-espresso/60 border border-bronze/20">
+                    <p className="font-mono text-[11px] text-bronze">Ports</p>
+                    <p className="font-serif text-xl font-bold text-ivory">
                       <Counter value={numbers.ports} fontSize={20} />
                     </p>
                   </div>
@@ -277,7 +278,7 @@ export function GlobalPresenceFull() {
         </div>
 
         {/* Region Step Indicator Bar at Bottom */}
-        <div className="relative z-10 w-full border-t border-[#A88B68]/20 py-4 bg-[#171210]/80 backdrop-blur-sm">
+        <div className="relative z-10 w-full border-t border-bronze/20 py-4 bg-espresso-deep/80 backdrop-blur-sm">
           <Container>
             <div className="flex items-center justify-between gap-2 overflow-x-auto">
               {REGIONS.map((r, idx) => (
@@ -287,8 +288,8 @@ export function GlobalPresenceFull() {
                   onClick={() => setActiveRegionIndex(idx)}
                   className={`px-3 py-1 rounded-full font-mono text-xs transition-all ${
                     activeRegionIndex === idx
-                      ? 'bg-[#A88B68] text-[#171210] font-bold shadow'
-                      : 'text-[#F4EFE6]/60 hover:text-[#F4EFE6]'
+                      ? 'bg-bronze text-espresso-deep font-bold shadow'
+                      : 'text-ivory/60 hover:text-ivory'
                   }`}
                 >
                   {r.title}
@@ -306,7 +307,7 @@ export function GlobalPresenceFull() {
             <h2 className="text-3xl font-serif font-bold text-stone-900">
               Verified Regional Supply Lines
             </h2>
-            <p className="mt-2 text-base text-stone-600 max-w-3xl">
+            <p className="mt-2 text-base text-stone-600 max-w-[48rem]">
               Positioning is a sentence about the buyer, not an adjective about the market. Industry links lead directly to published catalogue rows.
             </p>
           </div>
@@ -320,7 +321,7 @@ export function GlobalPresenceFull() {
                 <div>
                   <div className="flex items-baseline justify-between border-b border-stone-200 pb-3 mb-4">
                     <h3 className="font-serif text-xl font-bold text-stone-900">{region.name}</h3>
-                    <span className="font-mono text-xs text-[#A88B68]">
+                    <span className="font-mono text-xs text-bronze">
                       {industries.length} sectors
                     </span>
                   </div>
@@ -343,7 +344,7 @@ export function GlobalPresenceFull() {
                       <Link
                         key={ind.slug}
                         href={`/industries/${ind.slug}`}
-                        className="rounded border border-stone-300 bg-white px-2 py-0.5 text-xs text-stone-700 hover:border-[#A88B68] hover:text-[#241C18] transition-colors"
+                        className="rounded border border-stone-300 bg-white px-2 py-0.5 text-xs text-stone-700 hover:border-bronze hover:text-espresso transition-colors"
                       >
                         {ind.name}
                       </Link>
@@ -357,16 +358,16 @@ export function GlobalPresenceFull() {
       </Section>
 
       {/* 3. Dedicated Loading Ports Section (#ports) */}
-      <Section surface="dark" id="ports" className="py-20 border-t border-[#A88B68]/20">
+      <Section surface="dark" id="ports" className="py-20 border-t border-bronze/20">
         <Container>
-          <div className="border-b border-[#A88B68]/20 pb-6 mb-12">
-            <span className="font-mono text-xs uppercase tracking-widest text-[#A88B68] block mb-2">
+          <div className="border-b border-bronze/20 pb-6 mb-12">
+            <span className="font-mono text-xs uppercase tracking-widest text-bronze block mb-2">
               Maritime Infrastructure
             </span>
-            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-[#F4EFE6]">
+            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-ivory">
               Three Gujarat & Maharashtra Loading Ports
             </h2>
-            <p className="mt-2 text-base text-[#F4EFE6]/70 max-w-3xl">
+            <p className="mt-2 text-base text-ivory/70 max-w-[48rem]">
               Consignments originate within hours of the western seaboard. Cargo routes are chosen by commodity requirements, vessel frequency, and destination port clearance agreements.
             </p>
           </div>
@@ -375,19 +376,19 @@ export function GlobalPresenceFull() {
             {PORTS.map((port) => (
               <div
                 key={port.slug}
-                className="p-6 rounded-2xl border border-[#A88B68]/30 bg-[#241C18] text-[#F4EFE6] flex flex-col justify-between"
+                className="p-6 rounded-2xl border border-bronze/30 bg-espresso text-ivory flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-center justify-between border-b border-[#A88B68]/20 pb-3 mb-4">
-                    <span className="font-mono text-sm font-bold text-[#C4A47C]">{port.locode}</span>
-                    <span className="font-mono text-xs text-[#F4EFE6]/60">Western India</span>
+                  <div className="flex items-center justify-between border-b border-bronze/20 pb-3 mb-4">
+                    <span className="font-mono text-sm font-bold text-bronze">{port.locode}</span>
+                    <span className="font-mono text-xs text-ivory/60">Western India</span>
                   </div>
-                  <h3 className="font-serif text-2xl font-bold text-[#F4EFE6]">{port.name}</h3>
-                  <p className="mt-3 text-sm text-[#F4EFE6]/80 leading-relaxed">
+                  <h3 className="font-serif text-2xl font-bold text-ivory">{port.name}</h3>
+                  <p className="mt-3 text-sm text-ivory/80 leading-relaxed">
                     {port.reason}
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-[#A88B68]/20 flex items-center justify-between text-xs font-mono text-[#A88B68]">
+                <div className="mt-6 pt-4 border-t border-bronze/20 flex items-center justify-between text-xs font-mono text-bronze">
                   <span>Operational Hub</span>
                   <span>Direct Export Route →</span>
                 </div>

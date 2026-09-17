@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React, { useState } from 'react';
 import { Container, Section } from '@/components/ui/layout';
 import { Eyebrow, Prose } from '@/components/ui/typography';
@@ -84,7 +85,7 @@ export function LegalDocumentView({ document: docData }: { document: LegalDocume
                   <dt className="surface-faint spec-value uppercase" data-spec>
                     Review status
                   </dt>
-                  <dd className="surface-fg spec-value text-right font-semibold text-[#A88B68]" data-spec>
+                  <dd className="text-bronze-ink spec-value text-right font-semibold" data-spec>
                     {docData.reviewStatus === 'counsel-approved' ? 'Counsel approved' : 'Internal review'}
                   </dd>
                 </div>
@@ -115,9 +116,9 @@ export function LegalDocumentView({ document: docData }: { document: LegalDocume
                 <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/80">
                   <LineSidebar
                     items={anchors.map((a) => a.heading)}
-                    accentColor="#A88B68"
-                    textColor="#241C18"
-                    markerColor="#C4A47C"
+                    accentColor={BRAND.bronze.hex}
+                    textColor={BRAND.espresso.hex}
+                    markerColor={BRAND.bronze.hex}
                     defaultActive={activeToc}
                     onItemClick={handleTocClick}
                     fontSize={0.88}

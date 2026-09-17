@@ -13,6 +13,8 @@ import { focusFirstInvalid } from '@/lib/forms/focus-first-invalid';
 import { composeEnquiry, type Enquiry } from '@/lib/forms/mailto';
 import { HONEYPOT_FIELD, RfqSubmissionSchema } from '@/lib/forms/schema';
 import type { SubmissionResult } from '@/lib/forms/transport';
+import { TurnstileWidget } from '@/components/forms/turnstile-widget';
+import { BRAND } from '@/lib/tokens/colors';
 import OptionWheel from '@/components/reactbits/OptionWheel/OptionWheel';
 import SpecularButton from '@/components/reactbits/SpecularButton/SpecularButton';
 import ClickSpark from '@/components/reactbits/ClickSpark/ClickSpark';
@@ -111,6 +113,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
 
   const [mountTime] = useState<number>(() => Date.now());
   const [prefillChip, setPrefillChip] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string>('');
 
   // Stepper state: 1 Product & Industry -> 2 Grade / Specification -> 3 Quantity & Destination Port -> 4 Incoterm & Timeline -> 5 Contact & Review
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -456,6 +459,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
           path: paramPath === 'sample' || paramPath === 'audit' ? paramPath : '',
           division: paramDivision,
           submittedAt: mountTime,
+          turnstileToken,
           referringUrl: typeof window !== 'undefined' ? window.location.href : '',
         }),
       });
@@ -546,7 +550,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
       {/* Stepper Progress Bar */}
       <div className="surface-raised surface-hairline border rounded-2xl p-4 sm:p-5">
         <div className="flex items-center justify-between text-xs font-mono mb-3">
-          <span className="text-[#A88B68] font-semibold uppercase tracking-wider">
+          <span className="text-bronze font-semibold uppercase tracking-wider">
             Step {currentStep} of 5 — {stepTitles[currentStep - 1]}
           </span>
           <span className="surface-faint">{Math.round((currentStep / 5) * 100)}% complete</span>
@@ -562,9 +566,9 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
                 onClick={() => (step < currentStep ? goToStep(step) : undefined)}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   isDone
-                    ? 'bg-[#A88B68] cursor-pointer'
+                    ? 'bg-bronze cursor-pointer'
                     : isCurrent
-                      ? 'bg-stone-900 ring-2 ring-[#A88B68]/50'
+                      ? 'ring-bronze/50 bg-stone-900 ring-2'
                       : 'bg-stone-200 cursor-not-allowed'
                 }`}
                 aria-label={`Jump to step ${step}: ${stepTitles[step - 1]}`}
@@ -617,14 +621,14 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
                     }}
                     className={`relative p-3.5 sm:p-4 rounded-xl text-left border transition-all duration-200 flex flex-col justify-between min-h-[90px] sm:min-h-[105px] ${
                       isSelected
-                        ? 'bg-[#241C18] text-[#F4EFE6] border-[#A88B68] shadow-md ring-2 ring-[#A88B68]/30'
+                        ? 'bg-espresso text-ivory border-bronze ring-bronze/30 shadow-md ring-2'
                         : 'bg-white/80 hover:bg-stone-50 border-stone-200/80 text-stone-900'
                     }`}
                   >
                     <div>
                       <span
                         className={`block font-mono text-[10px] uppercase tracking-wider ${
-                          isSelected ? 'text-[#C4A47C]' : 'text-stone-500'
+                          isSelected ? 'text-bronze' : 'text-stone-500'
                         }`}
                       >
                         {ind.slug === 'technology' ? 'Service Export' : 'Product Export'}
@@ -746,7 +750,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
                         className="cursor-pointer rounded-lg px-3 py-2 hover:bg-stone-100 hover:text-stone-950 transition-colors flex items-center justify-between"
                       >
                         <span>{port}</span>
-                        <span className="text-[#A88B68] text-[10px]">Select ↵</span>
+                        <span className="text-bronze text-[10px]">Select ↵</span>
                       </li>
                     ))}
                   </ul>
@@ -756,7 +760,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
 
             {/* Quick Port Chips from Taxonomy */}
             <div className="p-4 rounded-xl bg-stone-50 border border-stone-200">
-              <span className="font-mono text-xs text-[#A88B68] uppercase tracking-wider block mb-2">
+              <span className="text-bronze font-mono text-xs uppercase tracking-wider block mb-2">
                 Common Loading Ports from Gujarat Belt:
               </span>
               <div className="flex flex-wrap gap-2">
@@ -768,7 +772,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
                       set('destination', `${p.name} [${p.locode}]`);
                       setShowPortSuggestions(false);
                     }}
-                    className="font-mono text-xs px-2.5 py-1 rounded-md border border-stone-300 bg-white hover:border-[#A88B68] hover:text-[#A88B68] transition-colors"
+                    className="hover:border-bronze hover:text-bronze font-mono text-xs px-2.5 py-1 rounded-md border border-stone-300 bg-white transition-colors"
                   >
                     {p.name} ({p.locode})
                   </button>
@@ -801,7 +805,7 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
                       defaultSelected={INCOTERMS.indexOf(targetIncoterm) !== -1 ? INCOTERMS.indexOf(targetIncoterm) : 3}
                       onChange={(_idx, item) => setTargetIncoterm(item)}
                       activeColor="#241C18"
-                      textColor="#A88B68"
+                      textColor={BRAND.bronze.hex}
                       fontSize={1.4}
                     />
                   </div>
@@ -910,6 +914,8 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
               onChange={(event) => set('referral', event.target.value)}
               disabled={isSubmitting}
             />
+
+            <TurnstileWidget onVerify={setTurnstileToken} onExpire={() => setTurnstileToken('')} />
           </div>
         )}
 
@@ -937,18 +943,18 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
                 Continue to Step {currentStep + 1} →
               </button>
             ) : (
-              <ClickSpark sparkColor="#A88B68" sparkCount={12} duration={400}>
+              <ClickSpark sparkColor={BRAND.bronze.hex} sparkCount={12} duration={400}>
                 <SpecularButton
                   type="submit"
                   size="md"
                   disabled={isSubmitting}
                   radius={12}
-                  tint="#A88B68"
+                  tint={BRAND.bronze.hex}
                   tintOpacity={0.15}
-                  lineColor="#A88B68"
-                  textColor="#F4EFE6"
-                  baseColor="#241C18"
-                  className="bg-[#241C18] text-[#F4EFE6] px-8 py-3.5 font-medium"
+                  lineColor={BRAND.bronze.hex}
+                  textColor={BRAND.ivory.hex}
+                  baseColor={BRAND.espresso.hex}
+                  className="bg-espresso text-ivory px-8 py-3.5 font-medium"
                 >
                   {isSubmitting ? 'Transmitting to Export Desk...' : 'Transmit RFQ to Export Desk →'}
                 </SpecularButton>
@@ -1010,7 +1016,7 @@ function SentPanel({ href, reference }: { href: string; reference?: string }) {
   }, []);
 
   return (
-    <ClickSpark sparkColor="#A88B68" sparkCount={16} duration={500}>
+    <ClickSpark sparkColor={BRAND.bronze.hex} sparkCount={16} duration={500}>
       <div role="status" className="border-bronze/50 surface-raised flex flex-col gap-md border p-xl rounded-2xl shadow-xl bg-white">
         <div className="flex items-center gap-3">
           <svg
@@ -1040,8 +1046,8 @@ function SentPanel({ href, reference }: { href: string; reference?: string }) {
             : `Your mail client has the enquiry.`}
         </h2>
 
-        <div className="font-mono text-sm text-[#A88B68] font-semibold bg-[#241C18] text-[#F4EFE6] px-4 py-2.5 rounded-xl inline-block max-w-fit">
-          Answered within <CountUp to={24} duration={1.5} className="text-xl font-bold text-[#C4A47C]" /> business hours (IST)
+        <div className="text-bronze bg-espresso text-ivory font-mono text-sm font-semibold px-4 py-2.5 rounded-xl inline-block max-w-fit">
+          Answered within <CountUp to={24} duration={1.5} className="text-bronze text-xl font-bold" /> business hours (IST)
         </div>
 
         <Prose className="text-body-md">

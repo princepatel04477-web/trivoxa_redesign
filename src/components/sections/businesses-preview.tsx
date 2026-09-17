@@ -118,7 +118,7 @@ export function BusinessesPreview() {
               delay={30}
               animateBy="words"
               direction="top"
-              className="max-w-2xl text-center"
+              className="max-w-[42rem] text-center"
             />
           </div>
         </div>

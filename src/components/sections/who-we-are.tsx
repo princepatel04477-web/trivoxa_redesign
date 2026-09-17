@@ -77,7 +77,7 @@ export function WhoWeAre() {
                     width
                     weight
                     italic={false}
-                    textColor="var(--surface-paper, #F4EFE6)"
+                    textColor="var(--color-ivory)"
                   />
                 </span>
                 <span className="block lg:hidden">
@@ -116,7 +116,7 @@ export function WhoWeAre() {
               </div>
 
               {/* Canonical sentence with ScrollReveal */}
-              <div className="text-[clamp(22px,2vw,32px)] leading-relaxed text-[#F4EFE6]">
+              <div className="text-[clamp(22px,2vw,32px)] leading-relaxed text-ivory">
                 <ScrollReveal
                   baseOpacity={0.15}
                   enableBlur={!reducedMotion}
@@ -124,7 +124,7 @@ export function WhoWeAre() {
                   blurStrength={4}
                   wordAnimationEnd="center center"
                   rotationEnd="center center"
-                  textClassName="leading-relaxed font-serif text-[#F4EFE6]"
+                  textClassName="leading-relaxed font-serif text-ivory"
                 >
                   {SHIVESHWAR_CANONICAL_SENTENCE}
                 </ScrollReveal>
@@ -163,7 +163,7 @@ export function WhoWeAre() {
                   <div data-cursor="target">
                     <SpecularButton
                       size="md"
-                      tint="var(--color-accent, #A88B68)"
+                      tint="var(--color-bronze)"
                       tintOpacity={0.4}
                       onClick={() => router.push('/group')}
                       className="cursor-pointer"

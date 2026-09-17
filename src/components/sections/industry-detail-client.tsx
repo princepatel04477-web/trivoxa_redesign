@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React from 'react';
 import Link from 'next/link';
 import { Container, Section, HairlineRow } from '@/components/ui/layout';
@@ -78,14 +79,14 @@ export function IndustryDetailClient({
   return (
     <div className="relative w-full overflow-x-hidden">
       {/* 1. SCROLLEXPAND Hero (COMPULSORY) */}
-      <section className="relative w-full bg-[#171210] text-[#F4EFE6] pt-12">
+      <section className="relative w-full bg-espresso-deep text-ivory pt-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-6">
-          <nav aria-label="Breadcrumb" className="flex items-center gap-2 font-mono text-xs text-[#A88B68]">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 font-mono text-xs text-bronze">
             <Link href="/" className="hover:underline">Home</Link>
             <span>/</span>
             <Link href="/industries" className="hover:underline">Industries</Link>
             <span>/</span>
-            <span className="text-[#F4EFE6]/80">{industry.name}</span>
+            <span className="text-ivory/80">{industry.name}</span>
           </nav>
         </div>
 
@@ -96,10 +97,10 @@ export function IndustryDetailClient({
           startHeight={45}
           scrollDistance={800}
           holdDistance={200}
-          className="bg-[#171210]"
+          className="bg-espresso-deep"
         >
           <div className="mx-auto max-w-5xl px-4 py-12 text-center">
-            <span className="inline-block rounded-full border border-[#A88B68]/40 bg-[#171210]/90 px-3 py-1 font-mono text-xs text-[#A88B68] mb-4">
+            <span className="inline-block rounded-full border border-bronze/40 bg-espresso-deep/90 px-3 py-1 font-mono text-xs text-bronze mb-4">
               {isService ? 'Service Exports Division' : onboarding ? 'Portfolio Onboarding' : 'Verified Export Sector'}
             </span>
 
@@ -107,40 +108,40 @@ export function IndustryDetailClient({
               <MaskedHeading
                 text={industry.name}
                 tag="h1"
-                className="font-serif text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-[#F4EFE6]"
+                className="font-serif text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-ivory"
               />
             </div>
 
-            <div className="mt-4 max-w-3xl mx-auto">
+            <div className="mt-4 max-w-[48rem] mx-auto">
               <BlurText
                 text={industry.shortDescription}
-                className="text-base sm:text-xl text-[#F4EFE6]/80 leading-relaxed justify-center"
+                className="text-base sm:text-xl text-ivory/80 leading-relaxed justify-center"
                 delay={20}
               />
             </div>
 
             {/* Ports + Incoterms SplitFlapText Chips */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 pt-4 border-t border-[#A88B68]/20">
-              <span className="font-mono text-xs text-[#A88B68] uppercase tracking-wider">Ports:</span>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 pt-4 border-t border-bronze/20">
+              <span className="font-mono text-xs text-bronze uppercase tracking-wider">Ports:</span>
               {portsList.map((p) => (
                 <span
                   key={p.locode}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-[#A88B68]/30 bg-[#241C18]/80 px-2.5 py-1 font-mono text-xs text-[#F4EFE6]"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-bronze/30 bg-espresso/80 px-2.5 py-1 font-mono text-xs text-ivory"
                 >
-                  <span className="text-[#F4EFE6]/70">{p.name}</span>
-                  <span className="text-[#A88B68] font-bold">
+                  <span className="text-ivory/70">{p.name}</span>
+                  <span className="text-bronze font-bold">
                     <SplitFlapText text={p.locode} flipDuration={0.4} />
                   </span>
                 </span>
               ))}
 
-              <span className="mx-2 text-[#A88B68]/40 hidden sm:inline">|</span>
+              <span className="mx-2 text-bronze/40 hidden sm:inline">|</span>
 
-              <span className="font-mono text-xs text-[#A88B68] uppercase tracking-wider">Incoterms:</span>
+              <span className="font-mono text-xs text-bronze uppercase tracking-wider">Incoterms:</span>
               {incotermsList.map((term) => (
                 <span
                   key={term}
-                  className="rounded-md border border-stone-800 bg-[#171210] px-2 py-0.5 font-mono text-xs text-[#A88B68]"
+                  className="rounded-md border border-stone-800 bg-espresso-deep px-2 py-0.5 font-mono text-xs text-bronze"
                 >
                   <SplitFlapText text={term} flipDuration={0.4} />
                 </span>
@@ -188,7 +189,7 @@ export function IndustryDetailClient({
                 <UICard key={service.slug} trace className="col-span-12 md:col-span-6 p-6">
                   <h3 className="text-xl font-serif font-medium text-stone-900">{service.name}</h3>
                   <p className="mt-2 text-sm text-stone-600 leading-relaxed">{service.summary}</p>
-                  <p className="mt-4 font-mono text-xs text-[#A88B68]">
+                  <p className="mt-4 font-mono text-xs text-bronze">
                     {service.deliverables.join(' · ')}
                   </p>
                 </UICard>
@@ -228,23 +229,23 @@ export function IndustryDetailClient({
       )}
 
       {/* 5. Specs We Quote Against as AnimatedList */}
-      <Section surface="dark" className="py-16 bg-[#171210] text-[#F4EFE6]">
+      <Section surface="dark" className="py-16 bg-espresso-deep text-ivory">
         <Container>
           <div className="grid grid-cols-12 gap-8 items-start">
             <div className="col-span-12 lg:col-span-5">
-              <p className="font-mono text-xs text-[#A88B68] uppercase tracking-widest mb-2">
+              <p className="font-mono text-xs text-bronze uppercase tracking-widest mb-2">
                 Technical Rigor
               </p>
-              <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#F4EFE6]">
+              <h2 className="font-serif text-3xl sm:text-4xl font-bold text-ivory">
                 Specifications We Quote Against
               </h2>
-              <p className="mt-4 text-sm sm:text-base text-[#F4EFE6]/70 leading-relaxed">
+              <p className="mt-4 text-sm sm:text-base text-ivory/70 leading-relaxed">
                 Before booking vessel space or production capacity, every parameter is verified with our factory floors and testing labs in Surat and Gujarat export clusters.
               </p>
               <div className="mt-6">
                 <Link
                   href="/compliance"
-                  className="font-mono text-xs text-[#A88B68] hover:underline"
+                  className="font-mono text-xs text-bronze hover:underline"
                 >
                   View group compliance registers →
                 </Link>
@@ -341,21 +342,21 @@ export function IndustryDetailClient({
       )}
 
       {/* 8. Buyers, Markets & Compliance */}
-      <Section surface="dark" tight className="py-16 bg-[#171210] text-[#F4EFE6]">
+      <Section surface="dark" tight className="py-16 bg-espresso-deep text-ivory">
         <Container>
           <div className="grid grid-cols-12 gap-12">
             <div className="col-span-12 lg:col-span-6">
               <SectionHeading eyebrow="Buyers & Markets" title="Who we ship this to." />
 
               <div className="mt-6">
-                <Eyebrow tick={false} className="text-[#A88B68]">
+                <Eyebrow tick={false} className="text-bronze">
                   Typical buyers
                 </Eyebrow>
                 <ul className="mt-3 flex flex-wrap gap-2">
                   {industry.typicalBuyers.map((buyer) => (
                     <li
                       key={buyer}
-                      className="border border-[#A88B68]/30 rounded px-3 py-1 text-sm text-[#F4EFE6]/90 bg-[#241C18]/60"
+                      className="border border-bronze/30 rounded px-3 py-1 text-sm text-ivory/90 bg-espresso/60"
                     >
                       {buyer}
                     </li>
@@ -364,10 +365,10 @@ export function IndustryDetailClient({
               </div>
 
               <div className="mt-8">
-                <Eyebrow tick={false} className="text-[#A88B68]">
+                <Eyebrow tick={false} className="text-bronze">
                   Strongest trade corridors
                 </Eyebrow>
-                <ul className="mt-3 divide-y divide-[#A88B68]/20 border-t border-b border-[#A88B68]/20">
+                <ul className="mt-3 divide-y divide-bronze/20 border-t border-b border-bronze/20">
                   {regions.length > 0 ? (
                     regions.map((region) => (
                       <li
@@ -376,15 +377,15 @@ export function IndustryDetailClient({
                       >
                         <Link
                           href="/global-presence"
-                          className="font-medium text-[#F4EFE6] hover:text-[#A88B68] transition-colors"
+                          className="font-medium text-ivory hover:text-bronze transition-colors"
                         >
                           {region.name}
                         </Link>
-                        <span className="text-xs text-[#F4EFE6]/60">{region.marketFocus}</span>
+                        <span className="text-xs text-ivory/60">{region.marketFocus}</span>
                       </li>
                     ))
                   ) : (
-                    <li className="py-3 text-sm text-[#F4EFE6]/60">
+                    <li className="py-3 text-sm text-ivory/60">
                       Quoted per destination port on inquiry.
                     </li>
                   )}
@@ -395,25 +396,25 @@ export function IndustryDetailClient({
             <div className="col-span-12 lg:col-span-6">
               <SectionHeading eyebrow="Compliance & Quality" title="What this industry requires." />
 
-              <ul className="mt-6 divide-y divide-[#A88B68]/20 border-t border-b border-[#A88B68]/20">
+              <ul className="mt-6 divide-y divide-bronze/20 border-t border-b border-bronze/20">
                 {industry.complianceNotes.map((note) => (
                   <li
                     key={note}
-                    className="flex items-start gap-3 py-3 text-sm text-[#F4EFE6]/80 leading-relaxed"
+                    className="flex items-start gap-3 py-3 text-sm text-ivory/80 leading-relaxed"
                   >
-                    <span aria-hidden className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#A88B68]" />
+                    <span aria-hidden className="mt-1.5 size-1.5 shrink-0 rounded-full bg-bronze" />
                     {note}
                   </li>
                 ))}
               </ul>
 
-              <p className="mt-6 text-xs text-[#F4EFE6]/60 leading-relaxed">
+              <p className="mt-6 text-xs text-ivory/60 leading-relaxed">
                 Group credentials — what we hold and what is in progress, with target quarters — are published in one register rather than repeated per industry.
               </p>
 
               <div className="mt-6 flex flex-wrap gap-4">
-                <ArrowLink href="/compliance" className="text-xs text-[#A88B68]">Compliance register</ArrowLink>
-                <ArrowLink href="/businesses#how-it-works" className="text-xs text-[#A88B68]">How an order runs</ArrowLink>
+                <ArrowLink href="/compliance" className="text-xs text-bronze">Compliance register</ArrowLink>
+                <ArrowLink href="/businesses#how-it-works" className="text-xs text-bronze">How an order runs</ArrowLink>
               </div>
             </div>
           </div>
@@ -426,7 +427,7 @@ export function IndustryDetailClient({
           <Container>
             <HairlineRow label="Related industries" />
             <div className="mt-8 flex flex-col lg:flex-row items-center justify-between gap-8">
-              <div className="max-w-md">
+              <div className="max-w-[28rem]">
                 <h3 className="text-2xl font-serif font-bold text-stone-900">
                   Cross-Industry Sourcing
                 </h3>
@@ -436,7 +437,7 @@ export function IndustryDetailClient({
                 <div className="mt-6">
                   <Link
                     href="/industries"
-                    className="font-mono text-xs text-[#A88B68] hover:underline"
+                    className="font-mono text-xs text-bronze hover:underline"
                   >
                     View all 9 industries →
                   </Link>
@@ -449,20 +450,20 @@ export function IndustryDetailClient({
                   {related.slice(0, 4).map((entry) => (
                     <SwapCard
                       key={entry.slug}
-                      customClass="p-6 bg-[#241C18] text-[#F4EFE6] border border-[#A88B68]/40 shadow-xl flex flex-col justify-between"
+                      customClass="p-6 bg-espresso text-ivory border border-bronze/40 shadow-xl flex flex-col justify-between"
                     >
                       <div>
-                        <span className="font-mono text-[10px] text-[#A88B68] uppercase tracking-wider block">
+                        <span className="font-mono text-[10px] text-bronze uppercase tracking-wider block">
                           Related Sector · {entry.status}
                         </span>
-                        <h4 className="font-serif text-xl font-bold text-[#F4EFE6] mt-2">
+                        <h4 className="font-serif text-xl font-bold text-ivory mt-2">
                           {entry.name}
                         </h4>
                       </div>
-                      <div className="mt-4 pt-2 border-t border-[#A88B68]/20 flex justify-between items-center">
+                      <div className="mt-4 pt-2 border-t border-bronze/20 flex justify-between items-center">
                         <Link
                           href={`/industries/${entry.slug}`}
-                          className="font-mono text-xs text-[#A88B68] hover:underline"
+                          className="font-mono text-xs text-bronze hover:underline"
                         >
                           Explore sector →
                         </Link>
@@ -477,18 +478,18 @@ export function IndustryDetailClient({
       )}
 
       {/* 10. Sticky CTA with ElectricBorder */}
-      <div className="sticky bottom-4 z-40 mx-auto max-w-4xl px-4 py-2 pointer-events-auto">
+      <div className="sticky bottom-4 z-40 mx-auto max-w-[56rem] px-4 py-2 pointer-events-auto">
         <ElectricBorder
-          color="#A88B68"
+          color={BRAND.bronze.hex}
           chaos={0.25}
           borderRadius={18}
-          className="p-4 bg-[#171210]/95 backdrop-blur-md shadow-2xl border border-[#A88B68]/50 flex flex-col sm:flex-row items-center justify-between gap-4"
+          className="p-4 bg-espresso-deep/95 backdrop-blur-md shadow-2xl border border-bronze/50 flex flex-col sm:flex-row items-center justify-between gap-4"
         >
           <div className="flex flex-col">
-            <span className="font-serif text-base sm:text-lg font-semibold text-[#F4EFE6]">
+            <span className="font-serif text-base sm:text-lg font-semibold text-ivory">
               Request a quote for {industry.name}
             </span>
-            <span className="font-mono text-xs text-[#A88B68]">
+            <span className="font-mono text-xs text-bronze">
               Response within 24 business hours (IST) with HS code and MOQ
             </span>
           </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React, { useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -21,78 +22,78 @@ export function GroupHero() {
   const reducedMotion = useReducedMotion();
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-[#171210] py-24 sm:py-32 text-[#F4EFE6]">
+    <section ref={sectionRef} className="relative overflow-hidden bg-espresso-deep py-24 sm:py-32 text-ivory">
       {/* LightRays WebGL background with CSS fallback */}
       <div className="absolute inset-0 pointer-events-none opacity-50">
         {webglSlot.hasSlot && !reducedMotion ? (
           <LightRays
             raysOrigin="top-center"
-            raysColor="#A88B68"
+            raysColor={BRAND.bronze.hex}
             raysSpeed={1.0}
             lightSpread={0.7}
             rayLength={1.8}
             noiseAmount={0.04}
           />
         ) : (
-          <div className="h-full w-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#A88B68]/25 via-[#241C18]/80 to-[#171210]" />
+          <div className="h-full w-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-bronze/25 via-espresso/80 to-espresso-deep" />
         )}
       </div>
 
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#171210]/60 to-[#171210] pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-espresso-deep/60 to-espresso-deep pointer-events-none" />
 
       <Container className="relative z-10">
         {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 font-mono text-xs text-[#A88B68]">
+        <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 font-mono text-xs text-bronze">
           <Link href="/" className="hover:underline">Home</Link>
           <span>/</span>
-          <span className="text-[#F4EFE6]/80">The Group</span>
+          <span className="text-ivory/80">The Group</span>
         </nav>
 
-        <p className="eyebrow font-mono text-xs uppercase tracking-widest text-[#A88B68] mb-4">
+        <p className="eyebrow font-mono text-xs uppercase tracking-widest text-bronze mb-4">
           Corporate Heritage & Sourcing Network
         </p>
 
         {/* TextPressure Title */}
-        <h1 className="my-6 max-w-3xl">
+        <h1 className="my-6 max-w-[48rem]">
           <span className="hidden sm:block h-28 w-full">
             <TextPressure
               as="span"
               text="The Group"
-              textColor="#F4EFE6"
-              strokeColor="#A88B68"
+              textColor={BRAND.ivory.hex}
+              strokeColor={BRAND.bronze.hex}
               fontFamily="var(--font-serif, serif)"
             />
           </span>
-          <span className="sm:hidden font-serif text-5xl font-bold text-[#F4EFE6] block">
+          <span className="sm:hidden font-serif text-5xl font-bold text-ivory block">
             The Group
           </span>
         </h1>
 
-        <p className="mt-6 max-w-3xl text-lg sm:text-xl text-[#F4EFE6]/90 leading-relaxed font-sans">
+        <p className="mt-6 max-w-[48rem] text-lg sm:text-xl text-ivory/90 leading-relaxed font-sans">
           {SHIVESHWAR_CANONICAL_SENTENCE}
         </p>
 
         {/* Meta Stats Bar */}
-        <div className="mt-12 grid grid-cols-2 gap-6 border-t border-[#A88B68]/20 pt-8 sm:grid-cols-5">
+        <div className="mt-12 grid grid-cols-2 gap-6 border-t border-bronze/20 pt-8 sm:grid-cols-5">
           <div>
-            <p className="font-mono text-xs text-[#A88B68]">Established</p>
-            <p className="font-serif text-2xl font-bold text-[#F4EFE6]">{COMPANY.founded.year}</p>
+            <p className="font-mono text-xs text-bronze">Established</p>
+            <p className="font-serif text-2xl font-bold text-ivory">{COMPANY.founded.year}</p>
           </div>
           <div>
-            <p className="font-mono text-xs text-[#A88B68]">Headquarters</p>
-            <p className="font-serif text-2xl font-bold text-[#F4EFE6]">Surat, Gujarat</p>
+            <p className="font-mono text-xs text-bronze">Headquarters</p>
+            <p className="font-serif text-2xl font-bold text-ivory">Surat, Gujarat</p>
           </div>
           <div>
-            <p className="font-mono text-xs text-[#A88B68]">Mill Foundation</p>
-            <p className="font-serif text-2xl font-bold text-[#F4EFE6]">Shiveshwar</p>
+            <p className="font-mono text-xs text-bronze">Mill Foundation</p>
+            <p className="font-serif text-2xl font-bold text-ivory">Shiveshwar</p>
           </div>
           <div>
-            <p className="font-mono text-xs text-[#A88B68]">Divisions</p>
-            <p className="font-serif text-2xl font-bold text-[#F4EFE6]">{DIVISIONS.length}</p>
+            <p className="font-mono text-xs text-bronze">Divisions</p>
+            <p className="font-serif text-2xl font-bold text-ivory">{DIVISIONS.length}</p>
           </div>
           <div>
-            <p className="font-mono text-xs text-[#A88B68]">Export Sectors</p>
-            <p className="font-serif text-2xl font-bold text-[#F4EFE6]">{INDUSTRIES.length}</p>
+            <p className="font-mono text-xs text-bronze">Export Sectors</p>
+            <p className="font-serif text-2xl font-bold text-ivory">{INDUSTRIES.length}</p>
           </div>
         </div>
 

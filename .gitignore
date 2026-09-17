@@ -29,6 +29,7 @@ yarn-error.log*
 .cache
 .turbo
 *.tsbuildinfo
+.wrangler/
 
 # uploaded brand assets are tracked; generated derivatives are not
 /public/brand/_generated/

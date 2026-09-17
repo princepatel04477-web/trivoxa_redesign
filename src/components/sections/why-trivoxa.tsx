@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React, { useEffect, useRef } from 'react';
 import { Factory, ClipboardCheck, Stamp, Handshake } from 'lucide-react';
 import { Container, Section } from '@/components/ui/layout';
@@ -277,13 +278,13 @@ export function WhyTrivoxa() {
               </div>
 
               {/* Step visual "Order 1 -> 2 -> 3 -> 4 -> 5" */}
-              <div className="mt-4 flex flex-col justify-center rounded-xl border border-[#3D322A]/50 bg-[#171210]/60 p-4">
-                <div className="mb-2 flex items-center justify-between font-mono text-[11px] text-[#8C8279]">
+              <div className="mt-4 flex flex-col justify-center rounded-xl border border bg-espresso-deep/60 p-4">
+                <div className="mb-2 flex items-center justify-between font-mono text-[11px] surface-faint">
                   <span>Order 1</span>
                   <span>Order 2</span>
                   <span>Order 3</span>
                   <span>Order 4</span>
-                  <span className="font-semibold text-[#A88B68]">Order 5 (Partner)</span>
+                  <span className="font-semibold text-bronze">Order 5 (Partner)</span>
                 </div>
                 <svg
                   ref={stepsSvgRef}
@@ -297,27 +298,27 @@ export function WhyTrivoxa() {
                     y1="16"
                     x2="304"
                     y2="16"
-                    stroke="#3D322A"
+                    stroke="var(--surface-hairline)"
                     strokeWidth="2"
                     strokeDasharray="4 4"
                   />
                   <path
                     className="step-path"
                     d="M 16 16 L 304 16"
-                    stroke="#A88B68"
+                    stroke={BRAND.bronze.hex}
                     strokeWidth="3"
                     strokeLinecap="round"
                   />
-                  <circle cx="16" cy="16" r="5" fill="#171210" stroke="#A88B68" strokeWidth="2" />
-                  <circle cx="88" cy="16" r="5" fill="#171210" stroke="#A88B68" strokeWidth="2" />
-                  <circle cx="160" cy="16" r="5" fill="#171210" stroke="#A88B68" strokeWidth="2" />
-                  <circle cx="232" cy="16" r="5" fill="#171210" stroke="#A88B68" strokeWidth="2" />
+                  <circle cx="16" cy="16" r="5" fill={BRAND.espressoDeep.hex} stroke={BRAND.bronze.hex} strokeWidth="2" />
+                  <circle cx="88" cy="16" r="5" fill={BRAND.espressoDeep.hex} stroke={BRAND.bronze.hex} strokeWidth="2" />
+                  <circle cx="160" cy="16" r="5" fill={BRAND.espressoDeep.hex} stroke={BRAND.bronze.hex} strokeWidth="2" />
+                  <circle cx="232" cy="16" r="5" fill={BRAND.espressoDeep.hex} stroke={BRAND.bronze.hex} strokeWidth="2" />
                   <circle
                     className="dot-glow"
                     cx="304"
                     cy="16"
                     r="7"
-                    fill="#A88B68"
+                    fill={BRAND.bronze.hex}
                     filter="drop-shadow(0 0 6px rgba(168,139,104,0.8))"
                   />
                 </svg>

@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -10,6 +11,7 @@ import AnimatedList from '@/components/reactbits/AnimatedList/AnimatedList';
 import ClickSpark from '@/components/reactbits/ClickSpark/ClickSpark';
 import SplitText from '@/components/reactbits/SplitText/SplitText';
 import { INSIGHT_SERIES, type InsightSeries } from '@/content/editorial';
+import { HONEYPOT_FIELD } from '@/lib/forms/mailto';
 import { useReducedMotion } from '@/lib/motion/useReducedMotion';
 import { gsap } from 'gsap';
 import { Flip } from 'gsap/Flip';
@@ -48,7 +50,11 @@ const FEATURED_BRIEFS = [
 export function InsightsClient() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [email, setEmail] = useState('');
+  const [botField, setBotField] = useState('');
+  const [mountTime] = useState<number>(() => Date.now());
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [subscribeError, setSubscribeError] = useState('');
   const listContainerRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
 
@@ -82,28 +88,51 @@ export function InsightsClient() {
     date: b.date,
   }));
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
-    setIsSubscribed(true);
+    if (!email || !email.includes('@')) {
+      setSubscribeError('Enter a valid business email address.');
+      return;
+    }
+    setSubscribeError('');
+    setIsSubscribing(true);
+
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, [HONEYPOT_FIELD]: botField, submittedAt: mountTime }),
+      });
+
+      if (res.ok) {
+        setIsSubscribed(true);
+      } else {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        setSubscribeError(data.error || 'Subscription failed. Please email us directly.');
+      }
+    } catch {
+      setSubscribeError('Connection error. Please write to hello@trivoxagroup.com.');
+    } finally {
+      setIsSubscribing(false);
+    }
   };
 
   return (
     <div className="w-full">
       {/* 1. Hero */}
-      <section className="bg-[#171210] py-20 text-[#F4EFE6] border-b border-[#A88B68]/20">
+      <section className="bg-espresso-deep py-20 text-ivory border-b border-bronze/20">
         <Container>
-          <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-2 font-mono text-xs text-[#A88B68]">
+          <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-2 font-mono text-xs text-bronze">
             <Link href="/" className="hover:underline">Home</Link>
             <span>/</span>
-            <span className="text-[#F4EFE6]/80">Insights</span>
+            <span className="text-ivory/80">Insights</span>
           </nav>
 
-          <p className="font-mono text-xs uppercase tracking-widest text-[#A88B68] mb-3">
+          <p className="font-mono text-xs uppercase tracking-widest text-bronze mb-3">
             Editorial & Trade Intelligence
           </p>
 
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-[#F4EFE6] max-w-4xl">
+          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-ivory max-w-[56rem]">
             <SplitText
               text="What we are learning about these export corridors."
               tag="span"
@@ -112,39 +141,39 @@ export function InsightsClient() {
             />
           </h1>
 
-          <p className="mt-6 max-w-3xl text-base sm:text-lg text-[#F4EFE6]/80 leading-relaxed font-sans">
+          <p className="mt-6 max-w-[48rem] text-base sm:text-lg text-ivory/80 leading-relaxed font-sans">
             We publish when we have something a buyer can act on — a price movement with the HS heading named, a credential with its registration number, a document set from a real consignment.
           </p>
 
-          <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-[#A88B68]/20 pt-6">
+          <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-bronze/20 pt-6">
             <div>
-              <p className="font-mono text-xs text-[#A88B68]">Series Defined</p>
-              <p className="font-serif text-2xl font-bold text-[#F4EFE6]">{INSIGHT_SERIES.length}</p>
+              <p className="font-mono text-xs text-bronze">Series Defined</p>
+              <p className="font-serif text-2xl font-bold text-ivory">{INSIGHT_SERIES.length}</p>
             </div>
             <div>
-              <p className="font-mono text-xs text-[#A88B68]">First Release</p>
-              <p className="font-serif text-2xl font-bold text-[#F4EFE6]">2026-Q4</p>
+              <p className="font-mono text-xs text-bronze">First Release</p>
+              <p className="font-serif text-2xl font-bold text-ivory">2026-Q4</p>
             </div>
             <div>
-              <p className="font-mono text-xs text-[#A88B68]">Cadence</p>
-              <p className="font-serif text-2xl font-bold text-[#F4EFE6]">Quarterly</p>
+              <p className="font-mono text-xs text-bronze">Cadence</p>
+              <p className="font-serif text-2xl font-bold text-ivory">Quarterly</p>
             </div>
             <div>
-              <p className="font-mono text-xs text-[#A88B68]">Next Up</p>
-              <p className="font-serif text-2xl font-bold text-[#F4EFE6]">HS Analytics</p>
+              <p className="font-mono text-xs text-bronze">Next Up</p>
+              <p className="font-serif text-2xl font-bold text-ivory">HS Analytics</p>
             </div>
           </div>
         </Container>
       </section>
 
       {/* 2. DEPTHCAROUSEL for Featured Editorial Series (COMPULSORY) */}
-      <section className="py-20 bg-[#171210] overflow-hidden text-[#F4EFE6]">
+      <section className="py-20 bg-espresso-deep overflow-hidden text-ivory">
         <Container>
-          <div className="mb-8 text-center max-w-2xl mx-auto">
-            <span className="font-mono text-xs uppercase tracking-widest text-[#A88B68] block mb-2">
+          <div className="mb-8 text-center max-w-[42rem] mx-auto">
+            <span className="font-mono text-xs uppercase tracking-widest text-bronze block mb-2">
               Featured Editorial Tracks
             </span>
-            <h2 className="font-serif text-3xl font-bold text-[#F4EFE6]">
+            <h2 className="font-serif text-3xl font-bold text-ivory">
               Intelligence Built on Real Freight Data
             </h2>
           </div>
@@ -163,7 +192,7 @@ export function InsightsClient() {
               renderItem={(rawItem) => {
                 const item = rawItem as (typeof carouselItems)[0];
                 return (
-                  <div className="relative h-full w-full overflow-hidden rounded-[24px] border border-[#A88B68]/40 bg-[#241C18] p-6 text-[#F4EFE6] flex flex-col justify-between shadow-2xl">
+                  <div className="relative h-full w-full overflow-hidden rounded-[24px] border border-bronze/40 bg-espresso p-6 text-ivory flex flex-col justify-between shadow-2xl">
                     <div className="relative h-44 w-full overflow-hidden rounded-xl">
                       <Image
                         src={item.image}
@@ -171,28 +200,28 @@ export function InsightsClient() {
                         fill
                         className="object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#241C18] to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-espresso to-transparent" />
                     </div>
 
                     <div className="mt-4 flex-1 flex flex-col justify-between">
                       <div>
-                        <div className="flex items-center justify-between font-mono text-[11px] text-[#A88B68]">
+                        <div className="flex items-center justify-between font-mono text-[11px] text-bronze">
                           <span>{item.series}</span>
                           <span>{item.date}</span>
                         </div>
-                        <h3 className="font-serif text-xl font-bold text-[#F4EFE6] mt-2">
+                        <h3 className="font-serif text-xl font-bold text-ivory mt-2">
                           {item.title}
                         </h3>
-                        <p className="mt-2 text-xs text-[#F4EFE6]/75 leading-relaxed line-clamp-3">
+                        <p className="mt-2 text-xs text-ivory/75 leading-relaxed line-clamp-3">
                           {item.description}
                         </p>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-[#A88B68]/20 flex items-center justify-between">
-                        <span className="font-mono text-[11px] text-[#A88B68]">
+                      <div className="mt-4 pt-3 border-t border-bronze/20 flex items-center justify-between">
+                        <span className="font-mono text-[11px] text-bronze">
                           Read Series Scope →
                         </span>
-                        <ArrowUpRight className="size-4 text-[#A88B68]" />
+                        <ArrowUpRight className="size-4 text-bronze" />
                       </div>
                     </div>
                   </div>
@@ -223,7 +252,7 @@ export function InsightsClient() {
                 onClick={() => handleFilter('all')}
                 className={`px-3.5 py-1 rounded-full font-mono text-xs transition-colors ${
                   activeCategory === 'all'
-                    ? 'bg-[#241C18] text-[#FAF8F3] font-semibold'
+                    ? 'bg-espresso text-ivory-soft font-semibold'
                     : 'text-stone-600 hover:text-stone-900'
                 }`}
               >
@@ -236,7 +265,7 @@ export function InsightsClient() {
                   onClick={() => handleFilter(s.slug)}
                   className={`px-3.5 py-1 rounded-full font-mono text-xs transition-colors ${
                     activeCategory === s.slug
-                      ? 'bg-[#241C18] text-[#FAF8F3] font-semibold'
+                      ? 'bg-espresso text-ivory-soft font-semibold'
                       : 'text-stone-600 hover:text-stone-900'
                   }`}
                 >
@@ -254,7 +283,7 @@ export function InsightsClient() {
               >
                 <div>
                   <div className="flex items-center justify-between border-b border-stone-100 pb-3 mb-4">
-                    <span className="font-mono text-xs text-[#A88B68] font-semibold">
+                    <span className="font-mono text-xs text-bronze font-semibold">
                       {series.cadence}
                     </span>
                     <span className="font-mono text-[10px] uppercase text-stone-400">
@@ -277,7 +306,7 @@ export function InsightsClient() {
                   </div>
                 </div>
 
-                <div className="mt-8 pt-4 border-t border-stone-100 flex items-center justify-between text-xs font-mono text-[#A88B68]">
+                <div className="mt-8 pt-4 border-t border-stone-100 flex items-center justify-between text-xs font-mono text-bronze">
                   <span>Direct to subscribers</span>
                   <span>Quarterly →</span>
                 </div>
@@ -288,47 +317,65 @@ export function InsightsClient() {
       </Section>
 
       {/* 4. #subscribe: Animated Newsletter Form (same as footer) */}
-      <Section surface="dark" id="subscribe" className="py-20 bg-[#171210] text-[#F4EFE6] border-t border-[#A88B68]/20 scroll-mt-24">
+      <Section surface="dark" id="subscribe" className="py-20 bg-espresso-deep text-ivory border-t border-bronze/20 scroll-mt-24">
         <Container>
-          <div className="max-w-2xl mx-auto text-center">
-            <span className="font-mono text-xs uppercase tracking-widest text-[#A88B68] block mb-3">
+          <div className="max-w-[42rem] mx-auto text-center">
+            <span className="font-mono text-xs uppercase tracking-widest text-bronze block mb-3">
               Quarterly Briefing
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#F4EFE6]">
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-ivory">
               Be told when the first trade report goes out.
             </h2>
-            <p className="mt-4 text-sm sm:text-base text-[#F4EFE6]/80 leading-relaxed font-sans">
+            <p className="mt-4 text-sm sm:text-base text-ivory/80 leading-relaxed font-sans">
               Subscribe to receive our direct briefings on market intelligence, tariff shifts, and export compliance from our desks in Surat.
             </p>
 
-            <div className="mt-8 max-w-md mx-auto">
+            <div className="mt-8 max-w-[28rem] mx-auto">
               {isSubscribed ? (
-                <div className="rounded-xl border border-[#A88B68]/40 bg-[#241C18] p-4 text-center font-mono text-xs text-[#A88B68]">
+                <div className="rounded-xl border border-bronze/40 bg-espresso p-4 text-center font-mono text-xs text-bronze">
                   ✓ Subscribed to quarterly dispatch. First release arrives in 2026-Q4.
                 </div>
               ) : (
-                <ClickSpark sparkColor="#A88B68" sparkCount={8}>
-                  <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2">
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter corporate email..."
-                      className="flex-1 rounded-xl border border-stone-800 bg-[#241C18] px-4 py-3 text-xs text-[#F4EFE6] placeholder-stone-500 outline-none transition-all duration-300 focus:border-[#A88B68] focus:ring-1 focus:ring-[#A88B68]"
-                    />
-                    <button
-                      type="submit"
-                      className="rounded-xl border border-[#A88B68]/40 bg-[#A88B68] px-5 py-3 font-mono text-xs font-semibold text-[#171210] transition-colors hover:bg-[#C4A47C]"
-                    >
-                      Subscribe →
-                    </button>
+                <ClickSpark sparkColor={BRAND.bronze.hex} sparkCount={8}>
+                  <form onSubmit={(e) => void handleSubscribe(e)} className="flex flex-col gap-2" noValidate>
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <input
+                        type="email"
+                        required
+                        autoComplete="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        disabled={isSubscribing}
+                        placeholder="Enter corporate email..."
+                        className="flex-1 rounded-xl border border-stone-800 bg-espresso px-4 py-3 text-xs text-ivory placeholder-stone-500 outline-none transition-all duration-300 focus:border-bronze focus:ring-1 focus:ring-bronze disabled:opacity-60"
+                      />
+                      <button
+                        type="submit"
+                        disabled={isSubscribing}
+                        className="rounded-xl border border-bronze/40 bg-bronze px-5 py-3 font-mono text-xs font-semibold text-espresso-deep transition-colors hover:bg-bronze disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {isSubscribing ? 'Subscribing…' : 'Subscribe →'}
+                      </button>
+                    </div>
+                    <div className="absolute -left-[9999px] top-0" aria-hidden>
+                      <input
+                        tabIndex={-1}
+                        autoComplete="off"
+                        value={botField}
+                        onChange={(e) => setBotField(e.target.value)}
+                      />
+                    </div>
+                    {subscribeError ? (
+                      <p role="alert" className="text-left text-xs text-red-400">
+                        {subscribeError}
+                      </p>
+                    ) : null}
                   </form>
                 </ClickSpark>
               )}
             </div>
 
-            <p className="mt-4 text-[11px] font-mono text-[#F4EFE6]/50">
+            <p className="mt-4 text-[11px] font-mono text-ivory/50">
               No tracking pixels · Delivered to group-domain and corporate inboxes only.
             </p>
           </div>

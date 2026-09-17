@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import {
@@ -117,14 +118,14 @@ export function IndustriesPreview() {
       />
 
       <Container className="relative z-10">
-        <div className="mb-12 max-w-2xl">
-          <p className="font-mono text-xs font-semibold tracking-widest text-[#A88B68] uppercase mb-3">
+        <div className="mb-12 max-w-[42rem]">
+          <p className="font-mono text-xs font-semibold tracking-widest text-bronze uppercase mb-3">
             Industries We Serve
           </p>
-          <h2 className="font-serif text-3xl font-medium text-[#F4EFE6] sm:text-4xl md:text-5xl leading-tight">
+          <h2 className="font-serif text-3xl font-medium text-ivory sm:text-4xl md:text-5xl leading-tight">
             Supporting the Industries That Shape Tomorrow.
           </h2>
-          <p className="mt-3 text-sm text-[#8C8279] leading-relaxed">
+          <p className="mt-3 text-sm surface-faint leading-relaxed">
             Nine export sectors structured around verified manufacturing lineages, quality controls, and established port corridors.
           </p>
         </div>
@@ -181,8 +182,8 @@ export function IndustriesPreview() {
                 <div
                   className={`relative h-full w-full overflow-hidden rounded-[20px] border transition-all duration-300 flex flex-col justify-between p-7 select-none ${
                     isActive
-                      ? 'border-[#A88B68]/60 bg-[#241C18] shadow-[0_25px_60px_rgba(0,0,0,0.85)]'
-                      : 'border-[#3D322A] bg-[#171210]'
+                      ? 'border-bronze/60 bg-espresso shadow-[0_25px_60px_rgba(0,0,0,0.85)]'
+                      : 'border bg-espresso-deep'
                   }`}
                 >
                   {/* Subtle radial glow */}
@@ -193,19 +194,19 @@ export function IndustriesPreview() {
 
                   {/* Top card bar: Number + Badge */}
                   <div className="relative z-10 flex items-center justify-between">
-                    <span className="font-mono text-xs text-[#A88B68] font-bold tracking-wider">
+                    <span className="font-mono text-xs text-bronze font-bold tracking-wider">
                       {numStr}
                     </span>
                     {isFurniture ? (
-                      <span className="rounded-full border border-[#A88B68]/40 bg-[#171210]/90 px-3 py-1 font-mono text-[10px] text-[#A88B68]">
+                      <span className="rounded-full border border-bronze/40 bg-espresso-deep/90 px-3 py-1 font-mono text-[10px] text-bronze">
                         <ShinyText text="Quoted, not yet catalogued" speed={3} />
                       </span>
                     ) : item.status === 'onboarding' ? (
-                      <span className="rounded-full border border-[#3D322A] bg-[#171210]/90 px-3 py-1 font-mono text-[10px] text-[#8C8279]">
+                      <span className="rounded-full border border bg-espresso-deep/90 px-3 py-1 font-mono text-[10px] surface-faint">
                         In Onboarding
                       </span>
                     ) : (
-                      <span className="rounded-full border border-[#A88B68]/30 bg-[#A88B68]/10 px-3 py-1 font-mono text-[10px] text-[#C9AE89]">
+                      <span className="rounded-full border border-bronze/30 bg-bronze/10 px-3 py-1 font-mono text-[10px] text-bronze">
                         Live Export
                       </span>
                     )}
@@ -213,22 +214,22 @@ export function IndustriesPreview() {
 
                   {/* Center: Large Architectural Icon */}
                   <div className="relative z-10 my-auto flex items-center justify-center py-6">
-                    <div className="flex size-20 items-center justify-center rounded-2xl border border-[#3D322A] bg-[#171210]/70 text-[#A88B68] shadow-inner transition-transform duration-500 hover:scale-105">
+                    <div className="flex size-20 items-center justify-center rounded-2xl border border bg-espresso-deep/70 text-bronze shadow-inner transition-transform duration-500 hover:scale-105">
                       <IconComp className="size-10 stroke-[1.25]" />
                     </div>
                   </div>
 
                   {/* Bottom: Title, Description, Link */}
                   <div className="relative z-10 flex flex-col">
-                    <h3 className="font-serif text-2xl font-medium text-[#F4EFE6] leading-tight">
+                    <h3 className="font-serif text-2xl font-medium text-ivory leading-tight">
                       {item.title}
                     </h3>
-                    <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-[#8C8279]">
+                    <p className="mt-2 line-clamp-2 text-xs leading-relaxed surface-faint">
                       {item.description}
                     </p>
                     <Link
                       href={`/industries/${item.slug}`}
-                      className="group mt-4 inline-flex items-center gap-1.5 font-mono text-xs text-[#A88B68] transition-colors hover:text-[#F4EFE6]"
+                      className="group mt-4 inline-flex items-center gap-1.5 font-mono text-xs text-bronze transition-colors hover:text-ivory"
                     >
                       <span>Explore industry</span>
                       <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -279,8 +280,8 @@ export function IndustriesPreview() {
         {/* View all 9 industries StarBorder CTA */}
         <div className="mt-10 flex justify-center">
           <Link href="/industries" data-cursor="target">
-            <StarBorder color="#A88B68" speed="5s">
-              <span className="font-mono text-xs uppercase tracking-wider text-[#F4EFE6] px-4 py-1 inline-block">
+            <StarBorder color={BRAND.bronze.hex} speed="5s">
+              <span className="font-mono text-xs uppercase tracking-wider text-ivory px-4 py-1 inline-block">
                 View all 9 industries →
               </span>
             </StarBorder>

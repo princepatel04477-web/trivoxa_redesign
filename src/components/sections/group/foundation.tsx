@@ -20,7 +20,7 @@ export function GroupFoundation() {
   ];
 
   return (
-    <Section surface="deep" id="foundation" className="scroll-mt-24 py-24 bg-[#171210] text-[#F4EFE6] overflow-hidden">
+    <Section surface="deep" id="foundation" className="scroll-mt-24 py-24 bg-espresso-deep text-ivory overflow-hidden">
       <Container>
         <div className="grid grid-cols-12 gap-12 items-center">
           {/* Left Column: Headings and ScrollReveal copy */}
@@ -36,17 +36,17 @@ export function GroupFoundation() {
                 baseOpacity={0.15}
                 enableBlur={true}
                 blurStrength={3}
-                containerClassName="text-base sm:text-lg text-[#F4EFE6]/90 leading-relaxed font-sans"
+                containerClassName="text-base sm:text-lg text-ivory/90 leading-relaxed font-sans"
               >
                 {SHIVESHWAR_CANONICAL_SENTENCE}
               </ScrollReveal>
             </div>
 
-            <div className="mt-8 p-6 rounded-2xl border border-[#A88B68]/30 bg-[#241C18]/60">
-              <p className="font-mono text-xs uppercase tracking-widest text-[#A88B68] mb-2">
+            <div className="mt-8 p-6 rounded-2xl border border-bronze/30 bg-espresso/60">
+              <p className="font-mono text-xs uppercase tracking-widest text-bronze mb-2">
                 Manufacturing Assurance
               </p>
-              <p className="text-sm text-[#F4EFE6]/80 leading-relaxed">
+              <p className="text-sm text-ivory/80 leading-relaxed">
                 Before quoting an overseas inquiry, specifications are calibrated against loom constraints, yarn count tolerances, and certified testing standards on our production lines in Gujarat.
               </p>
             </div>

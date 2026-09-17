@@ -46,7 +46,7 @@ export function GroupLeadership() {
 
               <a
                 href={`mailto:${leader.email}`}
-                className="mt-3 inline-flex items-center gap-1.5 font-mono text-xs text-[#A88B68] hover:text-[#241C18] transition-colors"
+                className="text-bronze-ink mt-3 inline-flex items-center gap-1.5 font-mono text-xs transition-colors hover:text-espresso"
               >
                 <Mail size={13} />
                 <span>{leader.email}</span>

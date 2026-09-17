@@ -2,14 +2,14 @@ import { Resend } from 'resend';
 import { CONTACT } from '@/content/taxonomy';
 import type { RfqSubmissionInput, ContactSubmissionInput } from '@/lib/forms/schema';
 
-let resendClient: Resend | null = null;
-
-function getResendClient(): Resend | null {
-  if (resendClient) return resendClient;
-  const apiKey = process.env.RESEND_API_KEY;
+/**
+ * Takes the API key explicitly rather than reading `process.env` itself —
+ * this runs inside a Cloudflare Pages Function (Workers runtime), which has
+ * no `process.env`; the caller reads it from `context.env.RESEND_API_KEY`.
+ */
+function getResendClient(apiKey: string | undefined): Resend | null {
   if (!apiKey) return null;
-  resendClient = new Resend(apiKey);
-  return resendClient;
+  return new Resend(apiKey);
 }
 
 export const FROM_EMAIL = 'Trivoxa Group Desk <sales@trivoxagroup.com>';
@@ -25,8 +25,9 @@ export type EmailDeliveryResult = {
 export async function sendRfqEmails(
   data: RfqSubmissionInput,
   reference: string,
+  apiKey: string | undefined,
 ): Promise<EmailDeliveryResult> {
-  const client = getResendClient();
+  const client = getResendClient(apiKey);
   if (!client) {
     return { success: true, simulated: true };
   }
@@ -132,8 +133,9 @@ export async function sendRfqEmails(
 export async function sendContactEmails(
   data: ContactSubmissionInput,
   reference: string,
+  apiKey: string | undefined,
 ): Promise<EmailDeliveryResult> {
-  const client = getResendClient();
+  const client = getResendClient(apiKey);
   if (!client) {
     return { success: true, simulated: true };
   }

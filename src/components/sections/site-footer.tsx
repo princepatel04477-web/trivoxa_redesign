@@ -6,8 +6,9 @@ import { ArrowUpRight } from 'lucide-react';
 import { Container } from '@/components/ui/layout';
 import { CATEGORIES, CONTACT, INDUSTRIES } from '@/content/taxonomy';
 import { footerRegions } from '@/lib/selectors';
+import { HONEYPOT_FIELD } from '@/lib/forms/mailto';
+import { BRAND } from '@/lib/tokens/colors';
 import TextPressure from '@/components/reactbits/TextPressure/TextPressure';
-import GradientText from '@/components/reactbits/GradientText/GradientText';
 import ShinyText from '@/components/reactbits/ShinyText/ShinyText';
 import DotField from '@/components/reactbits/DotField/DotField';
 import Noise from '@/components/reactbits/Noise/Noise';
@@ -28,22 +29,51 @@ export function SiteFooter() {
 
   // Newsletter state
   const [email, setEmail] = useState('');
+  const [botField, setBotField] = useState('');
+  const [mountTime] = useState<number>(() => Date.now());
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newsletterError, setNewsletterError] = useState('');
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const playCheckmark = () => {
+    if (reducedMotion || !checkmarkSvgRef.current) return;
+    const path = checkmarkSvgRef.current.querySelector('path');
+    if (!path) return;
+    const drawable = svg.createDrawable(path);
+    animate(drawable, {
+      draw: ['0 0', '0 1'],
+      duration: 500,
+      ease: 'outQuart',
+    });
+  };
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !email.includes('@')) return;
-    setSubmitted(true);
-    if (!reducedMotion && checkmarkSvgRef.current) {
-      const path = checkmarkSvgRef.current.querySelector('path');
-      if (path) {
-        const drawable = svg.createDrawable(path);
-        animate(drawable, {
-          draw: ['0 0', '0 1'],
-          duration: 500,
-          ease: 'outQuart',
-        });
+    if (!email || !email.includes('@')) {
+      setNewsletterError('Enter a valid business email address.');
+      return;
+    }
+    setNewsletterError('');
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, [HONEYPOT_FIELD]: botField, submittedAt: mountTime }),
+      });
+
+      if (res.ok) {
+        setSubmitted(true);
+        playCheckmark();
+      } else {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        setNewsletterError(data.error || 'Subscription failed. Please email us directly.');
       }
+    } catch {
+      setNewsletterError('Connection error. Please write to hello@trivoxagroup.com.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -104,19 +134,13 @@ export function SiteFooter() {
               width
               weight
               italic={false}
-              textColor="var(--surface-paper, #F4EFE6)"
-              strokeColor="#A88B68"
+              textColor="var(--color-ivory)"
+              strokeColor="var(--color-bronze)"
               strokeWidth={1}
             />
           </div>
           <div className="mt-6 block py-4 text-center md:hidden">
-            <GradientText
-              colors={['#A88B68', '#F4EFE6', '#C4A47C']}
-              animationSpeed={6}
-              className="font-serif text-5xl font-bold tracking-wider"
-            >
-              TRIVOXA
-            </GradientText>
+            <span className="text-ivory font-serif text-5xl font-bold tracking-wider">TRIVOXA</span>
           </div>
         </Container>
       </div>
@@ -339,21 +363,37 @@ export function SiteFooter() {
                   <span>Subscribed to quarterly dispatch.</span>
                 </div>
               ) : (
-                <ClickSpark sparkColor="#A88B68" sparkCount={8}>
-                  <form onSubmit={handleNewsletterSubmit} className="mt-3 flex flex-col gap-2">
+                <ClickSpark sparkColor={BRAND.bronze.hex} sparkCount={8}>
+                  <form onSubmit={(e) => void handleNewsletterSubmit(e)} className="mt-3 flex flex-col gap-2" noValidate>
                     <input
                       type="email"
                       required
+                      autoComplete="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      disabled={isSubmitting}
                       placeholder="Enter corporate email..."
-                      className="w-full rounded-lg border border-stone-800 bg-stone-900/90 px-3 py-2 text-xs text-stone-100 placeholder-stone-500 outline-none transition-all duration-300 focus:border-accent focus:ring-1 focus:ring-accent"
+                      className="w-full rounded-lg border border-stone-800 bg-stone-900/90 px-3 py-2 text-xs text-stone-100 placeholder-stone-500 outline-none transition-all duration-300 focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-60"
                     />
+                    <div className="absolute -left-[9999px] top-0" aria-hidden>
+                      <input
+                        tabIndex={-1}
+                        autoComplete="off"
+                        value={botField}
+                        onChange={(e) => setBotField(e.target.value)}
+                      />
+                    </div>
+                    {newsletterError ? (
+                      <p role="alert" className="text-xs text-red-400">
+                        {newsletterError}
+                      </p>
+                    ) : null}
                     <button
                       type="submit"
-                      className="w-full rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 font-mono text-xs text-accent transition-colors hover:bg-accent hover:text-stone-950"
+                      disabled={isSubmitting}
+                      className="w-full rounded-lg border border-accent/40 bg-accent/10 px-3 py-2 font-mono text-xs text-accent transition-colors hover:bg-accent hover:text-stone-950 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      Subscribe →
+                      {isSubmitting ? 'Subscribing…' : 'Subscribe →'}
                     </button>
                   </form>
                 </ClickSpark>

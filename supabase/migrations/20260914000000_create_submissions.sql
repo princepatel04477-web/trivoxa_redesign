@@ -50,15 +50,15 @@ alter table public.contact_submissions enable row level security;
 
 -- Strict RLS: Do NOT allow public anon access
 -- The service role key used server-side automatically bypasses RLS in Supabase.
-drop policy if exists  Deny all public access to rfq_submissions on public.rfq_submissions;
-create policy Deny all public access to rfq_submissions
+drop policy if exists "Deny all public access to rfq_submissions" on public.rfq_submissions;
+create policy "Deny all public access to rfq_submissions"
   on public.rfq_submissions
   for all
   to anon, authenticated
   using (false);
 
-drop policy if exists Deny all public access to contact_submissions on public.contact_submissions;
-create policy Deny all public access to contact_submissions
+drop policy if exists "Deny all public access to contact_submissions" on public.contact_submissions;
+create policy "Deny all public access to contact_submissions"
   on public.contact_submissions
   for all
   to anon, authenticated

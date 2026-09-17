@@ -1,14 +1,14 @@
 /**
- * src/lib/forms/mailto.ts — how an enquiry leaves this site today.
+ * src/lib/forms/mailto.ts — the fallback when the real endpoint can't be
+ * reached.
  * ---------------------------------------------------------------------------
- * There is no backend in this repository, and a form that posts nowhere is a
- * lie with a button on it (the same reasoning that kept the newsletter form off
- * /insights). So submission composes a structured `mailto:` message: the buyer
- * sees exactly what will be sent, nothing is silently dropped, and the export
- * desk receives a message it can act on without a CRM.
- *
- * P21 replaces `submitEnquiry` with a real endpoint (server action + storage +
- * analytics event) behind this same signature, and no form component changes.
+ * P21 added `/functions/api/rfq`, `/functions/api/contact` and
+ * `/functions/api/subscribe` (Cloudflare Pages Functions — this site is a
+ * static export, so that's the backend): each form POSTs there first,
+ * persisting to Supabase and notifying the desk via Resend. `composeEnquiry`
+ * stays as what renders when that request fails — a structured `mailto:` the
+ * buyer can send themselves, so a network hiccup never strands their
+ * specification with no way out.
  */
 
 export type EnquiryField = { label: string; value: string };
@@ -34,12 +34,6 @@ export function composeEnquiry({ to, subject, fields, footer }: Enquiry): string
     .trim();
 
   return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(composed)}`;
-}
-
-export function submitEnquiry(enquiry: Enquiry): string {
-  const href = composeEnquiry(enquiry);
-  if (typeof window !== 'undefined') window.location.href = href;
-  return href;
 }
 
 /** One shared email shape check — forms and the taxonomy gate agree. */

@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React, { useRef, useEffect } from 'react';
 import { Container, Section } from '@/components/ui/layout';
 import { SectionHeading } from '@/components/ui/typography';
@@ -43,7 +44,7 @@ export function GroupJourney() {
   }, [reducedMotion]);
 
   return (
-    <Section surface="dark" id="journey" className="py-24 bg-[#171210] text-[#F4EFE6] overflow-hidden">
+    <Section surface="dark" id="journey" className="py-24 bg-espresso-deep text-ivory overflow-hidden">
       <Container>
         <div ref={containerRef} className="grid grid-cols-12 gap-12 items-start">
           {/* Left Column: Sticky Title and Scrubbed DrawSVG Spine Line */}
@@ -74,23 +75,23 @@ export function GroupJourney() {
                   y1="0"
                   x2="12"
                   y2="300"
-                  stroke="#A88B68"
+                  stroke={BRAND.bronze.hex}
                   strokeWidth="3"
                   strokeDasharray="300"
                   strokeDashoffset="300"
                 />
                 {/* Accent node dot at top */}
-                <circle cx="12" cy="6" r="4" fill="#A88B68" />
+                <circle cx="12" cy="6" r="4" fill={BRAND.bronze.hex} />
               </svg>
 
               <div className="flex flex-col gap-1">
-                <span className="font-mono text-xs uppercase tracking-widest text-[#A88B68]">
+                <span className="font-mono text-xs uppercase tracking-widest text-bronze">
                   Evolution
                 </span>
-                <span className="font-serif text-2xl font-bold text-[#F4EFE6]">
+                <span className="font-serif text-2xl font-bold text-ivory">
                   1998 → 2026+
                 </span>
-                <span className="text-xs text-[#F4EFE6]/60">
+                <span className="text-xs text-ivory/60">
                   5 defined developmental eras
                 </span>
               </div>
@@ -109,32 +110,32 @@ export function GroupJourney() {
               {JOURNEY.map((item) => (
                 <ScrollStackItem
                   key={item.step}
-                  itemClassName="bg-[#241C18] border border-[#A88B68]/30 p-8 sm:p-10 rounded-[28px] text-[#F4EFE6] shadow-2xl flex flex-col justify-between"
+                  itemClassName="bg-espresso border border-bronze/30 p-8 sm:p-10 rounded-[28px] text-ivory shadow-2xl flex flex-col justify-between"
                 >
                   <div>
-                    <div className="flex items-center justify-between border-b border-[#A88B68]/20 pb-4 mb-4">
-                      <span className="inline-block rounded-full border border-[#A88B68]/40 bg-[#171210] px-3 py-1 font-mono text-xs text-[#A88B68]">
+                    <div className="flex items-center justify-between border-b border-bronze/20 pb-4 mb-4">
+                      <span className="inline-block rounded-full border border-bronze/40 bg-espresso-deep px-3 py-1 font-mono text-xs text-bronze">
                         Milestone 0{item.step}
                       </span>
-                      <span className="font-mono text-sm font-semibold text-[#A88B68]">
+                      <span className="font-mono text-sm font-semibold text-bronze">
                         {item.year}
                       </span>
                     </div>
 
-                    <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[#F4EFE6] mt-2">
+                    <h3 className="font-serif text-2xl sm:text-3xl font-bold text-ivory mt-2">
                       {item.title}
                     </h3>
 
-                    <p className="mt-4 text-base sm:text-lg text-[#F4EFE6]/80 leading-relaxed max-w-[62ch]">
+                    <p className="mt-4 text-base sm:text-lg text-ivory/80 leading-relaxed max-w-[62ch]">
                       {item.body}
                     </p>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-[#A88B68]/15 flex items-center justify-between">
-                    <span className="font-mono text-xs text-[#A88B68]/70">
+                  <div className="mt-6 pt-4 border-t border-bronze/15 flex items-center justify-between">
+                    <span className="font-mono text-xs text-bronze/70">
                       Trivoxa Corporate Heritage
                     </span>
-                    <span className="font-mono text-xs text-[#F4EFE6]/40">
+                    <span className="font-mono text-xs text-ivory/40">
                       Phase {item.step} of 5
                     </span>
                   </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
@@ -25,7 +26,7 @@ const REGION_DATA = [
     location: 'Rotterdam (NL RTM)',
     handle: 'Hub Port',
     image: '/brand/og/industry-textile-apparel.png',
-    borderColor: '#A88B68',
+    borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(168,139,104,0.15), rgba(23,18,16,0.95))',
     lanePath: 'M 40 180 Q 140 60 280 90',
   },
@@ -35,7 +36,7 @@ const REGION_DATA = [
     location: 'Jebel Ali (AE JEA)',
     handle: 'Hub Port',
     image: '/brand/og/industry-building-materials.png',
-    borderColor: '#C4A47C',
+    borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(196,164,124,0.15), rgba(23,18,16,0.95))',
     lanePath: 'M 40 180 Q 120 130 200 140',
   },
@@ -45,7 +46,7 @@ const REGION_DATA = [
     location: 'Mombasa (KE MBA)',
     handle: 'Hub Port',
     image: '/brand/og/industry-healthcare-pharmaceuticals.png',
-    borderColor: '#8C7355',
+    borderColor: BRAND.bronzeInk.hex,
     gradient: 'linear-gradient(145deg, rgba(140,115,85,0.15), rgba(23,18,16,0.95))',
     lanePath: 'M 40 180 Q 80 200 160 250',
   },
@@ -55,7 +56,7 @@ const REGION_DATA = [
     location: 'New York (US NYC)',
     handle: 'Hub Port',
     image: '/brand/og/product-engineered-quartz.png',
-    borderColor: '#A88B68',
+    borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(168,139,104,0.15), rgba(23,18,16,0.95))',
     lanePath: 'M 40 180 Q 120 40 320 80',
   },
@@ -65,7 +66,7 @@ const REGION_DATA = [
     location: 'Santos (BR SSZ)',
     handle: 'Hub Port',
     image: '/brand/og/industry-engineering-industrial.png',
-    borderColor: '#AF916E',
+    borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(175,145,110,0.15), rgba(23,18,16,0.95))',
     lanePath: 'M 40 180 Q 100 240 220 280',
   },
@@ -75,7 +76,7 @@ const REGION_DATA = [
     location: 'Singapore (SG SIN)',
     handle: 'Hub Port',
     image: '/brand/og/product-cotton-yarn.png',
-    borderColor: '#C4A47C',
+    borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(196,164,124,0.15), rgba(23,18,16,0.95))',
     lanePath: 'M 40 180 Q 180 200 290 220',
   },
@@ -131,7 +132,7 @@ export function GlobalPresencePreview() {
               <path
                 d="M 0 50 Q 50 20 100 50 T 200 50 M 0 100 Q 50 70 100 100 T 200 100 M 0 150 Q 50 120 100 150 T 200 150"
                 fill="none"
-                stroke="#A88B68"
+                stroke={BRAND.bronze.hex}
                 strokeWidth="1"
               />
             </pattern>
@@ -163,7 +164,7 @@ export function GlobalPresencePreview() {
           <div className="grid grid-cols-12 items-center gap-10 lg:gap-16">
             {/* Left: Globe and Route Visual */}
             <div className="col-span-12 lg:col-span-6">
-              <div className="relative aspect-square w-full max-w-[500px] mx-auto overflow-hidden rounded-[28px] border border-[#3D322A] bg-[#171210]/90 p-4">
+              <div className="relative aspect-square w-full max-w-[500px] mx-auto overflow-hidden rounded-[28px] border border bg-espresso-deep/90 p-4">
                 <GlobeLoader />
 
                 {/* SVG Route Lane overlay for active region */}
@@ -177,19 +178,19 @@ export function GlobalPresencePreview() {
                     <path
                       ref={lanePathRef}
                       d={activeRegion.lanePath}
-                      stroke="#A88B68"
+                      stroke={BRAND.bronze.hex}
                       strokeWidth="2.5"
                       strokeDasharray="6 4"
                       strokeLinecap="round"
                     />
-                    <circle cx="40" cy="180" r="4" fill="#F4EFE6" />
-                    <text x="40" y="200" fill="#A88B68" fontSize="10" fontFamily="monospace">
+                    <circle cx="40" cy="180" r="4" fill={BRAND.ivory.hex} />
+                    <text x="40" y="200" fill={BRAND.bronze.hex} fontSize="10" fontFamily="monospace">
                       SURAT HQ
                     </text>
                   </svg>
                 </div>
 
-                <div className="absolute bottom-4 left-4 rounded-full border border-[#3D322A] bg-[#171210]/90 px-3 py-1 font-mono text-[11px] text-[#A88B68] backdrop-blur-md">
+                <div className="absolute bottom-4 left-4 rounded-full border border bg-espresso-deep/90 px-3 py-1 font-mono text-[11px] text-bronze backdrop-blur-md">
                   Corridor: Surat → {activeRegion.location}
                 </div>
               </div>
@@ -198,10 +199,10 @@ export function GlobalPresencePreview() {
             {/* Right: Overview, Ports & Stats */}
             <div className="col-span-12 lg:col-span-6 flex flex-col justify-center">
               <div>
-                <h3 className="font-serif text-2xl md:text-3xl text-[#F4EFE6] font-medium">
+                <h3 className="font-serif text-2xl md:text-3xl text-ivory font-medium">
                   Direct Trade Corridors
                 </h3>
-                <p className="mt-3 text-sm md:text-base leading-relaxed text-[#8C8279]">
+                <p className="mt-3 text-sm md:text-base leading-relaxed surface-faint">
                   Six primary overseas destinations serviced continuously from Western India ports. 
                   Every consignment is monitored from gate-in through customs discharge.
                 </p>
@@ -209,7 +210,7 @@ export function GlobalPresencePreview() {
 
               {/* Port Chips with SplitFlapText */}
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <span className="font-mono text-xs text-[#8C8279]">Loading Hubs:</span>
+                <span className="font-mono text-xs surface-faint">Loading Hubs:</span>
                 {[
                   { code: 'INMUN', name: 'Mundra' },
                   { code: 'INIXY', name: 'Kandla' },
@@ -217,34 +218,34 @@ export function GlobalPresencePreview() {
                 ].map((port) => (
                   <div
                     key={port.code}
-                    className="flex items-center gap-2 rounded-lg border border-[#3D322A] bg-[#241C18]/80 px-3 py-1.5 font-mono text-xs text-[#F4EFE6]"
+                    className="flex items-center gap-2 rounded-lg border border bg-espresso/80 px-3 py-1.5 font-mono text-xs text-ivory"
                   >
-                    <span className="text-[#A88B68]">
+                    <span className="text-bronze">
                       <SplitFlapText text={port.code} fontSize="14px" flipDuration={0.35} />
                     </span>
-                    <span className="text-[#8C8279]">({port.name})</span>
+                    <span className="surface-faint">({port.name})</span>
                   </div>
                 ))}
               </div>
 
               {/* Stats Row: Regions 6 · Industries 9 · Ports 3 using Counter */}
-              <div className="mt-8 flex flex-wrap items-center justify-between gap-6 border-t border-[#3D322A] pt-6">
+              <div className="mt-8 flex flex-wrap items-center justify-between gap-6 border-t border pt-6">
                 <div className="flex gap-8">
                   <div>
-                    <span className="font-mono text-xs text-[#8C8279] uppercase">Regions</span>
-                    <div className="font-serif text-2xl text-[#A88B68]">
+                    <span className="font-mono text-xs surface-faint uppercase">Regions</span>
+                    <div className="font-serif text-2xl text-bronze">
                       {statsVisible ? <Counter value={6} /> : 6}
                     </div>
                   </div>
                   <div>
-                    <span className="font-mono text-xs text-[#8C8279] uppercase">Industries</span>
-                    <div className="font-serif text-2xl text-[#A88B68]">
+                    <span className="font-mono text-xs surface-faint uppercase">Industries</span>
+                    <div className="font-serif text-2xl text-bronze">
                       {statsVisible ? <Counter value={9} /> : 9}
                     </div>
                   </div>
                   <div>
-                    <span className="font-mono text-xs text-[#8C8279] uppercase">Ports</span>
-                    <div className="font-serif text-2xl text-[#A88B68]">
+                    <span className="font-mono text-xs surface-faint uppercase">Ports</span>
+                    <div className="font-serif text-2xl text-bronze">
                       {statsVisible ? <Counter value={3} /> : 3}
                     </div>
                   </div>
@@ -252,7 +253,7 @@ export function GlobalPresencePreview() {
 
                 <Link
                   href="/global-presence"
-                  className="group inline-flex items-center gap-2 rounded-xl border border-[#A88B68]/40 bg-[#A88B68]/10 px-5 py-3 font-mono text-xs uppercase tracking-widest text-[#A88B68] transition-all hover:bg-[#A88B68] hover:text-[#171210]"
+                  className="group inline-flex items-center gap-2 rounded-xl border border-bronze/40 bg-bronze/10 px-5 py-3 font-mono text-xs uppercase tracking-widest text-bronze transition-all hover:bg-bronze hover:text-espresso-deep"
                   data-cursor="target"
                 >
                   <span>View Our Global Network</span>
@@ -273,7 +274,7 @@ export function GlobalPresencePreview() {
             />
           </div>
 
-          <p className="mt-8 text-center font-mono text-xs text-[#8C8279]">
+          <p className="mt-8 text-center font-mono text-xs surface-faint">
             Response window {numbers.responseWindow}
           </p>
         </Container>

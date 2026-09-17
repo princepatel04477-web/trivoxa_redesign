@@ -1,10 +1,16 @@
 /**
  * src/content/legal.ts — the four legal documents, as data.
  * ---------------------------------------------------------------------------
- * Written to describe what this site ACTUALLY does, which is unusually simple
- * and is the reason these pages can be short: no accounts, no database, no
- * cookies, no analytics, no newsletter list. Enquiries are composed in the
- * visitor's own mail client (src/lib/forms/mailto.ts) and sent by them.
+ * Written to describe what this site ACTUALLY does: no accounts, no
+ * advertising/tracking cookies, no third-party analytics script. As of P21,
+ * form submissions (RFQ, contact, newsletter) ARE persisted — Supabase
+ * (AWS ap-south-1) for the record, Resend for desk notification and buyer
+ * acknowledgement, Cloudflare Turnstile for bot verification when configured.
+ * The policy body below already describes that infrastructure; this comment
+ * previously said "no database, no newsletter list", which stopped being true
+ * the moment /functions/api/* shipped — keep this comment in sync with
+ * src/lib/supabase, src/lib/email and src/lib/turnstile, not the other way
+ * around.
  *
  * Every claim here is checkable against the codebase — that is deliberate,
  * because a privacy policy describing infrastructure we do not have is the kind

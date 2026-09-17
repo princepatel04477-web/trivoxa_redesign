@@ -12,6 +12,7 @@ import { focusFirstInvalid } from '@/lib/forms/focus-first-invalid';
 import { composeEnquiry, HONEYPOT_FIELD, type Enquiry } from '@/lib/forms/mailto';
 import { ContactSubmissionSchema } from '@/lib/forms/schema';
 import type { SubmissionResult } from '@/lib/forms/transport';
+import { TurnstileWidget } from '@/components/forms/turnstile-widget';
 
 /**
  * P16 — the contact form.
@@ -56,6 +57,7 @@ export function ContactForm() {
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [fallbackMailto, setFallbackMailto] = useState<string | null>(null);
   const [sent, setSent] = useState<SubmissionResult | 'nothing' | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string>('');
   const formRef = useRef<HTMLFormElement | null>(null);
 
   const set = (key: keyof FormState, value: string): void => {
@@ -146,6 +148,7 @@ export function ContactForm() {
         body: JSON.stringify({
           ...values,
           submittedAt: mountTime,
+          turnstileToken,
         }),
       });
 
@@ -288,6 +291,8 @@ export function ContactForm() {
           onChange={(event) => set(HONEYPOT_FIELD, event.target.value)}
         />
       </div>
+
+      <TurnstileWidget onVerify={setTurnstileToken} onExpire={() => setTurnstileToken('')} />
 
       <div className="mt-md flex flex-wrap items-center gap-lg">
         <Button type="submit" size="lg" arrow disabled={isSubmitting}>

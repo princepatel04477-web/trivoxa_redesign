@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React, { useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -89,45 +90,45 @@ export function IndustriesHubClient({
     handle: ind.productCount > 0 ? `${ind.productCount} rows` : 'Quoted on order',
     location: ind.status === 'live' ? 'Live' : 'Onboarding',
     url: `/industries/${ind.slug}`,
-    borderColor: '#A88B68',
+    borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(168,139,104,0.18), rgba(23,18,16,0.95))',
   }));
 
   return (
     <>
       {/* Hero: SplitText title + Grainient background */}
-      <section ref={heroSectionRef} className="relative overflow-hidden bg-[#171210] py-20 lg:py-28 text-[#F4EFE6]">
+      <section ref={heroSectionRef} className="relative overflow-hidden bg-espresso-deep py-20 lg:py-28 text-ivory">
         {/* WebGL Grainient or CSS Fallback */}
         <div className="absolute inset-0 pointer-events-none opacity-40">
           {webglSlot.hasSlot && !reducedMotion ? (
             <Grainient
-              color1="#A88B68"
-              color2="#241C18"
-              color3="#171210"
+              color1={BRAND.bronze.hex}
+              color2={BRAND.espresso.hex}
+              color3={BRAND.espressoDeep.hex}
               warpStrength={0.8}
               warpSpeed={1.2}
               grainAmount={0.06}
             />
           ) : (
-            <div className="h-full w-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#A88B68]/20 via-[#171210] to-[#171210]" />
+            <div className="h-full w-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-bronze/20 via-espresso-deep to-espresso-deep" />
           )}
         </div>
 
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#171210]/60 to-[#171210] pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-espresso-deep/60 to-espresso-deep pointer-events-none" />
 
         <Container className="relative z-10">
           {/* Breadcrumb */}
-          <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 font-mono text-xs text-[#A88B68]">
+          <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 font-mono text-xs text-bronze">
             <Link href="/" className="hover:underline">Home</Link>
             <span>/</span>
-            <span className="text-[#F4EFE6]/80">Industries</span>
+            <span className="text-ivory/80">Industries</span>
           </nav>
 
-          <p className="eyebrow font-mono text-xs uppercase tracking-widest text-[#A88B68] mb-3">
+          <p className="eyebrow font-mono text-xs uppercase tracking-widest text-bronze mb-3">
             Industries We Serve
           </p>
 
-          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#F4EFE6] max-w-4xl">
+          <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-ivory max-w-[56rem]">
             <SplitText
               text={`${hub.length} industries. One sourcing discipline.`}
               tag="span"
@@ -136,27 +137,27 @@ export function IndustriesHubClient({
             />
           </h1>
 
-          <p className="mt-6 max-w-3xl text-base sm:text-lg text-[#F4EFE6]/80 leading-relaxed">
+          <p className="mt-6 max-w-[48rem] text-base sm:text-lg text-ivory/80 leading-relaxed">
             Each industry below is backed by catalogue rows with HS codes, grades, MOQs and lead times — or it is labelled onboarding, with what we can do for you today stated instead.
           </p>
 
           {/* Meta stats bar */}
-          <div className="mt-10 grid grid-cols-2 gap-4 border-t border-[#A88B68]/20 pt-6 sm:grid-cols-4">
+          <div className="mt-10 grid grid-cols-2 gap-4 border-t border-bronze/20 pt-6 sm:grid-cols-4">
             <div>
-              <p className="font-mono text-xs text-[#A88B68]">Industries</p>
-              <p className="font-serif text-2xl font-bold text-[#F4EFE6]">{hub.length}</p>
+              <p className="font-mono text-xs text-bronze">Industries</p>
+              <p className="font-serif text-2xl font-bold text-ivory">{hub.length}</p>
             </div>
             <div>
-              <p className="font-mono text-xs text-[#A88B68]">Live today</p>
-              <p className="font-serif text-2xl font-bold text-[#F4EFE6]">{liveCount}</p>
+              <p className="font-mono text-xs text-bronze">Live today</p>
+              <p className="font-serif text-2xl font-bold text-ivory">{liveCount}</p>
             </div>
             <div>
-              <p className="font-mono text-xs text-[#A88B68]">Catalogue rows</p>
-              <p className="font-serif text-2xl font-bold text-[#F4EFE6]">{productCount}</p>
+              <p className="font-mono text-xs text-bronze">Catalogue rows</p>
+              <p className="font-serif text-2xl font-bold text-ivory">{productCount}</p>
             </div>
             <div>
-              <p className="font-mono text-xs text-[#A88B68]">Loading ports</p>
-              <p className="font-mono text-sm font-semibold text-[#F4EFE6] mt-1">{portsLocode}</p>
+              <p className="font-mono text-xs text-bronze">Loading ports</p>
+              <p className="font-mono text-sm font-semibold text-ivory mt-1">{portsLocode}</p>
             </div>
           </div>
         </Container>
@@ -184,7 +185,7 @@ export function IndustriesHubClient({
                 onClick={() => handleFilterChange('all')}
                 className={`px-4 py-1.5 rounded-full font-mono text-xs transition-all duration-200 ${
                   activeFilter === 'all'
-                    ? 'bg-[#241C18] text-[#FAF8F3] shadow-sm font-semibold'
+                    ? 'bg-espresso text-ivory-soft shadow-sm font-semibold'
                     : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
                 }`}
               >
@@ -197,7 +198,7 @@ export function IndustriesHubClient({
                 onClick={() => handleFilterChange('catalogued')}
                 className={`px-4 py-1.5 rounded-full font-mono text-xs transition-all duration-200 ${
                   activeFilter === 'catalogued'
-                    ? 'bg-[#241C18] text-[#FAF8F3] shadow-sm font-semibold'
+                    ? 'bg-espresso text-ivory-soft shadow-sm font-semibold'
                     : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
                 }`}
               >
@@ -210,7 +211,7 @@ export function IndustriesHubClient({
                 onClick={() => handleFilterChange('quoted')}
                 className={`px-4 py-1.5 rounded-full font-mono text-xs transition-all duration-200 ${
                   activeFilter === 'quoted'
-                    ? 'bg-[#241C18] text-[#FAF8F3] shadow-sm font-semibold'
+                    ? 'bg-espresso text-ivory-soft shadow-sm font-semibold'
                     : 'text-stone-600 hover:text-stone-900 hover:bg-stone-200/50'
                 }`}
               >
@@ -232,7 +233,7 @@ export function IndustriesHubClient({
       </Section>
 
       {/* Capabilities Section */}
-      <Section surface="dark" id="capabilities" className="py-20 bg-[#171210] text-[#F4EFE6]">
+      <Section surface="dark" id="capabilities" className="py-20 bg-espresso-deep text-ivory">
         <Container>
           <SectionHeading
             eyebrow="Capabilities"
@@ -244,21 +245,21 @@ export function IndustriesHubClient({
             {CAPABILITIES.map((capability, index) => (
               <div
                 key={capability.slug}
-                className="col-span-12 md:col-span-6 border-t border-[#A88B68]/20 pt-6 flex flex-col justify-between"
+                className="col-span-12 md:col-span-6 border-t border-bronze/20 pt-6 flex flex-col justify-between"
               >
                 <div>
-                  <p className="font-mono text-xs text-[#A88B68] mb-1">
+                  <p className="font-mono text-xs text-bronze mb-1">
                     {String(index + 1).padStart(2, '0')}
                   </p>
-                  <h3 className="font-serif text-xl font-medium text-[#F4EFE6]">
+                  <h3 className="font-serif text-xl font-medium text-ivory">
                     {capability.name}
                   </h3>
-                  <p className="mt-2 text-sm text-[#F4EFE6]/70 leading-relaxed max-w-[60ch]">
+                  <p className="mt-2 text-sm text-ivory/70 leading-relaxed max-w-[60ch]">
                     {capability.body}
                   </p>
                 </div>
                 <div className="mt-4 pt-2">
-                  <ArrowLink href={capability.evidenceHref} className="text-xs text-[#A88B68] hover:text-[#F4EFE6]">
+                  <ArrowLink href={capability.evidenceHref} className="text-xs text-bronze hover:text-ivory">
                     {capability.evidence} →
                   </ArrowLink>
                 </div>

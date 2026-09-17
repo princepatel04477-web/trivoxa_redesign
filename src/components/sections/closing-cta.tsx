@@ -1,5 +1,6 @@
 'use client';
 
+import { BRAND } from '@/lib/tokens/colors';
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -9,7 +10,6 @@ import { proofBand } from '@/lib/selectors';
 import LaserFlow from '@/components/reactbits/LaserFlow/LaserFlow';
 import SplitText from '@/components/reactbits/SplitText/SplitText';
 import TrueFocus from '@/components/reactbits/TrueFocus/TrueFocus';
-import GradientText from '@/components/reactbits/GradientText/GradientText';
 import GlareHover from '@/components/reactbits/GlareHover/GlareHover';
 import SpecularButton from '@/components/reactbits/SpecularButton/SpecularButton';
 import StarBorder from '@/components/reactbits/StarBorder/StarBorder';
@@ -73,7 +73,7 @@ export function ClosingCta() {
   }, [reducedMotion]);
 
   return (
-    <div className="relative overflow-hidden bg-stone-950 text-stone-100">
+    <div data-surface="dark" className="relative overflow-hidden bg-stone-950 text-stone-100">
       {/* CAREERS STRIP */}
       <div className="border-b border-stone-800/80 bg-stone-900/50 py-6">
         <Container>
@@ -83,16 +83,10 @@ export function ClosingCta() {
               <button
                 type="button"
                 onClick={handleCopyEmail}
-                className="relative inline-flex items-center gap-1.5 font-mono font-medium hover:opacity-80"
+                className="link-underline relative inline-flex items-center gap-1.5 font-mono font-medium text-accent"
                 title="Click to copy email"
               >
-                <GradientText
-                  colors={['#A88B68', '#F4EFE6', '#C4A47C']}
-                  animationSpeed={5}
-                  className="px-1"
-                >
-                  careers@trivoxagroup.com
-                </GradientText>
+                careers@trivoxagroup.com
                 {copied && (
                   <span
                     ref={copiedPillRef}
@@ -110,7 +104,7 @@ export function ClosingCta() {
                 height="auto"
                 background="transparent"
                 borderColor="transparent"
-                glareColor="#A88B68"
+                glareColor={BRAND.bronze.hex}
                 glareOpacity={0.3}
               >
                 <Link
@@ -132,28 +126,28 @@ export function ClosingCta() {
           <div className="pointer-events-none absolute inset-0 z-0 opacity-40">
             {webglSlot.hasSlot ? (
               <LaserFlow
-                color="#A88B68"
+                color={BRAND.bronze.hex}
                 flowSpeed={0.8}
                 wispIntensity={0.6}
                 horizontalBeamOffset={0}
                 verticalBeamOffset={-0.3}
               />
             ) : (
-              <div className="absolute inset-0 bg-gradient-to-b from-[#241C18]/80 via-[#171210] to-[#171210]" />
+              <div className="absolute inset-0 bg-gradient-to-b from-espresso/80 via-espresso-deep to-espresso-deep" />
             )}
           </div>
 
           <Container className="relative z-10">
             <div className="grid grid-cols-12 items-end gap-12 lg:gap-16 text-left">
               <div className="col-span-12 lg:col-span-7 text-left">
-                <p className="text-eyebrow mb-3 tracking-widest uppercase text-[#A88B68]">
+                <p className="text-eyebrow mb-3 tracking-widest uppercase text-bronze">
                   Start a Conversation
                 </p>
 
                 {/* Heading with ScrambleText on numbers. */}
-                <h2 className="font-serif text-3xl font-medium text-[#F4EFE6] sm:text-4xl md:text-5xl lg:max-w-[20ch] text-left">
+                <h2 className="font-serif text-3xl font-medium text-ivory sm:text-4xl md:text-5xl lg:max-w-[20ch] text-left">
                   <SplitText text="Send the specification. We'll come back with " className="inline" />
-                  <span ref={numbersSpanRef} className="text-[#A88B68] underline decoration-[#A88B68]/40">
+                  <span ref={numbersSpanRef} className="text-bronze underline decoration-bronze/40">
                     numbers.
                   </span>
                 </h2>
@@ -164,14 +158,14 @@ export function ClosingCta() {
                     sentence="Grade quantity destination-port Incoterm"
                     separator=" "
                     blurAmount={3}
-                    borderColor="#A88B68"
+                    borderColor={BRAND.bronze.hex}
                     glowColor="rgba(168,139,104,0.4)"
                     animationDuration={0.6}
                     pauseBetweenAnimations={1.5}
                   />
                 </div>
 
-                <p className="mt-6 max-w-xl text-sm leading-relaxed text-[#8C8279] md:text-base text-left">
+                <p className="mt-6 max-w-[36rem] text-sm leading-relaxed surface-faint md:text-base text-left">
                   Grade, quantity, destination port, target Incoterm. That is enough for the export
                   desk to price a real quotation instead of a brochure answer — answered{' '}
                   {band.responseWindow}, desk hours {band.hoursIst}.
@@ -185,7 +179,7 @@ export function ClosingCta() {
                   <div data-cursor="target">
                     <SpecularButton
                       size="lg"
-                      tint="#A88B68"
+                      tint={BRAND.bronze.hex}
                       tintOpacity={0.4}
                       onClick={() => router.push('/rfq')}
                       className="cursor-pointer"
@@ -196,7 +190,7 @@ export function ClosingCta() {
                 </Magnet>
 
                 <Link href="/contact" data-cursor="target">
-                  <StarBorder color="var(--color-accent, #A88B68)" speed="5s">
+                  <StarBorder color="var(--color-bronze)" speed="5s">
                     <span className="font-mono text-xs uppercase tracking-wider text-stone-100">
                       Contact the Group
                     </span>

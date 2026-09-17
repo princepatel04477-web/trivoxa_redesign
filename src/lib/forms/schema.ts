@@ -87,3 +87,15 @@ export const ContactSubmissionSchema = z.object({
 });
 
 export type ContactSubmissionInput = z.infer<typeof ContactSubmissionSchema>;
+
+export const NewsletterSubmissionSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .email({ message: 'A working email address is required.' }),
+  submittedAt: z.number().optional(),
+  turnstileToken: z.string().trim().optional(),
+  [HONEYPOT_FIELD]: z.string().trim().optional(),
+});
+
+export type NewsletterSubmissionInput = z.infer<typeof NewsletterSubmissionSchema>;
