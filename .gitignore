@@ -33,3 +33,4 @@ yarn-error.log*
 
 # uploaded brand assets are tracked; generated derivatives are not
 /public/brand/_generated/
+.playwright-mcp/
