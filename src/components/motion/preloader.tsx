@@ -36,7 +36,6 @@ export function Preloader() {
     if (el) {
       gsap.to(el, {
         clipPath: 'inset(0 0 100% 0)',
-        opacity: 0,
         duration: 0.5,
         ease: 'power3.inOut',
         onComplete: () => {
