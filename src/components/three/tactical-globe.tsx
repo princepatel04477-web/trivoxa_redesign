@@ -618,6 +618,8 @@ function buildGraticule(
 /* ========================================================================== */
 export interface GlobeMarker {
   label: string;
+  city?: string;
+  country?: string;
   description?: string;
   latitude: number;
   longitude: number;
@@ -671,6 +673,8 @@ export interface TacticalGlobeProps {
 export const DEFAULT_TRIVOXA_MARKERS: GlobeMarker[] = [
   {
     label: 'Surat (HQ)',
+    city: 'Surat (HQ)',
+    country: 'India',
     description: 'Trivoxa Group Central Headquarters & Export Desk',
     latitude: 21.17,
     longitude: 72.83,
@@ -678,55 +682,89 @@ export const DEFAULT_TRIVOXA_MARKERS: GlobeMarker[] = [
   },
   {
     label: 'Mundra Port',
+    city: 'Mundra Port',
+    country: 'India',
     description: 'Primary Container & Bulk Outbound Terminal (INMUN)',
     latitude: 22.84,
     longitude: 69.7,
-    color: '#C49A6C',
+    color: '#D4AF37',
+  },
+  {
+    label: 'Kandla Port',
+    city: 'Kandla Port',
+    country: 'India',
+    description: 'Major Breakbulk & Agro Outbound Terminal (INIXY)',
+    latitude: 23.01,
+    longitude: 70.22,
+    color: '#D4AF37',
   },
   {
     label: 'Nhava Sheva',
+    city: 'Nhava Sheva (JNPT)',
+    country: 'India',
     description: 'JNPT Outbound Freight & Formulation Corridor (INNSA)',
     latitude: 18.95,
     longitude: 72.95,
-    color: '#C49A6C',
+    color: '#D4AF37',
   },
   {
-    label: 'Europe (Rotterdam)',
+    label: 'Rotterdam',
+    city: 'Rotterdam',
+    country: 'Netherlands',
     description: 'European Main Port • REACH-Compliant Inbound',
     latitude: 51.92,
     longitude: 4.48,
     color: '#C49A6C',
   },
   {
-    label: 'Middle East (Jebel Ali)',
+    label: 'Jebel Ali',
+    city: 'Jebel Ali / Dubai',
+    country: 'UAE',
     description: 'Gulf Distribution Hub (AEJEA)',
     latitude: 25.01,
     longitude: 55.06,
     color: '#C49A6C',
   },
   {
-    label: 'East Africa (Mombasa)',
+    label: 'Dammam',
+    city: 'Dammam',
+    country: 'Saudi Arabia',
+    description: 'GCC Industrial & Materials Gateway (SADMM)',
+    latitude: 26.43,
+    longitude: 50.10,
+    color: '#C49A6C',
+  },
+  {
+    label: 'Mombasa',
+    city: 'Mombasa',
+    country: 'Kenya',
     description: 'East African Trade Corridor Gateway',
     latitude: -4.04,
     longitude: 39.67,
     color: '#C49A6C',
   },
   {
-    label: 'North America (New York)',
+    label: 'New York',
+    city: 'New York',
+    country: 'USA',
     description: 'US Retail & Wholesale Distribution Hub',
     latitude: 40.71,
     longitude: -74.01,
     color: '#C49A6C',
   },
   {
-    label: 'South America (Santos)',
+    label: 'Santos',
+    city: 'Santos',
+    country: 'Brazil',
     description: 'Mercosur Regional Trade Terminal',
     latitude: -23.96,
     longitude: -46.33,
     color: '#C49A6C',
   },
   {
-    label: 'Asia-Pacific (Singapore)',
+    label: 'Singapore',
+    city: 'Singapore',
+    country: 'Singapore',
     description: 'ASEAN & Pacific Rim Transshipment Center',
     latitude: 1.35,
     longitude: 103.82,
@@ -822,6 +860,8 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
     screenX: number;
     screenY: number;
     label: string;
+    city?: string;
+    country?: string;
     description?: string;
   } | null>(null);
   const [hC, setHC] = useState<{
@@ -1047,10 +1087,27 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
         if (!m || !el) continue;
         const p = project(m.longitude, m.latitude, lambda, phi, gamma, R, cx, cy);
         if (p.v) {
-          const fade = clamp(p.rx * 4, 0, 1);
-          el.style.opacity = String(fade);
-          el.style.display = '';
-          el.setAttribute('transform', `translate(${p.sx.toFixed(1)},${p.sy.toFixed(1)})`);
+          const fade = clamp((p.rx - 0.12) * 3.8, 0, 1);
+          if (fade <= 0.01) {
+            el.style.opacity = '0';
+            el.style.display = 'none';
+          } else {
+            el.style.opacity = String(fade);
+            el.style.display = '';
+            el.setAttribute('transform', `translate(${p.sx.toFixed(1)},${p.sy.toFixed(1)})`);
+
+            const textEl = el.querySelector('text');
+            if (textEl) {
+              const isRight = p.sx > cx;
+              const xOff = isRight ? -14 : 14;
+              textEl.setAttribute('text-anchor', isRight ? 'end' : 'start');
+              textEl.setAttribute('x', String(xOff));
+              const tspans = textEl.querySelectorAll('tspan');
+              for (let j = 0; j < tspans.length; j++) {
+                tspans[j]?.setAttribute('x', String(xOff));
+              }
+            }
+          }
         } else {
           el.style.opacity = '0';
           el.style.display = 'none';
@@ -1200,6 +1257,8 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
         screenX: e.clientX - r.left,
         screenY: e.clientY - r.top,
         label: m.label,
+        city: m.city,
+        country: m.country,
         description: m.description,
       });
     });
@@ -1215,6 +1274,8 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
         screenX: e.clientX - r.left,
         screenY: e.clientY - r.top,
         label: m.label,
+        city: m.city,
+        country: m.country,
         description: m.description,
       });
     });
@@ -1488,22 +1549,41 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
               <circle r={sz} fill={col} />
               <circle cx={-sz * 0.35} cy={-sz * 0.35} r={sz * 0.35} fill={rgba('#ffffff', 0.65)} />
 
-              {showLabels && m.label && (
+              {showLabels && (m.city || m.label) && (
                 <text
-                  x={sz * 2.2}
-                  y={sz * 0.4 + 1}
-                  fill="#F4EFE6"
-                  fontSize={10}
-                  fontWeight={600}
-                  fontFamily="var(--font-mono, monospace)"
-                  letterSpacing="0.04em"
+                  x={14}
+                  y={-2}
+                  fill="#FAF8F3"
                   stroke={oceanColor}
                   strokeWidth={3}
                   strokeLinejoin="round"
                   paintOrder="stroke"
                   style={{ pointerEvents: 'none', userSelect: 'none' }}
                 >
-                  {m.label}
+                  <tspan
+                    x={14}
+                    dy="0"
+                    fontSize={11}
+                    fontWeight={700}
+                    fontFamily="var(--font-heading, sans-serif)"
+                    fill="#FAF8F3"
+                    letterSpacing="0.02em"
+                  >
+                    {m.city || m.label}
+                  </tspan>
+                  {m.country && (
+                    <tspan
+                      x={14}
+                      dy="12"
+                      fontSize={9}
+                      fontWeight={600}
+                      fontFamily="var(--font-mono, monospace)"
+                      fill="#D4AF37"
+                      letterSpacing="0.08em"
+                    >
+                      {m.country.toUpperCase()}
+                    </tspan>
+                  )}
                 </text>
               )}
             </g>
@@ -1538,14 +1618,29 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
           <div
             style={{
               fontSize: 12,
-              fontWeight: 600,
-              letterSpacing: '0.03em',
-              fontFamily: 'var(--font-body, sans-serif)',
+              fontWeight: 700,
+              letterSpacing: '0.02em',
+              fontFamily: 'var(--font-heading, sans-serif)',
               whiteSpace: 'nowrap',
+              color: '#FAF8F3',
             }}
           >
-            {hM.label}
+            {hM.city || hM.label}
           </div>
+          {hM.country && (
+            <div
+              style={{
+                fontSize: 10,
+                fontWeight: 600,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                fontFamily: 'var(--font-mono, monospace)',
+                color: '#D4AF37',
+              }}
+            >
+              {hM.country}
+            </div>
+          )}
           {hM.description && (
             <div
               style={{
@@ -1554,6 +1649,7 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
                 opacity: 0.75,
                 lineHeight: 1.35,
                 fontFamily: 'var(--font-mono, monospace)',
+                marginTop: 2,
               }}
             >
               {hM.description}

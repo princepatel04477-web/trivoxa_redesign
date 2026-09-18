@@ -30,7 +30,7 @@ export function GlobeLoader() {
           autoRotateSpeed: 4.5,
           enableDrag: true,
           showStars: true,
-          showLabels: false,
+          showLabels: true,
           glowIntensity: 0.45,
         }}
       />
