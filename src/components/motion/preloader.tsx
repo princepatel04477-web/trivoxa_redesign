@@ -16,7 +16,7 @@ const MIN_DISPLAY_MS = 900;
 const MAX_DISPLAY_MS = 2000;
 
 export function Preloader() {
-  const [show, setShow] = useState<boolean>(false);
+  const [show, setShow] = useState<boolean>(true);
   const reducedMotion = useReducedMotion();
   const preloaderRef = useRef<HTMLDivElement>(null);
   const exitedRef = useRef<boolean>(false);
@@ -26,13 +26,19 @@ export function Preloader() {
   const exitPreloader = () => {
     if (exitedRef.current) return;
     exitedRef.current = true;
+    try {
+      sessionStorage.setItem('trivoxa_preloader_seen', 'true');
+    } catch {
+      // Ignore storage errors in restricted contexts
+    }
+
     const el = preloaderRef.current || document.getElementById('trivoxa-preloader');
     if (el) {
       gsap.to(el, {
         clipPath: 'inset(0 0 100% 0)',
         opacity: 0,
-        duration: 0.6,
-        ease: 'power2.inOut',
+        duration: 0.5,
+        ease: 'power3.inOut',
         onComplete: () => {
           setShow(false);
           window.dispatchEvent(new CustomEvent('trivoxa:ready'));
@@ -45,7 +51,16 @@ export function Preloader() {
   };
 
   useEffect(() => {
+    // Ensure clean initial scroll to top of fold on visit
+    if (typeof window !== 'undefined' && !window.location.hash) {
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+      }
+      window.scrollTo(0, 0);
+    }
+
     if (reducedMotion) {
+      setShow(false);
       window.dispatchEvent(new CustomEvent('trivoxa:ready'));
       return;
     }
@@ -53,16 +68,15 @@ export function Preloader() {
     try {
       const seen = sessionStorage.getItem('trivoxa_preloader_seen');
       if (seen) {
+        setShow(false);
         window.dispatchEvent(new CustomEvent('trivoxa:ready'));
         return;
       }
-      sessionStorage.setItem('trivoxa_preloader_seen', 'true');
     } catch {
+      setShow(false);
       window.dispatchEvent(new CustomEvent('trivoxa:ready'));
       return;
     }
-
-    setShow(true);
 
     const maybeExit = () => {
       if (minElapsedRef.current && pageLoadedRef.current) exitPreloader();
@@ -82,11 +96,9 @@ export function Preloader() {
       maybeExit();
     }, MIN_DISPLAY_MS);
 
-    // Hard fallback: force remove no matter what, so a slow asset never
-    // strands the visitor behind the mark.
+    // Hard fallback: force remove no matter what, so slow assets never strand the visitor
     const fallbackTimer = setTimeout(() => {
-      setShow(false);
-      window.dispatchEvent(new CustomEvent('trivoxa:ready'));
+      exitPreloader();
     }, MAX_DISPLAY_MS);
 
     return () => {
@@ -117,7 +129,7 @@ export function Preloader() {
       <div className="relative z-10 flex flex-col items-center gap-4">
         <SplitFlapText
           words={['SURAT', 'TRIVOXA']}
-          padTo={0}
+          padTo={7}
           loop={false}
           flipDuration={0.05}
           flipsPerChar={3}

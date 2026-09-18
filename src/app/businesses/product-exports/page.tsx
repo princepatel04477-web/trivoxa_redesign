@@ -60,7 +60,7 @@ export default function ProductExportsPage() {
         </Container>
       </Section>
 
-      <Section surface="light" id="catalogue" bleed>
+      <Section surface="light" id="catalogue" bleed className="scroll-mt-28">
         <JsonLd data={catalogSchema(rows, 'Trivoxa Group export catalogue')} />
         <ProductCatalog rows={rows} facets={catalogFacets()} />
       </Section>

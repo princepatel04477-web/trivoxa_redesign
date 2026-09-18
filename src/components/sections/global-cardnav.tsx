@@ -66,6 +66,7 @@ export function GlobalCardNav() {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const navRef = useRef<HTMLDivElement | null>(null);
+  const cardsContainerRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
@@ -97,7 +98,7 @@ export function GlobalCardNav() {
     };
   }, [isExpanded]);
 
-  // Scroll listener for height compression, hide on fast scroll down, and scroll-progress hairline
+  // Scroll listener for height compression, hide on scroll down, and scroll-progress hairline
   useEffect(() => {
     const st = ScrollTrigger.create({
       start: 0,
@@ -106,10 +107,10 @@ export function GlobalCardNav() {
         const currentY = window.scrollY;
         setIsScrolled(currentY > 120);
 
-        // Fast downward scroll hides nav; scroll up shows nav
-        if (currentY > 200 && self.direction === 1 && self.getVelocity() > 600) {
+        // Responsive hide on scroll down past 160px; reveal immediately on scroll up
+        if (currentY > 160 && self.direction === 1 && !isExpanded) {
           setIsHidden(true);
-        } else if (self.direction === -1) {
+        } else if (self.direction === -1 || currentY < 120) {
           setIsHidden(false);
         }
 
@@ -123,16 +124,16 @@ export function GlobalCardNav() {
     return () => {
       st.kill();
     };
-  }, []);
+  }, [isExpanded]);
 
   const calculateHeight = () => {
-    const navEl = navRef.current;
-    if (!navEl) return 260;
-    const isMobile = window.matchMedia('(max-width: 768px)').matches;
-    if (isMobile) {
-      return 520;
+    const headerHeight = isScrolled ? 52 : 64;
+    const cardsEl = cardsContainerRef.current;
+    if (cardsEl) {
+      return headerHeight + cardsEl.scrollHeight;
     }
-    return 260;
+    const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
+    return isMobile ? 680 : 340;
   };
 
   const createTimeline = () => {
@@ -140,18 +141,24 @@ export function GlobalCardNav() {
     if (!navEl) return null;
 
     gsap.set(navEl, { height: isScrolled ? 52 : 64, overflow: 'hidden' });
-    gsap.set(cardsRef.current, { y: 30, opacity: 0 });
+    gsap.set(cardsRef.current, { y: 20, opacity: 0 });
 
     const tl = gsap.timeline({ paused: true });
     tl.to(navEl, {
       height: calculateHeight,
-      duration: 0.6,
-      ease: 'trivoxa.out',
+      duration: 0.45,
+      ease: 'power3.out',
+      onComplete: () => {
+        if (navEl) {
+          navEl.style.height = 'auto';
+          navEl.style.overflow = 'visible';
+        }
+      },
     });
     tl.to(
       cardsRef.current,
-      { y: 0, opacity: 1, duration: 0.5, ease: 'trivoxa.out', stagger: 0.08 },
-      '-=0.3'
+      { y: 0, opacity: 1, duration: 0.35, ease: 'power3.out', stagger: 0.05 },
+      '-=0.25'
     );
     return tl;
   };
@@ -166,12 +173,19 @@ export function GlobalCardNav() {
 
   const toggleMenu = () => {
     const tl = tlRef.current;
-    if (!tl) return;
+    const navEl = navRef.current;
+    if (!tl || !navEl) return;
     if (!isExpanded) {
+      navEl.style.overflow = 'hidden';
       setIsExpanded(true);
       tl.play(0);
     } else {
-      tl.eventCallback('onReverseComplete', () => setIsExpanded(false));
+      navEl.style.overflow = 'hidden';
+      navEl.style.height = `${navEl.offsetHeight}px`;
+      tl.eventCallback('onReverseComplete', () => {
+        setIsExpanded(false);
+        navEl.style.height = `${isScrolled ? 52 : 64}px`;
+      });
       tl.reverse();
     }
   };
@@ -332,7 +346,8 @@ export function GlobalCardNav() {
 
         {/* Expandable 3 Cards Container */}
         <div
-          className={`grid grid-cols-1 md:grid-cols-3 gap-3 p-3 md:p-4 border-t border-bronze/20 transition-opacity duration-300 ${
+          ref={cardsContainerRef}
+          className={`grid grid-cols-1 md:grid-cols-3 gap-3 p-3 md:p-4 border-t border-bronze/20 transition-opacity duration-300 max-h-[calc(100vh-100px)] overflow-y-auto ${
             isExpanded ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none hidden'
           }`}
           aria-hidden={!isExpanded}
@@ -344,7 +359,7 @@ export function GlobalCardNav() {
                 if (el) cardsRef.current[idx] = el;
               }}
               style={{ backgroundColor: item.bgColor, color: item.textColor }}
-              className="flex flex-col justify-between rounded-xl p-5 shadow-lg min-h-[160px]"
+              className="flex flex-col justify-between rounded-xl p-4 md:p-5 shadow-lg min-h-[170px]"
             >
               <h3 className="text-sm font-semibold tracking-wide text-bronze pb-2 border-b border-espresso/10">
                 {item.label}
