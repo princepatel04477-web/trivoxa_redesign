@@ -264,9 +264,14 @@ const DepthCarousel = ({
     const onWheel = (e: WheelEvent) => {
       const cfg = cfgRef.current;
       if (cfg.count < 2) return;
+      // Never trap vertical page scroll. Only respond to intentional horizontal
+      // wheel gestures (trackpad swipe or shift+wheel).
+      const isHorizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey;
+      if (!isHorizontal) return;
+
       e.preventDefault();
       tweenRef.current?.kill();
-      const raw = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      const raw = e.shiftKey ? e.deltaY : e.deltaX;
       const delta = e.deltaMode === 1 ? raw * 24 : raw;
       const step = clamp(delta / (cfg.cardWidth * 0.9), -0.6, 0.6);
       posRef.current += step;

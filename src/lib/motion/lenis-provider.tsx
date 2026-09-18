@@ -1,40 +1,22 @@
 'use client';
 
-import React, { useEffect, useRef, type ReactNode } from 'react';
-import Lenis from 'lenis';
-import { gsap, ScrollTrigger } from './gsap';
-import { useReducedMotion } from './useReducedMotion';
+import React, { useEffect, type ReactNode } from 'react';
+import { ScrollTrigger } from './gsap';
 
+/**
+ * LenisProvider — Preserves native, responsive 120Hz browser scrolling.
+ *
+ * Artificial JS scroll-jacking with high durations (e.g. 1.2s lerp) causes
+ * floatiness, input lag, and motion nausea on desktop wheels and precision trackpads.
+ * Native browser scrolling gives 1:1 tactile precision, zero latency, and hardware
+ * acceleration. GSAP's ScrollTrigger tracks window scrolling natively.
+ */
 export function LenisProvider({ children }: { children: ReactNode }) {
-  const reducedMotion = useReducedMotion();
-  const lenisRef = useRef<Lenis | null>(null);
-
   useEffect(() => {
-    if (reducedMotion) return;
-
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-    });
-    lenisRef.current = lenis;
-
-    // Connect Lenis to GSAP ScrollTrigger
-    lenis.on('scroll', ScrollTrigger.update);
-
-    const updateTicker = (time: number) => {
-      lenis.raf(time * 1000);
-    };
-
-    gsap.ticker.add(updateTicker);
-    gsap.ticker.lagSmoothing(0);
-
-    return () => {
-      gsap.ticker.remove(updateTicker);
-      lenis.destroy();
-      lenisRef.current = null;
-    };
-  }, [reducedMotion]);
+    // Refresh ScrollTrigger when DOM layout stabilizes
+    ScrollTrigger.refresh();
+  }, []);
 
   return <>{children}</>;
 }
+

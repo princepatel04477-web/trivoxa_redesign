@@ -297,9 +297,33 @@ const ElectricBorder: React.FC<ElectricBorderProps> = ({
     });
     resizeObserver.observe(container);
 
-    animationRef.current = requestAnimationFrame(drawElectricBorder);
+    // The noise-displaced stroke is resampled every frame forever — only pay
+    // for it while the border is actually on screen.
+    let intersectionObserver: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              if (animationRef.current === null) {
+                lastFrameTimeRef.current = performance.now();
+                animationRef.current = requestAnimationFrame(drawElectricBorder);
+              }
+            } else if (animationRef.current !== null) {
+              cancelAnimationFrame(animationRef.current);
+              animationRef.current = null;
+            }
+          }
+        },
+        { rootMargin: '200px' },
+      );
+      intersectionObserver.observe(container);
+    } else {
+      animationRef.current = requestAnimationFrame(drawElectricBorder);
+    }
 
     return () => {
+      intersectionObserver?.disconnect();
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }

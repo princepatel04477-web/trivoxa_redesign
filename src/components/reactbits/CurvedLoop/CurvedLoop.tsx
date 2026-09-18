@@ -27,6 +27,7 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
   const measureRef = useRef<SVGTextElement | null>(null);
   const textPathRef = useRef<SVGTextPathElement | null>(null);
   const pathRef = useRef<SVGPathElement | null>(null);
+  const rootRef = useRef<HTMLDivElement | null>(null);
   const [spacing, setSpacing] = useState(0);
   const [offset, setOffset] = useState(0);
   const uid = useId();
@@ -61,9 +62,24 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
 
   useEffect(() => {
     if (!spacing || !ready) return;
+
+    // This loop runs forever, calling setState every frame — never pay for
+    // that (a React re-render every single frame) while scrolled off-screen.
+    let isVisible = true;
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined' && rootRef.current) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) isVisible = entry.isIntersecting;
+        },
+        { rootMargin: '200px' },
+      );
+      observer.observe(rootRef.current);
+    }
+
     let frame = 0;
     const step = () => {
-      if (!dragRef.current && textPathRef.current) {
+      if (isVisible && !dragRef.current && textPathRef.current) {
         const delta = dirRef.current === 'right' ? speed : -speed;
         const currentOffset = parseFloat(textPathRef.current.getAttribute('startOffset') || '0');
         let newOffset = currentOffset + delta;
@@ -76,7 +92,10 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
       frame = requestAnimationFrame(step);
     };
     frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      observer?.disconnect();
+      cancelAnimationFrame(frame);
+    };
   }, [spacing, speed, ready]);
 
   const onPointerDown = (e: PointerEvent) => {
@@ -111,6 +130,7 @@ const CurvedLoop: FC<CurvedLoopProps> = ({
 
   return (
     <div
+      ref={rootRef}
       className="min-h-screen flex items-center justify-center w-full"
       style={{ visibility: ready ? 'visible' : 'hidden', cursor: cursorStyle }}
       onPointerDown={onPointerDown}

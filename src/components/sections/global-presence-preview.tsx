@@ -1,23 +1,16 @@
 'use client';
 
 import { BRAND } from '@/lib/tokens/colors';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
 import { Container, Section } from '@/components/ui/layout';
 import SplitText from '@/components/reactbits/SplitText/SplitText';
 import ShinyText from '@/components/reactbits/ShinyText/ShinyText';
-import SplitFlapText from '@/components/reactbits/SplitFlapText/SplitFlapText';
 import ChromaGrid from '@/components/reactbits/ChromaGrid/ChromaGrid';
-import Counter from '@/components/reactbits/Counter/Counter';
+import { CountUp } from '@/components/motion/count-up';
 import { GlobeLoader } from '@/components/three/globe-loader';
 import { presenceNumbers } from '@/lib/selectors';
-import { animate, svg } from '@/lib/motion/anime';
-import { useReducedMotion } from '@/lib/motion/useReducedMotion';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const REGION_DATA = [
   {
@@ -28,7 +21,6 @@ const REGION_DATA = [
     image: '/brand/og/industry-textile-apparel.png',
     borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(168,139,104,0.15), rgba(23,18,16,0.95))',
-    lanePath: 'M 40 180 Q 140 60 280 90',
   },
   {
     title: 'Middle East',
@@ -38,7 +30,6 @@ const REGION_DATA = [
     image: '/brand/og/industry-building-materials.png',
     borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(196,164,124,0.15), rgba(23,18,16,0.95))',
-    lanePath: 'M 40 180 Q 120 130 200 140',
   },
   {
     title: 'Africa',
@@ -48,7 +39,6 @@ const REGION_DATA = [
     image: '/brand/og/industry-healthcare-pharmaceuticals.png',
     borderColor: BRAND.bronzeInk.hex,
     gradient: 'linear-gradient(145deg, rgba(140,115,85,0.15), rgba(23,18,16,0.95))',
-    lanePath: 'M 40 180 Q 80 200 160 250',
   },
   {
     title: 'North America',
@@ -58,7 +48,6 @@ const REGION_DATA = [
     image: '/brand/og/product-engineered-quartz.png',
     borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(168,139,104,0.15), rgba(23,18,16,0.95))',
-    lanePath: 'M 40 180 Q 120 40 320 80',
   },
   {
     title: 'South America',
@@ -68,7 +57,6 @@ const REGION_DATA = [
     image: '/brand/og/industry-engineering-industrial.png',
     borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(175,145,110,0.15), rgba(23,18,16,0.95))',
-    lanePath: 'M 40 180 Q 100 240 220 280',
   },
   {
     title: 'Asia-Pacific',
@@ -78,52 +66,16 @@ const REGION_DATA = [
     image: '/brand/og/product-cotton-yarn.png',
     borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(196,164,124,0.15), rgba(23,18,16,0.95))',
-    lanePath: 'M 40 180 Q 180 200 290 220',
   },
 ];
 
 export function GlobalPresencePreview() {
   const numbers = presenceNumbers();
-  const [activeRegionIndex, setActiveRegionIndex] = useState(0);
-  const [statsVisible, setStatsVisible] = useState(false);
+  const [, setActiveRegionIndex] = useState(0);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const routeSvgRef = useRef<SVGSVGElement>(null);
-  const lanePathRef = useRef<SVGPathElement>(null);
-  const reducedMotion = useReducedMotion();
-
-  // Draw SVG route map whenever activeRegionIndex changes
-  useEffect(() => {
-    if (reducedMotion || !lanePathRef.current) return;
-
-    const path = lanePathRef.current;
-    const drawable = svg.createDrawable(path);
-    animate(drawable, {
-      draw: ['0 0', '0 1'],
-      duration: 1200,
-      ease: 'inOutQuad',
-    });
-  }, [activeRegionIndex, reducedMotion]);
-
-  // Pin section on desktop for 150vh scrub rotation
-  useEffect(() => {
-    if (reducedMotion || !sectionRef.current) return;
-
-    const ctx = gsap.context(() => {
-      // Stats trigger on enter
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: 'top 75%',
-        onEnter: () => setStatsVisible(true),
-      });
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, [reducedMotion]);
-
-  const activeRegion = REGION_DATA[activeRegionIndex] ?? REGION_DATA[0]!;
 
   return (
-    <div ref={sectionRef} className="relative overflow-hidden bg-stone-950 text-stone-100">
+    <div ref={sectionRef} data-surface="deep" className="relative overflow-hidden bg-stone-950 text-stone-100">
       {/* Background: Static Topography SVG (0 WebGL budget consumed) */}
       <div className="pointer-events-none absolute inset-0 opacity-15">
         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -161,104 +113,128 @@ export function GlobalPresencePreview() {
             </div>
           </div>
 
-          <div className="grid grid-cols-12 items-center gap-10 lg:gap-16">
-            {/* Left: Globe and Route Visual */}
-            <div className="col-span-12 lg:col-span-6">
-              <div className="relative aspect-square w-full max-w-[500px] mx-auto overflow-hidden rounded-[28px] border border bg-espresso-deep/90 p-4">
-                <GlobeLoader />
-
-                {/* SVG Route Lane overlay for active region */}
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
-                  <svg
-                    ref={routeSvgRef}
-                    viewBox="0 0 360 360"
-                    className="h-full w-full"
-                    fill="none"
-                  >
-                    <path
-                      ref={lanePathRef}
-                      d={activeRegion.lanePath}
-                      stroke={BRAND.bronze.hex}
-                      strokeWidth="2.5"
-                      strokeDasharray="6 4"
-                      strokeLinecap="round"
-                    />
-                    <circle cx="40" cy="180" r="4" fill={BRAND.ivory.hex} />
-                    <text x="40" y="200" fill={BRAND.bronze.hex} fontSize="10" fontFamily="monospace">
-                      SURAT HQ
-                    </text>
-                  </svg>
+          <div className="grid grid-cols-12 items-stretch gap-8 lg:gap-12">
+            {/* Left: Command-Center 3D Interactive Globe Card */}
+            <div className="col-span-12 lg:col-span-6 flex flex-col">
+              <div className="relative aspect-square w-full max-w-[520px] mx-auto overflow-hidden rounded-3xl border border-stone-800/80 bg-stone-950/90 p-5 shadow-2xl flex flex-col justify-between">
+                {/* Globe Canvas */}
+                <div className="absolute inset-0">
+                  <GlobeLoader />
                 </div>
 
-                <div className="absolute bottom-4 left-4 rounded-full border border bg-espresso-deep/90 px-3 py-1 font-mono text-[11px] text-bronze backdrop-blur-md">
-                  Corridor: Surat → {activeRegion.location}
+                {/* Top Badge: Live Network Status */}
+                <div className="relative z-10 flex items-center justify-between pointer-events-none">
+                  <div className="flex items-center gap-2 rounded-full border border-stone-800/90 bg-stone-900/80 px-3 py-1 font-mono text-[11px] text-stone-300 backdrop-blur-md">
+                    <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Global Trade Network</span>
+                  </div>
+                  <span className="font-mono text-[11px] text-stone-500 uppercase tracking-wider hidden sm:inline">
+                    Interactive 3D Sphere
+                  </span>
+                </div>
+
+                {/* Bottom Route Summary Bar */}
+                <div className="relative z-10 rounded-2xl border border-stone-800/90 bg-stone-900/90 px-4 py-2.5 backdrop-blur-md">
+                  <div className="flex items-center justify-between font-mono text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="size-1.5 rounded-full bg-bronze" />
+                      <span className="text-bronze font-semibold">Surat Global HQ</span>
+                    </div>
+                    <span className="text-stone-400">Gateways: Mundra & JNPT</span>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Right: Overview, Ports & Stats */}
-            <div className="col-span-12 lg:col-span-6 flex flex-col justify-center">
+            <div className="col-span-12 lg:col-span-6 flex flex-col justify-between gap-6">
               <div>
-                <h3 className="font-serif text-2xl md:text-3xl text-ivory font-medium">
-                  Direct Trade Corridors
+                <p className="font-mono text-xs font-semibold tracking-widest text-bronze uppercase mb-2">
+                  Maritime Trade Architecture
+                </p>
+                <h3 className="font-serif text-3xl sm:text-4xl text-stone-100 font-medium leading-tight">
+                  Direct Corridors ex Western India
                 </h3>
-                <p className="mt-3 text-sm md:text-base leading-relaxed surface-faint">
+                <p className="mt-3 text-sm md:text-base leading-relaxed text-stone-400">
                   Six primary overseas destinations serviced continuously from Western India ports. 
-                  Every consignment is monitored from gate-in through customs discharge.
+                  Every consignment is monitored from factory gate-in through customs discharge with full compliance documentation.
                 </p>
               </div>
 
-              {/* Port Chips with SplitFlapText */}
-              <div className="mt-6 flex flex-wrap items-center gap-3">
-                <span className="font-mono text-xs surface-faint">Loading Hubs:</span>
-                {[
-                  { code: 'INMUN', name: 'Mundra' },
-                  { code: 'INIXY', name: 'Kandla' },
-                  { code: 'INNSA', name: 'Nhava Sheva' },
-                ].map((port) => (
-                  <div
-                    key={port.code}
-                    className="flex items-center gap-2 rounded-lg border border bg-espresso/80 px-3 py-1.5 font-mono text-xs text-ivory"
-                  >
-                    <span className="text-bronze">
-                      <SplitFlapText text={port.code} fontSize="14px" flipDuration={0.35} />
-                    </span>
-                    <span className="surface-faint">({port.name})</span>
-                  </div>
-                ))}
+              {/* Designated Outbound Loading Hubs */}
+              <div className="space-y-2.5">
+                <span className="font-mono text-xs text-stone-400 uppercase tracking-wider block">
+                  Designated Outbound Loading Hubs
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    { code: 'INMUN', name: 'Mundra Port', state: 'Gujarat' },
+                    { code: 'INIXY', name: 'Kandla Port', state: 'Gujarat' },
+                    { code: 'INNSA', name: 'Nhava Sheva', state: 'JNPT Mumbai' },
+                  ].map((port) => (
+                    <div
+                      key={port.code}
+                      className="group rounded-xl border border-stone-800/80 bg-stone-900/60 p-3.5 transition-colors hover:border-bronze/50 hover:bg-stone-900/90"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-xs font-bold text-bronze tracking-wider">
+                          {port.code}
+                        </span>
+                        <span className="size-1.5 rounded-full bg-bronze/50 group-hover:bg-bronze transition-colors" />
+                      </div>
+                      <p className="mt-2 font-serif text-sm font-medium text-stone-200">
+                        {port.name}
+                      </p>
+                      <p className="font-mono text-[11px] text-stone-500 mt-0.5">
+                        {port.state}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Stats Row: Regions 6 · Industries 9 · Ports 3 using Counter */}
-              <div className="mt-8 flex flex-wrap items-center justify-between gap-6 border-t border pt-6">
-                <div className="flex gap-8">
-                  <div>
-                    <span className="font-mono text-xs surface-faint uppercase">Regions</span>
-                    <div className="font-serif text-2xl text-bronze">
-                      {statsVisible ? <Counter value={6} /> : 6}
+              {/* Stats and Action Card */}
+              <div className="rounded-2xl border border-stone-800/80 bg-stone-900/40 p-5 sm:p-6">
+                <div className="grid grid-cols-3 gap-4 text-center divide-x divide-stone-800/80">
+                  <div className="px-2">
+                    <div className="font-serif text-3xl sm:text-4xl text-stone-100 font-medium">
+                      <CountUp value={numbers.regions} />
                     </div>
+                    <span className="mt-1 block font-mono text-[11px] uppercase tracking-wider text-stone-400">
+                      Global Regions
+                    </span>
                   </div>
-                  <div>
-                    <span className="font-mono text-xs surface-faint uppercase">Industries</span>
-                    <div className="font-serif text-2xl text-bronze">
-                      {statsVisible ? <Counter value={9} /> : 9}
+                  <div className="px-2">
+                    <div className="font-serif text-3xl sm:text-4xl text-stone-100 font-medium">
+                      <CountUp value={numbers.industries} />
                     </div>
+                    <span className="mt-1 block font-mono text-[11px] uppercase tracking-wider text-stone-400">
+                      Core Sectors
+                    </span>
                   </div>
-                  <div>
-                    <span className="font-mono text-xs surface-faint uppercase">Ports</span>
-                    <div className="font-serif text-2xl text-bronze">
-                      {statsVisible ? <Counter value={3} /> : 3}
+                  <div className="px-2">
+                    <div className="font-serif text-3xl sm:text-4xl text-stone-100 font-medium">
+                      <CountUp value={numbers.ports} />
                     </div>
+                    <span className="mt-1 block font-mono text-[11px] uppercase tracking-wider text-stone-400">
+                      Export Hubs
+                    </span>
                   </div>
                 </div>
 
-                <Link
-                  href="/global-presence"
-                  className="group inline-flex items-center gap-2 rounded-xl border border-bronze/40 bg-bronze/10 px-5 py-3 font-mono text-xs uppercase tracking-widest text-bronze transition-all hover:bg-bronze hover:text-espresso-deep"
-                  data-cursor="target"
-                >
-                  <span>View Our Global Network</span>
-                  <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </Link>
+                <div className="mt-5 pt-4 border-t border-stone-800/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <span className="font-mono text-xs text-stone-400">
+                    SLA Inbound Response: <span className="text-bronze font-semibold">{numbers.responseWindow}</span>
+                  </span>
+                  <Link
+                    href="/global-presence"
+                    className="group inline-flex items-center gap-2 rounded-xl border border-bronze/40 bg-bronze/10 px-4 py-2 font-mono text-xs uppercase tracking-wider text-bronze transition-all hover:bg-bronze hover:text-stone-950"
+                    data-cursor="target"
+                  >
+                    <span>View Global Network</span>
+                    <ArrowUpRight className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -282,4 +258,3 @@ export function GlobalPresencePreview() {
     </div>
   );
 }
-

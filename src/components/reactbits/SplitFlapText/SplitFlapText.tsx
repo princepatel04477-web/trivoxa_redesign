@@ -134,7 +134,7 @@ const SplitFlapText = ({
   gap = 6,
   fontSize = 52,
   loop = true,
-  padTo = 12,
+  padTo,
   className = '',
   style = {},
   ...props
@@ -150,8 +150,15 @@ const SplitFlapText = ({
 
   const width = useMemo(() => {
     const longest = phrases.reduce((max, phrase) => Math.max(max, phrase.length), 1);
-    return Math.max(1, Math.ceil(Number(padTo) || 0), longest);
-  }, [padTo, phrases]);
+    if (padTo !== undefined) {
+      return Math.max(1, Math.ceil(Number(padTo) || 0), longest);
+    }
+    // If text prop is provided without explicit padTo, fit exactly to text
+    if (typeof text === 'string') {
+      return longest;
+    }
+    return Math.max(longest, 12);
+  }, [padTo, phrases, text]);
 
   const normalizedPhrases = useMemo(() => phrases.map(phrase => normalizePhrase(phrase, width)), [phrases, width]);
 

@@ -243,10 +243,17 @@ export function IndustriesPreview() {
 
         {/* Carousel Footer: Active Details, Progress Bar & SplitFlap counter */}
         <div className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-stone-800/60 pt-6 md:flex-row">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {/* SplitFlap slide counter */}
-            <div className="flex items-center font-mono text-sm text-accent">
-              <SplitFlapText text={slideCounter} flipDuration={0.4} />
+            <div className="flex items-center">
+              <SplitFlapText
+                text={slideCounter}
+                fontSize={16}
+                padTo={slideCounter.length}
+                tileRadius={3}
+                gap={3}
+                flipDuration={0.35}
+              />
             </div>
 
             {/* Autoplay Pause / Resume toggle */}
@@ -254,14 +261,14 @@ export function IndustriesPreview() {
               type="button"
               onClick={() => setIsAutoplayPaused((prev) => !prev)}
               aria-label={isAutoplayPaused ? 'Play carousel autoplay' : 'Pause carousel autoplay'}
-              className="flex size-7 items-center justify-center rounded-full border border-stone-700 bg-stone-900/80 text-stone-400 hover:text-stone-100"
+              className="flex size-7 items-center justify-center rounded-full border border-stone-700 bg-stone-900/80 text-stone-400 hover:text-stone-100 transition-colors"
             >
               {isAutoplayPaused ? <Play className="size-3" /> : <Pause className="size-3" />}
             </button>
           </div>
 
           {/* Autoplay Progress Bar */}
-          <div className="h-1 w-48 overflow-hidden rounded-full bg-stone-800 md:w-64">
+          <div className="h-1 w-36 overflow-hidden rounded-full bg-stone-800 md:w-56">
             <div
               ref={progressBarRef}
               className="h-full bg-accent transition-[width] duration-100 ease-linear"
@@ -271,7 +278,7 @@ export function IndustriesPreview() {
 
           {/* Active Industry Title with DecryptedText */}
           <div className="text-right">
-            <div className="font-serif text-lg text-stone-200">
+            <div className="font-serif text-base text-stone-200 sm:text-lg">
               <DecryptedText text={currentIndustry.name} speed={30} />
             </div>
           </div>

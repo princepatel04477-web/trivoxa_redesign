@@ -126,11 +126,11 @@ export function SiteFooter() {
       {/* HUGE TRIVOXA WORDMARK */}
       <div className="relative z-10 border-b border-stone-800/80 pt-12 pb-6">
         <Container>
-          <div className="mt-6 hidden h-32 w-full md:block">
+          <div className="mt-4 hidden h-36 w-full md:block md:h-44 lg:h-52">
             <TextPressure
               text="TRIVOXA"
               fontFamily="Instrument Serif"
-              minFontSize={64}
+              minFontSize={48}
               width
               weight
               italic={false}
@@ -140,7 +140,7 @@ export function SiteFooter() {
             />
           </div>
           <div className="mt-6 block py-4 text-center md:hidden">
-            <span className="text-ivory font-serif text-5xl font-bold tracking-wider">TRIVOXA</span>
+            <span className="font-serif text-4xl font-bold tracking-[0.2em] text-ivory uppercase sm:text-5xl">TRIVOXA</span>
           </div>
         </Container>
       </div>

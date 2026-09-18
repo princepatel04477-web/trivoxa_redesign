@@ -27,7 +27,8 @@ const Noise: React.FC<NoiseProps> = ({
     if (!ctx) return;
 
     let frame = 0;
-    let animationId: number;
+    let animationId: number | null = null;
+    let running = false;
 
     const canvasSize = 1024;
 
@@ -63,13 +64,44 @@ const Noise: React.FC<NoiseProps> = ({
       animationId = window.requestAnimationFrame(loop);
     };
 
+    // Grain redraw is CPU-heavy (a full ImageData fill every couple of
+    // frames). Never do that work while the canvas is scrolled out of view —
+    // most of this component's mounts (e.g. the site footer, alive on every
+    // route from first paint) sit far below the fold for most of a visit.
+    const start = () => {
+      if (running) return;
+      running = true;
+      loop();
+    };
+    const stop = () => {
+      running = false;
+      if (animationId !== null) window.cancelAnimationFrame(animationId);
+      animationId = null;
+    };
+
     window.addEventListener('resize', resize);
     resize();
-    loop();
+
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) start();
+            else stop();
+          }
+        },
+        { rootMargin: '200px' },
+      );
+      observer.observe(canvas);
+    } else {
+      start();
+    }
 
     return () => {
+      observer?.disconnect();
       window.removeEventListener('resize', resize);
-      window.cancelAnimationFrame(animationId);
+      stop();
     };
   }, [patternSize, patternScaleX, patternScaleY, patternRefreshInterval, patternAlpha]);
 

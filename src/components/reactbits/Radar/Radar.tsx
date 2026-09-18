@@ -200,7 +200,7 @@ export default function Radar({
       gl.canvas.addEventListener('mouseleave', handleMouseLeave);
     }
 
-    let animationFrameId: number;
+    let animationFrameId: number | null = null;
 
     function update(time: number) {
       animationFrameId = requestAnimationFrame(update);
@@ -226,10 +226,32 @@ export default function Radar({
 
       renderer.render({ scene: mesh });
     }
-    animationFrameId = requestAnimationFrame(update);
+
+    // This shader runs every frame forever once started — only pay for it
+    // while the canvas is actually on screen.
+    let intersectionObserver: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              if (animationFrameId === null) animationFrameId = requestAnimationFrame(update);
+            } else if (animationFrameId !== null) {
+              cancelAnimationFrame(animationFrameId);
+              animationFrameId = null;
+            }
+          }
+        },
+        { rootMargin: '200px' },
+      );
+      intersectionObserver.observe(container);
+    } else {
+      animationFrameId = requestAnimationFrame(update);
+    }
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      intersectionObserver?.disconnect();
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', resize);
       if (enableMouseInteraction) {
         gl.canvas.removeEventListener('mousemove', handleMouseMove);

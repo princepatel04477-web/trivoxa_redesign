@@ -238,7 +238,31 @@ const DotField = memo(({
     doResize();
     window.addEventListener('resize', resize);
     window.addEventListener('mousemove', onMouseMove, { passive: true });
-    rafRef.current = requestAnimationFrame(tick);
+
+    // The per-dot physics pass runs every frame forever once started — never
+    // do that work while the canvas is scrolled out of view (this component
+    // mounts, among other places, inside the site footer, which is alive on
+    // every route from first paint and sits far below the fold for most of a
+    // visit).
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              if (rafRef.current === null) rafRef.current = requestAnimationFrame(tick);
+            } else if (rafRef.current !== null) {
+              cancelAnimationFrame(rafRef.current);
+              rafRef.current = null;
+            }
+          }
+        },
+        { rootMargin: '200px' },
+      );
+      observer.observe(canvas);
+    } else {
+      rafRef.current = requestAnimationFrame(tick);
+    }
 
     rebuildRef.current = () => {
       const { w, h } = sizeRef.current;
@@ -246,13 +270,14 @@ const DotField = memo(({
     };
 
     return () => {
+      observer?.disconnect();
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       clearInterval(speedInterval);
       clearTimeout(resizeTimer);
       window.removeEventListener('resize', resize);
       window.removeEventListener('mousemove', onMouseMove);
     };
-   
+
   }, []);
 
   useEffect(() => {

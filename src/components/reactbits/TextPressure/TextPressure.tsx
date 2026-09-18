@@ -110,19 +110,26 @@ const TextPressure: React.FC<TextPressureProps> = ({
 
     const { width: containerW, height: containerH } = containerRef.current.getBoundingClientRect();
 
-    let newFontSize = containerW / (chars.length / 2);
-    newFontSize = Math.max(newFontSize, minFontSize);
+    // Scale font size to fit width across all characters
+    const widthFactor = chars.length * 0.75;
+    const widthBasedSize = containerW / Math.max(1, widthFactor);
+
+    // If container has a defined height, scale font size to fit height
+    const heightBasedSize = containerH > 20 ? containerH * 0.82 : widthBasedSize;
+
+    let newFontSize = Math.min(widthBasedSize, heightBasedSize);
+    newFontSize = Math.max(newFontSize, minFontSize ? Math.min(minFontSize, heightBasedSize) : 16);
 
     setFontSize(newFontSize);
     setScaleY(1);
-    setLineHeight(1);
+    setLineHeight(1.1);
 
     requestAnimationFrame(() => {
       if (!titleRef.current) return;
       const textRect = titleRef.current.getBoundingClientRect();
 
-      if (scale && textRect.height > 0) {
-        const yRatio = containerH / textRect.height;
+      if (scale && textRect.height > 0 && containerH > 0) {
+        const yRatio = Math.min(1, containerH / textRect.height);
         setScaleY(yRatio);
         setLineHeight(yRatio);
       }
@@ -130,15 +137,54 @@ const TextPressure: React.FC<TextPressureProps> = ({
   }, [chars.length, minFontSize, scale]);
 
   useEffect(() => {
+    setSize();
     const debouncedSetSize = debounce(setSize, 100);
-    debouncedSetSize();
     window.addEventListener('resize', debouncedSetSize);
-    return () => window.removeEventListener('resize', debouncedSetSize);
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      resizeObserver = new ResizeObserver(() => {
+        debouncedSetSize();
+      });
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('resize', debouncedSetSize);
+      resizeObserver?.disconnect();
+    };
   }, [setSize]);
+
+  const isVisibleRef = useRef(false);
+
+  // Every animation frame below calls getBoundingClientRect() per character,
+  // which forces a layout reflow — never worth paying while this element is
+  // scrolled out of view (this component mounts, among other places, as the
+  // giant footer wordmark, which is alive on every route from first paint
+  // and sits far below the fold for most of a visit).
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      isVisibleRef.current = true;
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) isVisibleRef.current = entry.isIntersecting;
+      },
+      { rootMargin: '200px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     let rafId: number;
     const animate = () => {
+      if (!isVisibleRef.current) {
+        rafId = requestAnimationFrame(animate);
+        return;
+      }
       mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) / 15;
       mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) / 15;
 
@@ -203,19 +249,19 @@ const TextPressure: React.FC<TextPressureProps> = ({
   }, [fontFamily, fontUrl, stroke, textColor, strokeColor, strokeWidth]);
 
   return (
-    <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-transparent">
+    <div ref={containerRef} className="relative w-full h-full overflow-hidden bg-transparent flex items-center justify-center">
       {styleElement}
       <Tag
         ref={titleRef as never}
         className={`text-pressure-title ${className} ${
           flex ? 'flex justify-between' : ''
-        } ${stroke ? 'stroke' : ''} uppercase text-center`}
+        } ${stroke ? 'stroke' : ''} uppercase text-center w-full`}
         style={{
           fontFamily,
           fontSize: fontSize,
           lineHeight,
           transform: `scale(1, ${scaleY})`,
-          transformOrigin: 'center top',
+          transformOrigin: 'center center',
           margin: 0,
           fontWeight: 100,
           color: stroke ? undefined : textColor

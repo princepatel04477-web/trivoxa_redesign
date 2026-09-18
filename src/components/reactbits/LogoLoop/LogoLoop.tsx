@@ -135,6 +135,20 @@ const useAnimationLoop = (
     const track = trackRef.current;
     if (!track) return;
 
+    // This loop runs forever once started — never pay for it while the
+    // marquee is scrolled out of view.
+    let isVisible = true;
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) isVisible = entry.isIntersecting;
+        },
+        { rootMargin: '200px' },
+      );
+      observer.observe(track);
+    }
+
     const prefersReduced =
       typeof window !== 'undefined' &&
       window.matchMedia &&
@@ -158,6 +172,12 @@ const useAnimationLoop = (
     }
 
     const animate = (timestamp: number) => {
+      if (!isVisible) {
+        lastTimestampRef.current = null;
+        rafRef.current = requestAnimationFrame(animate);
+        return;
+      }
+
       if (lastTimestampRef.current === null) {
         lastTimestampRef.current = timestamp;
       }
@@ -187,6 +207,7 @@ const useAnimationLoop = (
     rafRef.current = requestAnimationFrame(animate);
 
     return () => {
+      observer?.disconnect();
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;

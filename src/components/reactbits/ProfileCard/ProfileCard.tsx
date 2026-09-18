@@ -150,7 +150,11 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
 
       const stillFar = Math.abs(targetX - currentX) > 0.05 || Math.abs(targetY - currentY) > 0.05;
 
-      if (stillFar || document.hasFocus()) {
+      // Was `stillFar || document.hasFocus()` — since the tab almost always
+      // has focus while a visitor is on the page, that condition was true
+      // forever, so the tilt loop never actually stopped once started (on
+      // mount, via beginInitial), even long after settling.
+      if (stillFar) {
         rafId = requestAnimationFrame(step);
       } else {
         running = false;

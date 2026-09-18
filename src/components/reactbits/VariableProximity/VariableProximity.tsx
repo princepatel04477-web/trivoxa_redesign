@@ -83,6 +83,26 @@ const VariableProximity = forwardRef<HTMLSpanElement, VariableProximityProps>((p
   const interpolatedSettingsRef = useRef<string[]>([]);
   const mousePositionRef = useMousePositionRef(containerRef);
   const lastPositionRef = useRef<{ x: number | null; y: number | null }>({ x: null, y: null });
+  const isVisibleRef = useRef(false);
+
+  // Every animation frame below calls getBoundingClientRect() per letter,
+  // which forces a layout reflow — never worth paying while this element is
+  // scrolled out of view, regardless of where the mouse happens to be.
+  useEffect(() => {
+    const el = containerRef?.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      isVisibleRef.current = true;
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) isVisibleRef.current = entry.isIntersecting;
+      },
+      { rootMargin: '200px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [containerRef]);
 
   const parsedSettings = useMemo(() => {
     const parseSettings = (settingsStr: string) =>
@@ -125,7 +145,7 @@ const VariableProximity = forwardRef<HTMLSpanElement, VariableProximityProps>((p
   };
 
   useAnimationFrame(() => {
-    if (!containerRef?.current) return;
+    if (!containerRef?.current || !isVisibleRef.current) return;
     const { x, y } = mousePositionRef.current;
     if (lastPositionRef.current.x === x && lastPositionRef.current.y === y) {
       return;

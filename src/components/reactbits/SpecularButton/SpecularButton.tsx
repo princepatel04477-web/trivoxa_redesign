@@ -231,8 +231,26 @@ const SpecularButton = ({
     const lineC = new Color();
     const baseC = new Color();
 
+    // This shader redraws every frame forever — only pay for it while the
+    // button is actually on screen.
+    let isVisible = true;
+    let intersectionObserver: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) isVisible = entry.isIntersecting;
+        },
+        { rootMargin: '200px' },
+      );
+      intersectionObserver.observe(btn);
+    }
+
     const update = (now: number) => {
       raf = requestAnimationFrame(update);
+      if (!isVisible) {
+        last = now;
+        return;
+      }
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       const p = propsRef.current;
@@ -262,6 +280,7 @@ const SpecularButton = ({
     raf = requestAnimationFrame(update);
 
     return () => {
+      intersectionObserver?.disconnect();
       cancelAnimationFrame(raf);
       ro.disconnect();
       window.removeEventListener('pointermove', onPointerMove);

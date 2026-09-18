@@ -81,8 +81,27 @@ export default function FallingText({
 
     let active = true;
 
+    // The physics sim redraws every frame forever — only pay for it while
+    // the canvas is actually on screen.
+    let isVisible = true;
+    let intersectionObserver: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) isVisible = entry.isIntersecting;
+        },
+        { rootMargin: '200px' },
+      );
+      intersectionObserver.observe(canvas);
+    }
+
     const render = () => {
       if (!active || !ctx) return;
+
+      if (!isVisible) {
+        animFrameId.current = requestAnimationFrame(render);
+        return;
+      }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -151,6 +170,7 @@ export default function FallingText({
 
     return () => {
       active = false;
+      intersectionObserver?.disconnect();
       if (animFrameId.current) cancelAnimationFrame(animFrameId.current);
       window.removeEventListener('resize', handleResize);
     };
