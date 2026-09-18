@@ -116,35 +116,50 @@ export default function DarkVeil({
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    const canvas = ref.current as HTMLCanvasElement;
-    const parent = canvas.parentElement as HTMLElement;
+    const canvas = ref.current;
+    if (!canvas) return;
+    const parent = canvas.parentElement;
+    if (!parent) return;
 
-    const renderer = new Renderer({
-      dpr: Math.min(window.devicePixelRatio, 2),
-      canvas
-    });
+    let renderer: Renderer;
+    let gl: any;
+    let program: Program;
+    let mesh: Mesh;
+    let frame = 0;
 
-    const gl = renderer.gl;
-    const geometry = new Triangle(gl);
+    try {
+      renderer = new Renderer({
+        dpr: Math.min(window.devicePixelRatio, 2),
+        canvas
+      });
 
-    const program = new Program(gl, {
-      vertex,
-      fragment,
-      uniforms: {
-        uTime: { value: 0 },
-        uResolution: { value: new Vec2() },
-        uHueShift: { value: hueShift },
-        uNoise: { value: noiseIntensity },
-        uScan: { value: scanlineIntensity },
-        uScanFreq: { value: scanlineFrequency },
-        uWarp: { value: warpAmount },
-        uLightMode: { value: lightMode ? 1 : 0 }
-      }
-    });
+      gl = renderer.gl;
+      if (!gl) return;
 
-    const mesh = new Mesh(gl, { geometry, program });
+      const geometry = new Triangle(gl);
+
+      program = new Program(gl, {
+        vertex,
+        fragment,
+        uniforms: {
+          uTime: { value: 0 },
+          uResolution: { value: new Vec2() },
+          uHueShift: { value: hueShift },
+          uNoise: { value: noiseIntensity },
+          uScan: { value: scanlineIntensity },
+          uScanFreq: { value: scanlineFrequency },
+          uWarp: { value: warpAmount },
+          uLightMode: { value: lightMode ? 1 : 0 }
+        }
+      });
+
+      mesh = new Mesh(gl, { geometry, program });
+    } catch {
+      return;
+    }
 
     const resize = () => {
+      if (!parent || !renderer || !program) return;
       const w = parent.clientWidth,
         h = parent.clientHeight;
       renderer.setSize(w * resolutionScale, h * resolutionScale);
@@ -155,7 +170,6 @@ export default function DarkVeil({
     resize();
 
     const start = performance.now();
-    let frame = 0;
 
     const loop = () => {
       program.uniforms.uTime.value = ((performance.now() - start) / 1000) * speed;
@@ -172,7 +186,7 @@ export default function DarkVeil({
     loop();
 
     return () => {
-      cancelAnimationFrame(frame);
+      if (frame) cancelAnimationFrame(frame);
       window.removeEventListener('resize', resize);
     };
   }, [hueShift, noiseIntensity, scanlineIntensity, speed, scanlineFrequency, warpAmount, resolutionScale, lightMode]);
