@@ -27,7 +27,6 @@ import SplitFlapText from '@/components/reactbits/SplitFlapText/SplitFlapText';
 import GradualBlur from '@/components/reactbits/GradualBlur/GradualBlur';
 import { animate } from '@/lib/motion/anime';
 import { useReducedMotion } from '@/lib/motion/useReducedMotion';
-import { gsap } from 'gsap';
 
 const INDUSTRY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   'textile-apparel': Shirt,
@@ -41,23 +40,10 @@ const INDUSTRY_ICONS: Record<string, React.ComponentType<{ className?: string }>
   technology: Cpu,
 };
 
-const INDUSTRY_TINTS = [
-  'rgba(168, 139, 104, 0.18)',
-  'rgba(196, 164, 124, 0.18)',
-  'rgba(140, 115, 85, 0.18)',
-  'rgba(175, 145, 110, 0.18)',
-  'rgba(155, 130, 95, 0.18)',
-  'rgba(130, 110, 85, 0.18)',
-  'rgba(180, 150, 115, 0.18)',
-  'rgba(200, 170, 130, 0.18)',
-  'rgba(145, 125, 100, 0.18)',
-];
-
 export function IndustriesPreview() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoplayPaused, setIsAutoplayPaused] = useState(false);
   const progressBarRef = useRef<HTMLDivElement>(null);
-  const bgTintRef = useRef<HTMLDivElement>(null);
   const animRef = useRef<ReturnType<typeof animate> | null>(null);
   const reducedMotion = useReducedMotion();
 
@@ -91,17 +77,6 @@ export function IndustriesPreview() {
     };
   }, [activeIndex, isAutoplayPaused, reducedMotion]);
 
-  // Crossfade background tint on active change (GSAP 0.8s)
-  useEffect(() => {
-    if (!bgTintRef.current) return;
-    const targetColor = INDUSTRY_TINTS[activeIndex % INDUSTRY_TINTS.length];
-    gsap.to(bgTintRef.current, {
-      backgroundColor: targetColor,
-      duration: 0.8,
-      ease: 'power2.out',
-    });
-  }, [activeIndex]);
-
   const slideCounter = `${String(activeIndex + 1).padStart(2, '0')} / ${String(INDUSTRIES.length).padStart(2, '0')}`;
 
   return (
@@ -110,13 +85,6 @@ export function IndustriesPreview() {
       className="relative overflow-hidden py-24"
       aria-label="Industries We Serve Carousel"
     >
-      {/* Background Crossfade Tint */}
-      <div
-        ref={bgTintRef}
-        className="pointer-events-none absolute inset-0 transition-colors duration-700"
-        style={{ backgroundColor: INDUSTRY_TINTS[0] }}
-      />
-
       <Container className="relative z-10">
         <div className="mb-12 max-w-[42rem]">
           <p className="font-mono text-xs font-semibold tracking-widest text-bronze uppercase mb-3">
