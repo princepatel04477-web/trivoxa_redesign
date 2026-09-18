@@ -17,6 +17,69 @@ import ScrollVelocity from '@/components/reactbits/ScrollVelocity/ScrollVelocity
 import { useWebGLSlot } from '@/lib/motion/webgl-budget';
 import { useReducedMotion } from '@/lib/motion/useReducedMotion';
 
+const TRADE_CORRIDORS = [
+  { badge: 'GLOBAL HQ', title: 'Surat', detail: 'Gujarat' },
+  { badge: 'INMUN', title: 'Mundra Port', detail: 'Container & Bulk' },
+  { badge: 'INIXY', title: 'Kandla Port', detail: 'Breakbulk & Agro' },
+  { badge: 'INNSA', title: 'Nhava Sheva', detail: 'JNPT Mumbai' },
+  { badge: 'SLA', title: '24h RFQ Response', detail: 'Guaranteed' },
+  { badge: 'LANES', title: '6 Continents', detail: 'Direct Ocean Freight' },
+];
+
+const EXPORT_LINES = [
+  { name: 'Textile & Apparel', spec: 'Woven Fabrics & Yarns' },
+  { name: 'Healthcare & Pharmaceuticals', spec: 'APIs & Formulations' },
+  { name: 'Building Materials', spec: 'Vitrified Ceramics & Granite' },
+  { name: 'Agriculture & Food', spec: 'Spices, Grains & Oilseeds' },
+  { name: 'Engineering & Industrial', spec: 'Machined Components & Hardware' },
+  { name: 'Furniture & Contract Interiors', spec: 'Hospitality & Commercial' },
+  { name: 'Quality Assured', spec: 'ISO 9001 · APEDA · FIEO Registered' },
+];
+
+function CorridorsTrack() {
+  return (
+    <span className="inline-flex items-center gap-6 pr-6">
+      {TRADE_CORRIDORS.map((item, idx) => (
+        <span key={idx} className="inline-flex items-center gap-2">
+          <span className="rounded border border-bronze/40 bg-bronze/10 px-2 py-0.5 font-mono text-[10px] font-semibold text-bronze uppercase">
+            {item.badge}
+          </span>
+          <span className="font-mono text-xs font-medium uppercase tracking-wider text-ivory">
+            {item.title}
+          </span>
+          <span className="font-mono text-[11px] text-stone-400">
+            · {item.detail}
+          </span>
+          <span className="pl-4 text-xs text-bronze/40 select-none" aria-hidden="true">
+            ◆
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function ExportLinesTrack() {
+  return (
+    <span className="inline-flex items-center gap-6 pr-6">
+      {EXPORT_LINES.map((item, idx) => (
+        <span key={idx} className="inline-flex items-center gap-2">
+          <span className="size-1.5 rounded-full bg-bronze/70" aria-hidden="true" />
+          <span className="font-mono text-xs font-medium uppercase tracking-wider text-ivory/90">
+            {item.name}
+          </span>
+          <span className="font-mono text-[11px] text-stone-400">
+            ({item.spec})
+          </span>
+          <span className="pl-4 text-xs text-bronze/40 select-none" aria-hidden="true">
+            ◆
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export function WhoWeAre() {
   const router = useRouter();
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -178,15 +241,29 @@ export function WhoWeAre() {
         </Container>
       </Section>
 
-      {/* Section divider: ScrollVelocity */}
-      <div className="border-y border-stone-800/80 bg-stone-900/60 py-4">
+      {/* Section divider: Institutional Trade Corridor & Export Ticker */}
+      <div
+        data-surface="deep"
+        className="relative overflow-hidden border-y border-bronze/25 bg-espresso-deep py-4 sm:py-5"
+      >
+        {/* Soft edge gradient fades */}
+        <div
+          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 sm:w-28 bg-gradient-to-r from-espresso-deep to-transparent"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 sm:w-28 bg-gradient-to-l from-espresso-deep to-transparent"
+          aria-hidden="true"
+        />
+
         <ScrollVelocity
           texts={[
-            'Surat · Mundra · Kandla · JNPT ·',
-            'Textiles · Pharma · Stone · Agri · Engineering ·',
+            <CorridorsTrack key="corridors" />,
+            <ExportLinesTrack key="lines" />,
           ]}
-          velocity={60}
-          className="font-mono text-xs uppercase tracking-widest text-stone-400"
+          velocity={22}
+          numCopies={4}
+          className="items-center"
         />
       </div>
     </div>

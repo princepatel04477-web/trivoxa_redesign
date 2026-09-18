@@ -120,8 +120,10 @@ export const ScrollVelocity: React.FC<ScrollVelocityProps> = ({
       return `${wrap(-copyWidth, 0, v)}px`;
     });
 
+    const [isHovered, setIsHovered] = useState(false);
     const directionFactor = useRef<number>(1);
     useAnimationFrame((t, delta) => {
+      if (isHovered) return;
       let moveBy = directionFactor.current * baseVelocity * (delta / 1000);
 
       if (velocityFactor.get() < 0) {
@@ -135,18 +137,23 @@ export const ScrollVelocity: React.FC<ScrollVelocityProps> = ({
     });
 
     const spans = [];
-    for (let i = 0; i < (numCopies ?? 6); i++) {
+    for (let i = 0; i < (numCopies ?? 4); i++) {
       spans.push(
-        <span className={`flex-shrink-0 ${className}`} key={i} ref={i === 0 ? copyRef : null}>
+        <span className={`inline-flex items-center flex-shrink-0 ${className}`} key={i} ref={i === 0 ? copyRef : null}>
           {children}&nbsp;
         </span>
       );
     }
 
     return (
-      <div className={`${parallaxClassName} relative overflow-hidden`} style={parallaxStyle}>
+      <div
+        className={`${parallaxClassName || ''} relative overflow-hidden`}
+        style={parallaxStyle}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <motion.div
-          className={`${scrollerClassName} flex whitespace-nowrap text-center font-sans text-4xl font-bold tracking-[-0.02em] drop-shadow md:text-[5rem] md:leading-[5rem]`}
+          className={`flex whitespace-nowrap items-center will-change-transform ${scrollerClassName || ''}`}
           style={{ x, ...scrollerStyle }}
         >
           {spans}
@@ -156,7 +163,7 @@ export const ScrollVelocity: React.FC<ScrollVelocityProps> = ({
   }
 
   return (
-    <section>
+    <div className="flex flex-col gap-3 sm:gap-4 py-1">
       {texts.map((text, index) => (
         <VelocityText
           key={index}
@@ -175,7 +182,7 @@ export const ScrollVelocity: React.FC<ScrollVelocityProps> = ({
           {text}
         </VelocityText>
       ))}
-    </section>
+    </div>
   );
 };
 
