@@ -51,7 +51,6 @@ export const TRIVOXA_CARDNAV_ITEMS: CardNavItem[] = [
     textColor: BRAND.espresso.hex,
     links: [
       { label: 'Global presence', href: '/global-presence', ariaLabel: 'Global Operations Map' },
-      { label: 'Compliance', href: '/compliance', ariaLabel: 'Certifications and Standards' },
       { label: 'Careers', href: '/careers', ariaLabel: 'Careers at Trivoxa' },
       { label: 'Contact', href: '/contact', ariaLabel: 'Contact Information' },
     ],

@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Container, Section } from '@/components/ui/layout';
 import { CERTIFICATIONS, PORTS } from '@/content/taxonomy';
 import { proofBand } from '@/lib/selectors';
-import MaskedHeading from '@/components/reactbits/MaskedHeading/MaskedHeading';
 import SpotlightCard from '@/components/reactbits/SpotlightCard/SpotlightCard';
 import ElectricBorder from '@/components/reactbits/ElectricBorder/ElectricBorder';
 import SplitFlapText from '@/components/reactbits/SplitFlapText/SplitFlapText';
@@ -54,12 +53,9 @@ export function ProofBand() {
 
         <Container className="relative z-10">
           <div className="mb-10 text-left">
-            <MaskedHeading
-              text="Operational Reality. Proven Trade Lines."
-              tag="h2"
-              align="left"
-              className="text-2xl md:text-3xl font-serif text-ivory"
-            />
+            <h2 className="text-2xl md:text-3xl font-serif text-ivory">
+              Operational Reality. Proven Trade Lines.
+            </h2>
           </div>
 
           <div className="grid grid-cols-12 gap-6 lg:gap-8">

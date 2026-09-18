@@ -179,7 +179,7 @@ export function ComplianceClient() {
                 textColor={BRAND.espresso.hex}
                 markerColor={BRAND.bronze.hex}
                 onItemClick={handleTocClick}
-                fontSize={12}
+                fontSize={0.75}
                 proximityRadius={80}
               />
             </div>

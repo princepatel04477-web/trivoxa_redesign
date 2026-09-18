@@ -67,6 +67,8 @@ export function ContactDetailsPanel() {
 
   return (
     <GlassSurface
+      width="100%"
+      height="auto"
       borderRadius={24}
       borderWidth={0.06}
       backgroundOpacity={0.06}

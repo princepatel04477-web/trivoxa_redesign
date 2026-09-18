@@ -28,7 +28,7 @@ export function Divisions() {
       alt: 'Trivoxa Product Exports',
     },
     {
-      image: '/brand/og/technology-digital-property.png',
+      image: '/brand/og/industry-technology.png',
       label: 'Service Exports',
       link: '/businesses/service-exports',
       alt: 'Trivoxa Service Exports',

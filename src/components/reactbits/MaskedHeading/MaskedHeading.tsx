@@ -336,19 +336,21 @@ const MaskedHeading: React.FC<MaskedHeadingProps> = ({
       <span ref={revealRef} className="absolute inset-0 block pointer-events-none">
         <span className="absolute inset-0 block" style={{ clipPath: `url(#${clipId})` }}>
           <span ref={mediaRef} className="absolute inset-0 block [will-change:transform,filter]">
-            {mediaType === 'video' ? (
-              <video
-                className="block w-full h-full object-cover select-none"
-                src={src}
-                poster={poster}
-                autoPlay
-                muted
-                loop
-                playsInline
-              />
-            ) : (
-              <img className="block w-full h-full object-cover select-none" src={src} alt="" draggable={false} />
-            )}
+            {src ? (
+              mediaType === 'video' ? (
+                <video
+                  className="block w-full h-full object-cover select-none"
+                  src={src}
+                  poster={poster || undefined}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                />
+              ) : (
+                <img className="block w-full h-full object-cover select-none" src={src} alt="" draggable={false} />
+              )
+            ) : null}
           </span>
         </span>
       </span>

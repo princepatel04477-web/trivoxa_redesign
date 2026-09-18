@@ -16,7 +16,6 @@ import type { CatalogRow } from '@/lib/selectors';
 
 // React Bits components
 import ScrollExpand from '@/components/reactbits/ScrollExpand/ScrollExpand';
-import MaskedHeading from '@/components/reactbits/MaskedHeading/MaskedHeading';
 import BlurText from '@/components/reactbits/BlurText/BlurText';
 import Masonry from '@/components/reactbits/Masonry/Masonry';
 import AnimatedList from '@/components/reactbits/AnimatedList/AnimatedList';
@@ -70,14 +69,14 @@ export function IndustryDetailClient({
   // Masonry items for categories
   const masonryItems = categories.map((cat, i) => ({
     id: cat.slug,
-    img: `/brand/og/product-${cat.slug}.png`,
+    img: `/brand/og/industry-${cat.slug}.png`,
     url: `/businesses/product-exports?category=${cat.slug}`,
     height: 240 + (i % 3) * 50,
     title: cat.name,
   }));
 
   return (
-    <div className="relative w-full overflow-x-hidden">
+    <div className="relative w-full overflow-x-clip">
       {/* 1. SCROLLEXPAND Hero (COMPULSORY) */}
       <section className="relative w-full bg-espresso-deep text-ivory pt-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mb-6">
@@ -95,22 +94,19 @@ export function IndustryDetailClient({
           alt={industry.name}
           startWidth={70}
           startHeight={45}
-          scrollDistance={800}
-          holdDistance={200}
+          scrollDistance={1.1}
+          holdDistance={0.3}
+          useWindowScroll
           className="bg-espresso-deep"
         >
-          <div className="mx-auto max-w-5xl px-4 py-12 text-center">
+          <div className="mx-auto max-w-5xl rounded-3xl bg-espresso-deep/80 px-4 py-12 text-center backdrop-blur-sm">
             <span className="inline-block rounded-full border border-bronze/40 bg-espresso-deep/90 px-3 py-1 font-mono text-xs text-bronze mb-4">
               {isService ? 'Service Exports Division' : onboarding ? 'Portfolio Onboarding' : 'Verified Export Sector'}
             </span>
 
-            <div className="my-3">
-              <MaskedHeading
-                text={industry.name}
-                tag="h1"
-                className="font-serif text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-ivory"
-              />
-            </div>
+            <h1 className="my-3 font-serif text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-ivory">
+              {industry.name}
+            </h1>
 
             <div className="mt-4 max-w-[48rem] mx-auto">
               <BlurText
