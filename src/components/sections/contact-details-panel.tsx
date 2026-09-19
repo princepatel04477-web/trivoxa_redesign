@@ -112,13 +112,13 @@ export function ContactDetailsPanel() {
             {aliases.map((alias) => (
               <li
                 key={alias.value}
-                className="surface-hairline flex items-baseline justify-between gap-md border-b py-3 first:border-t"
+                className="surface-hairline flex flex-wrap items-baseline justify-between gap-x-md gap-y-1 border-b py-3 first:border-t"
               >
                 <div className="flex flex-col">
                   <span className="surface-faint text-body-xs uppercase font-mono">{alias.label}</span>
                   <a
                     href={`mailto:${alias.value}`}
-                    className="link-underline text-stone-900 hover:text-bronze-ink text-body-sm font-semibold transition-colors mt-0.5"
+                    className="link-underline break-all text-stone-900 hover:text-bronze-ink text-body-sm font-semibold transition-colors mt-0.5"
                   >
                     <DecryptedText
                       text={alias.value}
@@ -145,12 +145,12 @@ export function ContactDetailsPanel() {
             {LEADERSHIP.map((leader) => (
               <li
                 key={leader.email}
-                className="surface-hairline flex items-baseline justify-between gap-md border-b py-2.5 first:border-t"
+                className="surface-hairline flex flex-wrap items-baseline justify-between gap-x-md gap-y-1 border-b py-2.5 first:border-t"
               >
                 <span className="surface-fg text-body-sm font-medium">{leader.name}</span>
                 <a
                   href={`mailto:${leader.email}`}
-                  className="link-underline surface-muted hover:text-bronze-ink text-body-xs font-mono"
+                  className="link-underline surface-muted hover:text-bronze-ink break-all text-body-xs font-mono"
                 >
                   <DecryptedText
                     text={leader.email}

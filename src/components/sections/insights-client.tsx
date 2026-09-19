@@ -246,7 +246,7 @@ export function InsightsClient() {
             </div>
 
             {/* GSAP Flip Category Filter Pills */}
-            <div className="flex items-center gap-1.5 p-1 bg-stone-100 rounded-full border border-stone-200" role="tablist">
+            <div className="flex max-w-full items-center gap-1.5 overflow-x-auto p-1 bg-stone-100 rounded-full border border-stone-200 [&>button]:shrink-0" role="tablist">
               <button
                 type="button"
                 onClick={() => handleFilter('all')}

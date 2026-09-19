@@ -58,7 +58,7 @@ export function Divisions() {
         </div>
 
         {/* Detailed Two-Division Cards */}
-        <div className="grid grid-cols-12 gap-8">
+        <div className="grid grid-cols-12 gap-y-8 sm:gap-x-8">
           {product ? (
             <Card trace className="col-span-12 flex flex-col gap-lg p-xl lg:col-span-6">
               <div className="flex flex-col gap-xs">

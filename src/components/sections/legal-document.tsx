@@ -52,7 +52,7 @@ export function LegalDocumentView({ document: docData }: { document: LegalDocume
         <Container>
           <Breadcrumb trail={trail} className="mb-xl" />
 
-          <div className="grid grid-cols-12 gap-xl">
+          <div className="grid grid-cols-12 gap-y-xl sm:gap-x-xl">
             <div className="col-span-12 lg:col-span-8">
               <Eyebrow>Legal</Eyebrow>
               <h1 className="mt-lg">
@@ -106,7 +106,7 @@ export function LegalDocumentView({ document: docData }: { document: LegalDocume
       {/* Main Content Layout with LineSidebar TOC and FadeContent headings */}
       <Section surface="light" className="pt-0">
         <Container>
-          <div className="grid grid-cols-12 gap-2xl">
+          <div className="grid grid-cols-12 gap-y-2xl sm:gap-x-2xl">
             <nav aria-label="Contents" className="col-span-12 lg:col-span-4 xl:col-span-3">
               <div className="lg:sticky lg:top-[120px]">
                 <Eyebrow tick={false} className="surface-faint mb-3">

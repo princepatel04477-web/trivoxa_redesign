@@ -64,7 +64,7 @@ export function PageHero({
       <Container>
         {trail.length > 0 ? <Breadcrumb trail={trail} className="mb-xl" /> : null}
 
-        <div className="grid grid-cols-12 gap-xl">
+        <div className="grid grid-cols-12 gap-y-xl sm:gap-x-xl">
           <div className="col-span-12 lg:col-span-8">
             <Eyebrow>{eyebrow}</Eyebrow>
             <KineticTextReveal as="h1" isHero className={`${SIZES[size]} mt-lg max-w-[56rem]`}>

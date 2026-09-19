@@ -432,7 +432,12 @@ export function SiteFooter() {
             <ShinyText text="Shiveshwar Textiles" speed={3} className="font-semibold text-accent" />
             <span>, Surat. Operating internationally as Trivoxa Group.</span>
           </div>
-          <p className="font-mono text-xs text-stone-500">© Trivoxa Group 2026</p>
+          <div className="flex flex-col items-center gap-1 font-mono text-xs text-stone-500 md:items-end">
+            <p>© Trivoxa Group 2026</p>
+            <p className="text-[11px]">
+              Made and managed by <span className="text-stone-300">Varunya Technologies</span>
+            </p>
+          </div>
         </div>
       </Container>
     </footer>

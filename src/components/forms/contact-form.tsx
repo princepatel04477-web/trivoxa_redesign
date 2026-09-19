@@ -295,7 +295,7 @@ export function ContactForm() {
       <TurnstileWidget onVerify={setTurnstileToken} onExpire={() => setTurnstileToken('')} />
 
       <div className="mt-md flex flex-wrap items-center gap-lg">
-        <Button type="submit" size="lg" arrow disabled={isSubmitting}>
+        <Button type="submit" size="lg" arrow disabled={isSubmitting} className="max-w-full whitespace-normal break-all sm:break-normal">
           {isSubmitting ? 'Sending to assigned desk...' : `Send to ${mailbox}`}
         </Button>
         <Prose className="text-body-sm">

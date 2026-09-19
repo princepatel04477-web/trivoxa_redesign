@@ -313,7 +313,7 @@ function MegaPanel({ group }: { group: NavGroup }) {
   const reduced = usePrefersReducedMotion();
 
   return (
-    <div className="container-content grid grid-cols-12 gap-xl py-xl">
+    <div className="container-content grid grid-cols-12 gap-y-xl sm:gap-x-xl py-xl">
       {group.columns.map((column, columnIndex) => (
         <motion.nav
           key={column.heading}

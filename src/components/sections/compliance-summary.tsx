@@ -37,21 +37,21 @@ export function ComplianceSummary({
           }
         />
 
-        <div className="mt-2xl grid grid-cols-12 gap-2xl">
+        <div className="mt-2xl grid grid-cols-12 gap-y-2xl sm:gap-x-2xl">
           <div className="col-span-12 lg:col-span-6">
             <p className="eyebrow mb-lg">Active</p>
             <ul className="flex flex-col">
               {active.map((cert) => (
                 <li
                   key={cert.slug}
-                  className="surface-hairline flex items-start justify-between gap-md border-b py-md first:border-t"
+                  className="surface-hairline flex flex-col items-start justify-between gap-sm border-b py-md first:border-t sm:flex-row sm:gap-md"
                 >
                   <span className="flex flex-col gap-1">
                     <span className="surface-fg text-body-lg font-medium">{cert.name}</span>
                     <span className="surface-muted text-body-sm">{cert.fullName}</span>
                     <span className="surface-faint text-body-sm">{cert.issuingAuthority}</span>
                   </span>
-                  <span className="flex shrink-0 flex-col items-end gap-xs">
+                  <span className="flex min-w-0 flex-col items-start gap-xs sm:shrink-0 sm:items-end">
                     <span className="surface-faint spec-value text-body-sm" data-spec>
                       {cert.registrationNumber ?? 'Number on request'}
                     </span>
@@ -67,7 +67,7 @@ export function ComplianceSummary({
               {inProgress.map((cert) => (
                 <li
                   key={cert.slug}
-                  className="surface-hairline flex items-start justify-between gap-md border-b py-md first:border-t"
+                  className="surface-hairline flex flex-col items-start justify-between gap-sm border-b py-md first:border-t sm:flex-row sm:gap-md"
                 >
                   <span className="flex flex-col gap-1">
                     <span className="surface-fg text-body-lg font-medium">{cert.name}</span>
@@ -76,7 +76,7 @@ export function ComplianceSummary({
                       <span className="surface-faint text-body-sm">{cert.targetNote}</span>
                     ) : null}
                   </span>
-                  <span className="flex shrink-0 flex-col items-end gap-xs">
+                  <span className="flex min-w-0 flex-col items-start gap-xs sm:shrink-0 sm:items-end">
                     <StatusBadge status="in-progress" detail={cert.targetQuarter} />
                     <span className="surface-faint spec-value text-body-sm" data-spec>
                       {cert.issuingAuthority}

@@ -15,7 +15,7 @@ export function GroupWay() {
   return (
     <Section surface="light" className="border-t surface-hairline" id="vision">
       <Container>
-        <div className="grid grid-cols-12 gap-2xl">
+        <div className="grid grid-cols-12 gap-y-2xl sm:gap-x-2xl">
           <div className="col-span-12 lg:col-span-5">
             <SectionHeading eyebrow="The Trivoxa Way" title="Six principles we can be held to." />
 

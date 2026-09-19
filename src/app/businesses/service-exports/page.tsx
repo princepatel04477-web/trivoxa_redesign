@@ -86,7 +86,7 @@ export default function ServiceExportsPage() {
 
       <Section surface="light" tight>
         <Container>
-          <div className="grid grid-cols-12 gap-2xl">
+          <div className="grid grid-cols-12 gap-y-2xl sm:gap-x-2xl">
             <div className="col-span-12 lg:col-span-5">
               <SectionHeading
                 eyebrow="Why Service Exports"

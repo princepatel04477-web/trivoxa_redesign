@@ -264,7 +264,9 @@ export function GlobalCardNav() {
             className="flex items-center gap-2 text-ivory transition-opacity hover:opacity-90 shrink-0"
             aria-label="Trivoxa Group - Homepage"
           >
-            <BrandLockup size={32} />
+            {/* Smaller lockup on phones so logo + Menu + CTA fit inside the bar. */}
+            <BrandLockup size={24} className="md:hidden" />
+            <BrandLockup size={32} className="hidden md:inline-flex" />
           </Link>
 
           {/* Center: Desktop 3 Card Triggers */}
@@ -337,7 +339,8 @@ export function GlobalCardNav() {
                 data-cursor="target"
                 className="inline-flex items-center justify-center rounded-full bg-ivory px-4 py-2 text-xs font-semibold text-espresso shadow-sm transition-all duration-200 hover:bg-ivory-soft hover:shadow-md active:scale-95 whitespace-nowrap"
               >
-                Request a quote
+                <span className="sm:hidden">Quote</span>
+                <span className="hidden sm:inline">Request a quote</span>
               </Link>
             </Magnet>
           </div>

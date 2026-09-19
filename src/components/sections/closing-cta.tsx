@@ -174,7 +174,7 @@ export function ClosingCta() {
           </div>
 
           <Container className="relative z-10">
-            <div className="grid grid-cols-12 items-end gap-12 lg:gap-16 text-left">
+            <div className="grid grid-cols-12 items-end gap-y-12 sm:gap-x-12 lg:gap-16 text-left">
               <div className="col-span-12 lg:col-span-7 text-left">
                 <p className="text-eyebrow mb-3 tracking-widest uppercase text-bronze">
                   Start a Conversation

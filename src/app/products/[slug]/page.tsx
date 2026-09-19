@@ -195,7 +195,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<Pa
       {details ? (
         <Section surface="light" tight className="border-t surface-hairline surface-raised">
           <Container>
-            <div className="grid grid-cols-12 gap-xl">
+            <div className="grid grid-cols-12 gap-y-xl sm:gap-x-xl">
               <div className="col-span-12 lg:col-span-7 flex flex-col gap-md">
                 <SectionHeading
                   eyebrow="Technical Standards"

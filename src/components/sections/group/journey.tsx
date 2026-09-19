@@ -46,7 +46,7 @@ export function GroupJourney() {
   return (
     <Section surface="dark" id="journey" className="py-24 bg-espresso-deep text-ivory overflow-hidden">
       <Container>
-        <div ref={containerRef} className="grid grid-cols-12 gap-12 items-start">
+        <div ref={containerRef} className="grid grid-cols-12 gap-y-12 sm:gap-x-12 items-start">
           {/* Left Column: Sticky Title and Scrubbed DrawSVG Spine Line */}
           <div className="col-span-12 lg:col-span-4 lg:sticky lg:top-32">
             <SectionHeading

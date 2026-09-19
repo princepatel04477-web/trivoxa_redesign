@@ -77,7 +77,7 @@ export default function ProductExportsPage() {
             }
           />
 
-          <div className="mt-2xl grid grid-cols-12 gap-2xl">
+          <div className="mt-2xl grid grid-cols-12 gap-y-2xl sm:gap-x-2xl">
             <div className="col-span-12 md:col-span-6">
               <p className="surface-faint spec-value mb-xs" data-spec>
                 {sampleCategories} categories ({band.liveCategoryCount} live, {CATEGORIES.length - band.liveCategoryCount} onboarding)

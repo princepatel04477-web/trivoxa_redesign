@@ -50,7 +50,7 @@ export default function ContactPage() {
 
       <Section surface="light" className="pt-0">
         <Container>
-          <div className="grid grid-cols-12 gap-2xl">
+          <div className="grid grid-cols-12 gap-y-2xl sm:gap-x-2xl">
             <div className="col-span-12 lg:col-span-7">
               <HairlineRow label="Send a message" />
               <div className="mt-xl">

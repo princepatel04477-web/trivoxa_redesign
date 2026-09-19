@@ -180,7 +180,7 @@ export function IndustriesHubClient({
             </div>
 
             {/* Filter Pills */}
-            <div className="flex items-center gap-1.5 p-1 bg-stone-100 rounded-full border border-stone-200 w-fit" role="tablist">
+            <div className="flex max-w-full items-center gap-1.5 overflow-x-auto p-1 bg-stone-100 rounded-full border border-stone-200 w-fit [&>button]:shrink-0" role="tablist">
               <button
                 type="button"
                 role="tab"

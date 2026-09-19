@@ -227,7 +227,7 @@ export function IndustryDetailClient({
       {/* 5. Specs We Quote Against as AnimatedList */}
       <Section surface="dark" className="py-16 bg-espresso-deep text-ivory">
         <Container>
-          <div className="grid grid-cols-12 gap-8 items-start">
+          <div className="grid grid-cols-12 gap-y-8 sm:gap-x-8 items-start">
             <div className="col-span-12 lg:col-span-5">
               <p className="font-mono text-xs text-bronze uppercase tracking-widest mb-2">
                 Technical Rigor
@@ -332,7 +332,7 @@ export function IndustryDetailClient({
       {/* 8. Buyers, Markets & Compliance */}
       <Section surface="dark" tight className="py-16 bg-espresso-deep text-ivory">
         <Container>
-          <div className="grid grid-cols-12 gap-12">
+          <div className="grid grid-cols-12 gap-y-12 sm:gap-x-12">
             <div className="col-span-12 lg:col-span-6">
               <SectionHeading eyebrow="Buyers & Markets" title="Who we ship this to." />
 

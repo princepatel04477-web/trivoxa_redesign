@@ -188,7 +188,7 @@ export function GlobalPresenceFull() {
         {/* Center Canvas & Active Region Spotlight */}
         <div className="relative z-10 flex-1 flex items-center">
           <Container className="h-full">
-            <div className="grid h-full grid-cols-12 items-center gap-8 py-4">
+            <div className="grid h-full grid-cols-12 items-center gap-y-8 py-4 sm:gap-x-8">
               {/* Left Column: 3D Interactive Globe */}
               <div className="col-span-12 lg:col-span-7 h-[340px] sm:h-[460px] lg:h-[540px] flex items-center justify-center">
                 <div className="relative h-full w-full max-w-[540px]">

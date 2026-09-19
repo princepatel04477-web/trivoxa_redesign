@@ -63,7 +63,7 @@ export default function RfqPage() {
             <RfqPathNote />
           </Suspense>
 
-          <div className="grid grid-cols-12 gap-2xl">
+          <div className="grid grid-cols-12 gap-y-2xl sm:gap-x-2xl">
             <div className="col-span-12 lg:col-span-7">
               <Suspense fallback={<div className="min-h-[400px]" />}>
                 <RfqForm />

@@ -113,7 +113,7 @@ export function GlobalPresencePreview() {
             </div>
           </div>
 
-          <div className="grid grid-cols-12 items-stretch gap-8 lg:gap-12">
+          <div className="grid grid-cols-12 items-stretch gap-y-8 sm:gap-x-8 lg:gap-12">
             {/* Left: Command-Center 3D Interactive Globe Card */}
             <div className="col-span-12 lg:col-span-6 flex flex-col">
               <div className="relative aspect-square w-full max-w-[520px] mx-auto overflow-hidden rounded-3xl border border-stone-800/80 bg-stone-950/90 p-5 shadow-2xl flex flex-col justify-between">

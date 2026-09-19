@@ -22,7 +22,7 @@ export function GroupFoundation() {
   return (
     <Section surface="deep" id="foundation" className="scroll-mt-24 py-24 bg-espresso-deep text-ivory overflow-hidden">
       <Container>
-        <div className="grid grid-cols-12 gap-12 items-center">
+        <div className="grid grid-cols-12 gap-y-12 sm:gap-x-12 items-center">
           {/* Left Column: Headings and ScrollReveal copy */}
           <div className="col-span-12 lg:col-span-6">
             <SectionHeading
@@ -53,8 +53,8 @@ export function GroupFoundation() {
           </div>
 
           {/* Right Column: BounceCards interactive gallery */}
-          <div className="col-span-12 lg:col-span-6 flex justify-center items-center">
-            <div className="relative w-full max-w-[420px] h-[400px] flex items-center justify-center">
+          <div className="col-span-12 lg:col-span-6 flex justify-center items-center overflow-hidden">
+            <div className="relative w-full max-w-[420px] h-[400px] flex items-center justify-center max-[420px]:scale-[0.8]">
               <BounceCards
                 images={foundationImages}
                 containerWidth={400}
