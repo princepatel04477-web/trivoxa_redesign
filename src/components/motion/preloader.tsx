@@ -1,29 +1,35 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { gsap } from '@/lib/motion/gsap';
 import { useReducedMotion } from '@/lib/motion/useReducedMotion';
-import SplitFlapText from '@/components/reactbits/SplitFlapText/SplitFlapText';
-import Noise from '@/components/reactbits/Noise/Noise';
+import { BrandMark, BrandWordmark } from '@/components/ui/brand-lockup';
 
 /**
- * The exit is driven by the split-flap actually finishing (Surat → Trivoxa),
- * not by a wall-clock guess — timers started at hydration raced the flip and,
- * on slow devices, wiped the overlay away while tiles were still mid-scramble.
- * Once TRIVOXA has settled it holds for HOLD_AFTER_FLIP_MS so it can be read,
- * then wipes as soon as the page has loaded.
+ * Trivoxa loader — the eagle mark and wordmark reveal, a progress line, then a
+ * curtain lift onto the page.
  *
- * HARD_CAP_MS is measured from navigation start (performance.now()), so a slow
- * connection or a stalled flip can never hold the visitor hostage.
+ * Timing model
+ *  · The reveal is pure CSS (see `.preloader-*` in globals.css). It is part of the
+ *    server-rendered HTML, so it starts at first paint instead of waiting for
+ *    hydration and never depends on the main thread being free.
+ *  · JS only decides WHEN to leave: once MIN_TOTAL_MS has passed since navigation
+ *    start (so the reveal always finishes) AND the page has loaded. HARD_CAP_MS
+ *    guarantees a slow network or a stalled asset can never trap the visitor.
+ *  · The exit is a compositor-only transform (translateY), not an animated
+ *    clip-path, so it stays smooth while the page underneath is still busy.
+ *  · Return visits and reduced-motion users never see it (head script in
+ *    layout.tsx hides it before first paint).
  */
-const HOLD_AFTER_FLIP_MS = 450;
-const HARD_CAP_MS = 4500;
-const MIN_TIME_AFTER_MOUNT_MS = 1500;
+const MIN_TOTAL_MS = 1900;
+const HARD_CAP_MS = 4200;
+const EXIT_MS = 800;
+/** How far into the exit the page's own entrance animations are released. */
+const READY_AT_MS = 280;
 
 /**
- * Tells the page the overlay is gone. Entrance animations (see `.hero-copy-enter`
- * in globals.css) wait for this attribute, so they play when the wipe reveals the
- * page instead of finishing unseen underneath the overlay.
+ * Tells the page the overlay is lifting. Entrance animations (see `.hero-copy-enter`
+ * in globals.css) wait for this attribute, so they play as the curtain rises instead
+ * of finishing unseen underneath it.
  */
 function signalReady(): void {
   document.documentElement.setAttribute('data-preloader-done', '');
@@ -35,10 +41,7 @@ export function Preloader() {
   const reducedMotion = useReducedMotion();
   const preloaderRef = useRef<HTMLDivElement>(null);
   const exitedRef = useRef<boolean>(false);
-  const flipHeldRef = useRef<boolean>(false);
-  const pageLoadedRef = useRef<boolean>(false);
-  const flipHoldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const onFlipCompleteRef = useRef<(() => void) | null>(null);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const exitPreloader = () => {
     if (exitedRef.current) return;
@@ -46,32 +49,25 @@ export function Preloader() {
     try {
       sessionStorage.setItem('trivoxa_preloader_seen', 'true');
     } catch {
-      // Ignore storage errors in restricted contexts
+      // Storage can be blocked (private mode, embedded contexts) — not fatal.
     }
 
-    const el = preloaderRef.current || document.getElementById('trivoxa-preloader');
-    if (el) {
-      gsap.to(el, {
-        clipPath: 'inset(0 0 100% 0)',
-        duration: 0.5,
-        ease: 'power3.inOut',
-        onComplete: () => {
-          setShow(false);
-          signalReady();
-        },
-      });
-    } else {
+    const el = preloaderRef.current ?? document.getElementById('trivoxa-preloader');
+    if (!el) {
       setShow(false);
       signalReady();
+      return;
     }
+
+    el.classList.add('preloader-exit');
+    timersRef.current.push(setTimeout(signalReady, READY_AT_MS));
+    timersRef.current.push(setTimeout(() => setShow(false), EXIT_MS + 60));
   };
 
   useEffect(() => {
-    // Ensure clean initial scroll to top of fold on visit
-    if (typeof window !== 'undefined' && !window.location.hash) {
-      if ('scrollRestoration' in history) {
-        history.scrollRestoration = 'manual';
-      }
+    // Always start a visit from the top, instantly (the page is smooth-scroll by default).
+    if (!window.location.hash) {
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     }
 
@@ -82,8 +78,7 @@ export function Preloader() {
     }
 
     try {
-      const seen = sessionStorage.getItem('trivoxa_preloader_seen');
-      if (seen) {
+      if (sessionStorage.getItem('trivoxa_preloader_seen')) {
         setShow(false);
         signalReady();
         return;
@@ -94,42 +89,32 @@ export function Preloader() {
       return;
     }
 
+    let minElapsed = false;
+    let loaded = document.readyState === 'complete';
     const maybeExit = () => {
-      if (flipHeldRef.current && pageLoadedRef.current) exitPreloader();
+      if (minElapsed && loaded) exitPreloader();
     };
-    flipHeldRef.current = false;
-    flipHoldTimerRef.current = null;
 
-    pageLoadedRef.current = document.readyState === 'complete';
-    const handleLoad = () => {
-      pageLoadedRef.current = true;
+    const onLoad = () => {
+      loaded = true;
       maybeExit();
     };
-    if (!pageLoadedRef.current) {
-      window.addEventListener('load', handleLoad, { once: true });
-    }
+    if (!loaded) window.addEventListener('load', onLoad, { once: true });
 
-    // Called by SplitFlapText once TRIVOXA has fully settled.
-    onFlipCompleteRef.current = () => {
-      if (flipHoldTimerRef.current) return;
-      flipHoldTimerRef.current = setTimeout(() => {
-        flipHeldRef.current = true;
+    // Measured from navigation start, so a slow hydration doesn't stack extra wait on top.
+    const sinceNavStart = performance.now();
+    timersRef.current.push(
+      setTimeout(() => {
+        minElapsed = true;
         maybeExit();
-      }, HOLD_AFTER_FLIP_MS);
-    };
-
-    // Hard fallback: force remove no matter what, so slow assets never strand the visitor
-    const sinceNavStart = typeof performance !== 'undefined' ? performance.now() : 0;
-    const fallbackTimer = setTimeout(
-      () => exitPreloader(),
-      Math.max(MIN_TIME_AFTER_MOUNT_MS, HARD_CAP_MS - sinceNavStart)
+      }, Math.max(0, MIN_TOTAL_MS - sinceNavStart)),
+      setTimeout(exitPreloader, Math.max(1200, HARD_CAP_MS - sinceNavStart))
     );
 
     return () => {
-      window.removeEventListener('load', handleLoad);
-      onFlipCompleteRef.current = null;
-      if (flipHoldTimerRef.current) clearTimeout(flipHoldTimerRef.current);
-      clearTimeout(fallbackTimer);
+      window.removeEventListener('load', onLoad);
+      timersRef.current.forEach(clearTimeout);
+      timersRef.current = [];
     };
   }, [reducedMotion]);
 
@@ -143,39 +128,25 @@ export function Preloader() {
       role="status"
       aria-live="polite"
       aria-label="Loading Trivoxa Group"
-      className="bg-espresso-deep text-ivory fixed inset-0 z-[10000] flex cursor-pointer select-none flex-col items-center justify-center"
-      style={{ clipPath: 'inset(0 0 0 0)' }}
+      className="preloader bg-espresso-deep text-ivory fixed inset-0 z-[10000] flex cursor-pointer select-none flex-col items-center justify-center"
       title="Click to skip"
     >
-      <div className="pointer-events-none absolute inset-0 opacity-20" aria-hidden="true">
-        <Noise patternSize={250} patternScaleX={1} patternScaleY={1} patternRefreshInterval={2} patternAlpha={12} />
-      </div>
+      <div className="preloader-glow pointer-events-none absolute inset-0" aria-hidden="true" />
 
-      <div className="relative z-10 flex flex-col items-center gap-4">
-        <SplitFlapText
-          words={['SURAT', 'TRIVOXA']}
-          padTo={7}
-          loop={false}
-          flipDuration={0.05}
-          flipsPerChar={3}
-          stagger={0.03}
-          cycleDelay={280}
-          textColor="var(--color-ivory)"
-          tileColor="var(--color-espresso)"
-          fontSize="clamp(28px, 6vw, 48px)"
-          onComplete={() => onFlipCompleteRef.current?.()}
-        />
-        <span aria-hidden="true" className="bg-bronze h-px w-10 origin-center scale-x-0 animate-[preloader-rule_0.5s_var(--ease-house)_0.4s_forwards]" />
+      <div className="preloader-content relative z-10 flex flex-col items-center">
+        <BrandMark size={96} decorative className="preloader-mark" />
+        <BrandWordmark height={46} decorative className="preloader-word mt-6" />
+        <span className="preloader-track mt-10" aria-hidden="true">
+          <span className="preloader-bar" />
+        </span>
       </div>
 
       <span className="sr-only">Loading</span>
 
-      <div className="text-bronze/70 absolute bottom-8 left-8 right-8 flex items-center justify-between font-mono text-[11px] uppercase tracking-widest">
+      <div className="preloader-foot text-bronze/70 absolute right-8 bottom-8 left-8 flex items-center justify-between font-mono text-[11px] tracking-widest uppercase">
         <span>Surat &rarr; Global</span>
         <span className="opacity-70">Click to skip</span>
       </div>
-
-      <style>{`@keyframes preloader-rule { to { transform: scaleX(1); } }`}</style>
     </div>
   );
 }
