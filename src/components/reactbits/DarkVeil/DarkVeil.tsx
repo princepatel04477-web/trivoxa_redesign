@@ -102,6 +102,19 @@ type Props = {
   className?: string;
 };
 
+/**
+ * DarkVeil's fragment shader is a full neural-network (CPPN) evaluation per
+ * pixel — dozens of mat4 multiplies. At the old settings (devicePixelRatio up
+ * to 2, full-size canvas, uncapped rAF) that is ~5M pixels x 60fps on the very
+ * first screen, which pins integrated GPUs and makes the whole page stutter.
+ *
+ * The veil is a soft, blurred atmosphere sitting under a scrim, so it is
+ * rendered at a fraction of the resolution and stretched by CSS (bilinear
+ * upscaling is invisible on a gradient), capped at 30fps, and paused whenever
+ * it is off screen or the tab is hidden. The GL context is released on unmount.
+ */
+const TARGET_FRAME_MS = 1000 / 30;
+
 export default function DarkVeil({
                                    hueShift = 0,
                                    noiseIntensity = 0,
@@ -109,7 +122,7 @@ export default function DarkVeil({
                                    speed = 0.5,
                                    scanlineFrequency = 0,
                                    warpAmount = 0,
-                                   resolutionScale = 1,
+                                   resolutionScale = 0.4,
                                    lightMode = false,
                                    className = ''
                                  }: Props) {
@@ -122,16 +135,13 @@ export default function DarkVeil({
     if (!parent) return;
 
     let renderer: Renderer;
-    let gl: any;
+    let gl: Renderer['gl'];
     let program: Program;
     let mesh: Mesh;
-    let frame = 0;
 
     try {
-      renderer = new Renderer({
-        dpr: Math.min(window.devicePixelRatio, 2),
-        canvas
-      });
+      // dpr 1: the render target is deliberately small (see above).
+      renderer = new Renderer({ dpr: 1, canvas, antialias: false, powerPreference: 'low-power' });
 
       gl = renderer.gl;
       if (!gl) return;
@@ -158,20 +168,32 @@ export default function DarkVeil({
       return;
     }
 
+    const scale = Math.min(1, Math.max(0.2, resolutionScale));
+
     const resize = () => {
-      if (!parent || !renderer || !program) return;
-      const w = parent.clientWidth,
-        h = parent.clientHeight;
-      renderer.setSize(w * resolutionScale, h * resolutionScale);
-      program.uniforms.uResolution.value.set(w, h);
+      const w = Math.max(1, Math.round(parent.clientWidth * scale));
+      const h = Math.max(1, Math.round(parent.clientHeight * scale));
+      renderer.setSize(w, h);
+      // ogl pins the canvas to the render size in px; stretch it back over the parent.
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      // Shader coordinates are in render-target pixels, so the resolution uniform must be too.
+      program.uniforms.uResolution.value.set(gl.canvas.width, gl.canvas.height);
     };
 
-    window.addEventListener('resize', resize);
+    const ro = new ResizeObserver(resize);
+    ro.observe(parent);
     resize();
 
     const start = performance.now();
+    let frame = 0;
+    let lastDraw = 0;
+    let inView = true;
 
-    const loop = () => {
+    const loop = (now: number) => {
+      frame = requestAnimationFrame(loop);
+      if (now - lastDraw < TARGET_FRAME_MS) return;
+      lastDraw = now;
       program.uniforms.uTime.value = ((performance.now() - start) / 1000) * speed;
       program.uniforms.uHueShift.value = hueShift;
       program.uniforms.uNoise.value = noiseIntensity;
@@ -180,14 +202,35 @@ export default function DarkVeil({
       program.uniforms.uWarp.value = warpAmount;
       program.uniforms.uLightMode.value = lightMode ? 1 : 0;
       renderer.render({ scene: mesh });
-      frame = requestAnimationFrame(loop);
     };
 
-    loop();
+    const sync = () => {
+      const shouldRun = inView && !document.hidden;
+      if (shouldRun && !frame) frame = requestAnimationFrame(loop);
+      else if (!shouldRun && frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    };
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        inView = entries.some((e) => e.isIntersecting);
+        sync();
+      },
+      { rootMargin: '100px' }
+    );
+    io.observe(canvas);
+    document.addEventListener('visibilitychange', sync);
+    sync();
 
     return () => {
       if (frame) cancelAnimationFrame(frame);
-      window.removeEventListener('resize', resize);
+      frame = 0;
+      io.disconnect();
+      ro.disconnect();
+      document.removeEventListener('visibilitychange', sync);
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
   }, [hueShift, noiseIntensity, scanlineIntensity, speed, scanlineFrequency, warpAmount, resolutionScale, lightMode]);
 

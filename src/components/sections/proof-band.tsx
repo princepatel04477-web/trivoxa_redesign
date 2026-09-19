@@ -13,6 +13,7 @@ import BorderGlow from '@/components/reactbits/BorderGlow/BorderGlow';
 import LogoLoop from '@/components/reactbits/LogoLoop/LogoLoop';
 import Radar from '@/components/reactbits/Radar/Radar';
 import { useWebGLSlot } from '@/lib/motion/webgl-budget';
+import { WebGLErrorBoundary } from '@/components/three/webgl-error-boundary';
 
 /**
  * P7 · SECTION A — the proof band.
@@ -46,7 +47,9 @@ export function ProofBand() {
         {/* Background Radar WebGL */}
         <div className="absolute inset-0 pointer-events-none z-0 opacity-20" aria-hidden="true">
           {webglSlot.hasSlot ? (
-            <Radar color={BRAND.bronze.hex} speed={0.8} ringCount={4} spokeCount={6} />
+            <WebGLErrorBoundary fallback={null}>
+              <Radar color={BRAND.bronze.hex} speed={0.8} ringCount={4} spokeCount={6} />
+            </WebGLErrorBoundary>
           ) : null}
         </div>
 

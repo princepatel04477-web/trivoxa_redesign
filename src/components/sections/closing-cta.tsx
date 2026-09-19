@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Container, Section } from '@/components/ui/layout';
 import { CONTACT } from '@/content/taxonomy';
 import { proofBand } from '@/lib/selectors';
-import LaserFlow from '@/components/reactbits/LaserFlow/LaserFlow';
+import dynamic from 'next/dynamic';
 import SplitText from '@/components/reactbits/SplitText/SplitText';
 import TrueFocus from '@/components/reactbits/TrueFocus/TrueFocus';
 import GlareHover from '@/components/reactbits/GlareHover/GlareHover';
@@ -17,6 +17,13 @@ import Magnet from '@/components/reactbits/Magnet/Magnet';
 import { useWebGLSlot } from '@/lib/motion/webgl-budget';
 import { useReducedMotion } from '@/lib/motion/useReducedMotion';
 import { animate } from '@/lib/motion/anime';
+import { WebGLErrorBoundary } from '@/components/three/webgl-error-boundary';
+
+// three.js is ~500 KB; it is only fetched once the CTA is near the viewport and
+// a WebGL slot is granted, instead of shipping in the homepage's first load.
+const LaserFlow = dynamic(() => import('@/components/reactbits/LaserFlow/LaserFlow'), {
+  ssr: false,
+});
 
 export function ClosingCta() {
   const router = useRouter();
@@ -44,32 +51,55 @@ export function ClosingCta() {
     setTimeout(() => setCopied(false), 2200);
   };
 
-  // Scramble / digit roll on "numbers."
+  // Scramble / digit roll on "numbers." — runs when the heading actually scrolls
+  // into view. It used to start at page load, so the whole roll had finished (and
+  // was never seen) by the time a visitor reached this section.
   useEffect(() => {
-    if (reducedMotion || !numbersSpanRef.current) return;
+    const el = numbersSpanRef.current;
+    if (reducedMotion || !el) return;
     const chars = '0123456789%#$@&';
     const target = 'numbers.';
-    let iteration = 0;
+    let interval: ReturnType<typeof setInterval> | undefined;
+    let started = false;
 
-    const interval = setInterval(() => {
-      if (!numbersSpanRef.current) return;
-      numbersSpanRef.current.innerText = target
-        .split('')
-        .map((char, index) => {
-          if (index < iteration) {
-            return target[index];
-          }
-          return chars[Math.floor(Math.random() * chars.length)];
-        })
-        .join('');
+    const run = () => {
+      if (started) return;
+      started = true;
+      let iteration = 0;
+      interval = setInterval(() => {
+        el.innerText = target
+          .split('')
+          .map((char, index) => (index < iteration ? target[index] : chars[Math.floor(Math.random() * chars.length)]))
+          .join('');
 
-      if (iteration >= target.length) {
-        clearInterval(interval);
-      }
-      iteration += 1 / 3;
-    }, 40);
+        if (iteration >= target.length) {
+          el.innerText = target;
+          if (interval) clearInterval(interval);
+        }
+        iteration += 1 / 3;
+      }, 40);
+    };
 
-    return () => clearInterval(interval);
+    if (typeof IntersectionObserver === 'undefined') {
+      run();
+      return () => {
+        if (interval) clearInterval(interval);
+      };
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          run();
+          io.disconnect();
+        }
+      },
+      { threshold: 0.6 }
+    );
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      if (interval) clearInterval(interval);
+    };
   }, [reducedMotion]);
 
   return (
@@ -125,13 +155,19 @@ export function ClosingCta() {
           {/* LaserFlow WebGL Background */}
           <div className="pointer-events-none absolute inset-0 z-0 opacity-40">
             {webglSlot.hasSlot ? (
-              <LaserFlow
-                color={BRAND.bronze.hex}
-                flowSpeed={0.8}
-                wispIntensity={0.6}
-                horizontalBeamOffset={0}
-                verticalBeamOffset={-0.3}
-              />
+              <WebGLErrorBoundary
+                fallback={
+                  <div className="absolute inset-0 bg-gradient-to-b from-espresso/80 via-espresso-deep to-espresso-deep" />
+                }
+              >
+                <LaserFlow
+                  color={BRAND.bronze.hex}
+                  flowSpeed={0.8}
+                  wispIntensity={0.6}
+                  horizontalBeamOffset={0}
+                  verticalBeamOffset={-0.3}
+                />
+              </WebGLErrorBoundary>
             ) : (
               <div className="absolute inset-0 bg-gradient-to-b from-espresso/80 via-espresso-deep to-espresso-deep" />
             )}

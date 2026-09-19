@@ -63,9 +63,9 @@ interface TiltEngine {
 }
 
 const ProfileCardComponent: React.FC<ProfileCardProps> = ({
-  avatarUrl = '<Placeholder for avatar URL>',
-  iconUrl = '<Placeholder for icon URL>',
-  grainUrl = '<Placeholder for grain URL>',
+  avatarUrl = '',
+  iconUrl = '',
+  grainUrl = '',
   innerGradient,
   behindGlowEnabled = true,
   behindGlowColor,
@@ -521,6 +521,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                 backfaceVisibility: 'hidden'
               }}
             >
+              {avatarUrl ? (
               <img
                 className="w-full absolute left-1/2 bottom-[-1px] will-change-transform transition-transform duration-[120ms] ease-out"
                 src={avatarUrl}
@@ -538,6 +539,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                   t.style.display = 'none';
                 }}
               />
+              ) : null}
               {showUserInfo && (
                 <div
                   className="absolute z-[2] flex items-center justify-between backdrop-blur-[30px] border border-white/10 pointer-events-auto"
@@ -559,6 +561,7 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                       className="rounded-full overflow-hidden border border-white/10 flex-shrink-0"
                       style={{ width: '48px', height: '48px' }}
                     >
+                      {(miniAvatarUrl || avatarUrl) ? (
                       <img
                         className="w-full h-full object-cover rounded-full"
                         src={miniAvatarUrl || avatarUrl}
@@ -566,11 +569,11 @@ const ProfileCardComponent: React.FC<ProfileCardProps> = ({
                         loading="lazy"
                         style={{ display: 'block', gridArea: 'auto', borderRadius: '50%', pointerEvents: 'auto' }}
                         onError={e => {
-                          const t = e.target as HTMLImageElement;
-                          t.style.opacity = '0.5';
-                          t.src = avatarUrl;
+                          // Never reassign src here: a failing URL would re-fire onError forever.
+                          (e.target as HTMLImageElement).style.display = 'none';
                         }}
                       />
+                      ) : null}
                     </div>
                     <div className="flex flex-col items-start gap-1.5">
                       <div className="text-sm font-medium text-white/90 leading-none">@{handle}</div>

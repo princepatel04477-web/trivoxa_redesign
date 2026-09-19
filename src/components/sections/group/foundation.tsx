@@ -34,7 +34,7 @@ export function GroupFoundation() {
             <div className="mt-8">
               <ScrollReveal
                 baseOpacity={0.15}
-                enableBlur={true}
+                enableBlur={false}
                 blurStrength={3}
                 containerClassName="text-base sm:text-lg text-ivory/90 leading-relaxed font-sans"
               >

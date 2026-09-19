@@ -518,6 +518,11 @@
   animation: hero-copy-enter var(--duration-base) var(--ease-house) both;
 }
 
+/* First visit: hold the hero entrance until the preloader has wiped away, so it is actually seen. */
+html:not([data-preloader-skip]):not([data-preloader-done]) .hero-copy-enter {
+  animation-play-state: paused;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -555,4 +560,23 @@ html {
 /* Preloader: hidden before first paint for return visits / reduced motion (see layout.tsx head script). */
 html[data-preloader-skip] #trivoxa-preloader {
   display: none !important;
+}
+
+/* Film grain "boil": stepped translate on a pre-rendered tile — compositor only, no per-frame JS. */
+@keyframes noise-grain-shift {
+  0% { transform: translate3d(0, 0, 0); }
+  20% { transform: translate3d(-4%, 3%, 0); }
+  40% { transform: translate3d(3%, -5%, 0); }
+  60% { transform: translate3d(-6%, -2%, 0); }
+  80% { transform: translate3d(5%, 4%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+.noise-grain {
+  animation: noise-grain-shift 0.7s steps(1, end) infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .noise-grain {
+    animation: none;
+  }
 }

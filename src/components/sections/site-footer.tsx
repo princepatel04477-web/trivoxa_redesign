@@ -85,6 +85,9 @@ export function SiteFooter() {
     if (cols.length === 0) return;
 
     const ctx = gsap.context(() => {
+      // Park the columns hidden up front. Otherwise they sit fully visible until
+      // their trigger fires, then snap to opacity 0 and fade back in (a visible pop).
+      gsap.set(cols, { opacity: 0, y: 24 });
       ScrollTrigger.batch(cols, {
         start: 'top 90%',
         onEnter: (batch) => {

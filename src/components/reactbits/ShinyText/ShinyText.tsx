@@ -35,15 +35,33 @@ const ShinyText: React.FC<ShinyTextProps> = ({
   const elapsedRef = useRef(0);
   const lastTimeRef = useRef<number | null>(null);
   const directionRef = useRef(direction === 'left' ? 1 : -1);
+  const elRef = useRef<HTMLSpanElement>(null);
+  // The shine repaints clipped text every frame; only do that while it is on screen
+  // (one instance lives in the footer of every page, far below the fold).
+  const inViewRef = useRef(true);
+  const lastPaintRef = useRef(0);
 
   const animationDuration = speed * 1000;
   const delayDuration = delay * 1000;
 
+  useEffect(() => {
+    const el = elRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(([entry]) => {
+      inViewRef.current = Boolean(entry?.isIntersecting);
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   useAnimationFrame(time => {
-    if (disabled || isPaused) {
+    if (disabled || isPaused || !inViewRef.current) {
       lastTimeRef.current = null;
       return;
     }
+    // ~30fps is indistinguishable for a slow shine and halves the repaint cost.
+    if (time - lastPaintRef.current < 33) return;
+    lastPaintRef.current = time;
 
     if (lastTimeRef.current === null) {
       lastTimeRef.current = time;
@@ -120,6 +138,7 @@ const ShinyText: React.FC<ShinyTextProps> = ({
 
   return (
     <motion.span
+      ref={elRef}
       className={`inline-block ${className}`}
       style={{ ...gradientStyle, backgroundPosition }}
       onMouseEnter={handleMouseEnter}

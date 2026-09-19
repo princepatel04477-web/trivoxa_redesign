@@ -6,113 +6,69 @@ interface NoiseProps {
   patternSize?: number;
   patternScaleX?: number;
   patternScaleY?: number;
+  /** Kept for API compatibility; the grain now animates via a CSS step shift. */
   patternRefreshInterval?: number;
   patternAlpha?: number;
 }
 
-const Noise: React.FC<NoiseProps> = ({
-  patternSize = 250,
-  patternScaleX = 1,
-  patternScaleY = 1,
-  patternRefreshInterval = 2,
-  patternAlpha = 15
-}) => {
+const TILE = 512;
+
+/**
+ * Film grain.
+ *
+ * The previous version refilled a 1024x1024 ImageData (1M Math.random calls +
+ * a 4MB texture upload) every second frame on the main thread — a permanent
+ * ~10ms/frame tax anywhere it was visible (preloader, hero fallback, footer).
+ *
+ * Now the grain is generated ONCE with a fast xorshift PRNG into a small tile,
+ * and the "boil" is a stepped CSS translate on an oversized copy, which the
+ * compositor runs off the main thread (and skips entirely when off screen).
+ */
+const Noise: React.FC<NoiseProps> = ({ patternAlpha = 15 }) => {
   const grainRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     const canvas = grainRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d', { alpha: true });
     if (!ctx) return;
 
-    let frame = 0;
-    let animationId: number | null = null;
-    let running = false;
+    canvas.width = TILE;
+    canvas.height = TILE;
 
-    const canvasSize = 1024;
+    const imageData = ctx.createImageData(TILE, TILE);
+    const px = new Uint32Array(imageData.data.buffer);
+    const alpha = Math.max(0, Math.min(255, patternAlpha)) << 24;
 
-    const resize = () => {
-      if (!canvas) return;
-      canvas.width = canvasSize;
-      canvas.height = canvasSize;
-
-      canvas.style.width = '100vw';
-      canvas.style.height = '100vh';
-    };
-
-    const drawGrain = () => {
-      const imageData = ctx.createImageData(canvasSize, canvasSize);
-      const data = imageData.data;
-
-      for (let i = 0; i < data.length; i += 4) {
-        const value = Math.random() * 255;
-        data[i] = value;
-        data[i + 1] = value;
-        data[i + 2] = value;
-        data[i + 3] = patternAlpha;
-      }
-
-      ctx.putImageData(imageData, 0, 0);
-    };
-
-    const loop = () => {
-      if (frame % patternRefreshInterval === 0) {
-        drawGrain();
-      }
-      frame++;
-      animationId = window.requestAnimationFrame(loop);
-    };
-
-    // Grain redraw is CPU-heavy (a full ImageData fill every couple of
-    // frames). Never do that work while the canvas is scrolled out of view —
-    // most of this component's mounts (e.g. the site footer, alive on every
-    // route from first paint) sit far below the fold for most of a visit.
-    const start = () => {
-      if (running) return;
-      running = true;
-      loop();
-    };
-    const stop = () => {
-      running = false;
-      if (animationId !== null) window.cancelAnimationFrame(animationId);
-      animationId = null;
-    };
-
-    window.addEventListener('resize', resize);
-    resize();
-
-    let observer: IntersectionObserver | null = null;
-    if (typeof IntersectionObserver !== 'undefined') {
-      observer = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (entry.isIntersecting) start();
-            else stop();
-          }
-        },
-        { rootMargin: '200px' },
-      );
-      observer.observe(canvas);
-    } else {
-      start();
+    let seed = 0x9e3779b9;
+    for (let i = 0; i < px.length; i++) {
+      seed ^= seed << 13;
+      seed ^= seed >>> 17;
+      seed ^= seed << 5;
+      const v = seed & 0xff;
+      // Little-endian RGBA: 0xAABBGGRR
+      px[i] = alpha | (v << 16) | (v << 8) | v;
     }
-
-    return () => {
-      observer?.disconnect();
-      window.removeEventListener('resize', resize);
-      stop();
-    };
-  }, [patternSize, patternScaleX, patternScaleY, patternRefreshInterval, patternAlpha]);
+    ctx.putImageData(imageData, 0, 0);
+  }, [patternAlpha]);
 
   return (
-    <canvas
-      className="pointer-events-none absolute top-0 left-0 h-screen w-screen"
-      ref={grainRef}
-      style={{
-        imageRendering: 'pixelated'
-      }}
-    />
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute top-0 left-0 h-screen w-screen overflow-hidden"
+    >
+      <canvas
+        ref={grainRef}
+        className="noise-grain absolute"
+        style={{
+          left: '-10%',
+          top: '-10%',
+          width: '120%',
+          height: '120%',
+          imageRendering: 'pixelated',
+        }}
+      />
+    </div>
   );
 };
 

@@ -68,6 +68,9 @@ const TextPressure: React.FC<TextPressureProps> = ({
 
   const mouseRef = useRef({ x: 0, y: 0 });
   const cursorRef = useRef({ x: 0, y: 0 });
+  // The animation loop parks itself once the effect has settled; anything that
+  // could change the result (pointer, scroll, resize, visibility) wakes it.
+  const wakeRef = useRef<() => void>(() => {});
 
   const [fontSize, setFontSize] = useState(minFontSize);
   const [scaleY, setScaleY] = useState(1);
@@ -79,12 +82,14 @@ const TextPressure: React.FC<TextPressureProps> = ({
     const handleMouseMove = (e: MouseEvent) => {
       cursorRef.current.x = e.clientX;
       cursorRef.current.y = e.clientY;
+      wakeRef.current();
     };
     const handleTouchMove = (e: TouchEvent) => {
       const t = e.touches[0];
       if (t) {
         cursorRef.current.x = t.clientX;
         cursorRef.current.y = t.clientY;
+        wakeRef.current();
       }
     };
 
@@ -171,6 +176,7 @@ const TextPressure: React.FC<TextPressureProps> = ({
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) isVisibleRef.current = entry.isIntersecting;
+        if (isVisibleRef.current) wakeRef.current();
       },
       { rootMargin: '200px' },
     );
@@ -179,14 +185,33 @@ const TextPressure: React.FC<TextPressureProps> = ({
   }, []);
 
   useEffect(() => {
-    let rafId: number;
-    const animate = () => {
-      if (!isVisibleRef.current) {
-        rafId = requestAnimationFrame(animate);
-        return;
+    let rafId = 0;
+    let idleFrames = 0;
+    let lastScrollY = -1;
+
+    const frame = () => {
+      rafId = 0;
+      // Parked while off screen; the IntersectionObserver above wakes us.
+      if (!isVisibleRef.current) return;
+
+      const mouse = mouseRef.current;
+      const cursor = cursorRef.current;
+      const dx = cursor.x - mouse.x;
+      const dy = cursor.y - mouse.y;
+      mouse.x += dx / 15;
+      mouse.y += dy / 15;
+
+      // Character centres are viewport-relative, so scrolling changes the result too.
+      const scrollY = window.scrollY;
+      const settled = Math.abs(dx) < 0.25 && Math.abs(dy) < 0.25 && scrollY === lastScrollY;
+      lastScrollY = scrollY;
+      if (settled) {
+        // Nothing moved for a few frames: stop instead of re-measuring every
+        // character (a forced layout each) 60 times a second for no change.
+        if (++idleFrames > 2) return;
+      } else {
+        idleFrames = 0;
       }
-      mouseRef.current.x += (cursorRef.current.x - mouseRef.current.x) / 15;
-      mouseRef.current.y += (cursorRef.current.y - mouseRef.current.y) / 15;
 
       if (titleRef.current) {
         const titleRect = titleRef.current.getBoundingClientRect();
@@ -219,12 +244,28 @@ const TextPressure: React.FC<TextPressureProps> = ({
         });
       }
 
-      rafId = requestAnimationFrame(animate);
+      rafId = requestAnimationFrame(frame);
     };
 
-    animate();
-    return () => cancelAnimationFrame(rafId);
+    const wake = () => {
+      idleFrames = 0;
+      if (!rafId && isVisibleRef.current) rafId = requestAnimationFrame(frame);
+    };
+    wakeRef.current = wake;
+    window.addEventListener('scroll', wake, { passive: true });
+    wake();
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', wake);
+      wakeRef.current = () => {};
+    };
   }, [width, weight, italic, alpha]);
+
+  // A resize / font-size change moves the characters without any pointer input.
+  useEffect(() => {
+    wakeRef.current();
+  }, [fontSize, scaleY, lineHeight]);
 
   const styleElement = useMemo(() => {
     return (

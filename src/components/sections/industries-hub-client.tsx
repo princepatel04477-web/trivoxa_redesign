@@ -12,6 +12,7 @@ import SplitText from '@/components/reactbits/SplitText/SplitText';
 import ChromaGrid, { type ChromaItem } from '@/components/reactbits/ChromaGrid/ChromaGrid';
 import { useReducedMotion } from '@/lib/motion/useReducedMotion';
 import { useWebGLSlot } from '@/lib/motion/webgl-budget';
+import { WebGLErrorBoundary } from '@/components/three/webgl-error-boundary';
 import { gsap } from 'gsap';
 import { Flip } from 'gsap/Flip';
 
@@ -101,14 +102,16 @@ export function IndustriesHubClient({
         {/* WebGL Grainient or CSS Fallback */}
         <div className="absolute inset-0 pointer-events-none opacity-40">
           {webglSlot.hasSlot && !reducedMotion ? (
-            <Grainient
-              color1={BRAND.bronze.hex}
-              color2={BRAND.espresso.hex}
-              color3={BRAND.espressoDeep.hex}
-              warpStrength={0.8}
-              warpSpeed={1.2}
-              grainAmount={0.06}
-            />
+            <WebGLErrorBoundary fallback={null}>
+              <Grainient
+                color1={BRAND.bronze.hex}
+                color2={BRAND.espresso.hex}
+                color3={BRAND.espressoDeep.hex}
+                warpStrength={0.8}
+                warpSpeed={1.2}
+                grainAmount={0.06}
+              />
+            </WebGLErrorBoundary>
           ) : (
             <div className="h-full w-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-bronze/20 via-espresso-deep to-espresso-deep" />
           )}

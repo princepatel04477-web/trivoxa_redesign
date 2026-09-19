@@ -15,6 +15,7 @@ import SpecularButton from '@/components/reactbits/SpecularButton/SpecularButton
 import Magnet from '@/components/reactbits/Magnet/Magnet';
 import ScrollVelocity from '@/components/reactbits/ScrollVelocity/ScrollVelocity';
 import { useWebGLSlot } from '@/lib/motion/webgl-budget';
+import { WebGLErrorBoundary } from '@/components/three/webgl-error-boundary';
 import { useReducedMotion } from '@/lib/motion/useReducedMotion';
 
 const TRADE_CORRIDORS = [
@@ -110,12 +111,14 @@ export function WhoWeAre() {
         {/* Background: Threads WebGL with budget slot */}
         <div className="pointer-events-none absolute inset-0 z-0 opacity-40">
           {webglSlot.hasSlot && !reducedMotion ? (
-            <Threads
-              amplitude={1}
-              distance={0}
-              enableMouseInteraction={true}
-              color={[0.66, 0.55, 0.41]}
-            />
+            <WebGLErrorBoundary fallback={null}>
+              <Threads
+                amplitude={1}
+                distance={0}
+                enableMouseInteraction={true}
+                color={[0.66, 0.55, 0.41]}
+              />
+            </WebGLErrorBoundary>
           ) : (
             <div className="absolute inset-0 bg-stone-950/80" />
           )}
@@ -182,7 +185,7 @@ export function WhoWeAre() {
               <div className="text-[clamp(22px,2vw,32px)] leading-relaxed text-ivory">
                 <ScrollReveal
                   baseOpacity={0.15}
-                  enableBlur={!reducedMotion}
+                  enableBlur={false}
                   baseRotation={0}
                   blurStrength={4}
                   wordAnimationEnd="center center"

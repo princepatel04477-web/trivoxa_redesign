@@ -81,17 +81,24 @@ export function classifyPerfTier(input: {
   return 'high';
 }
 
+let webglProbeResult: boolean | undefined;
+
 function probeWebGL(): boolean {
+  // The answer cannot change within a session, and every probe would otherwise
+  // leave a live GL context behind, counting against the browser's ~16 limit.
+  if (webglProbeResult !== undefined) return webglProbeResult;
   try {
     const canvas = document.createElement('canvas');
     const gl =
       canvas.getContext('webgl2') ??
       canvas.getContext('webgl') ??
       canvas.getContext('experimental-webgl');
-    return Boolean(gl);
+    webglProbeResult = Boolean(gl);
+    (gl as WebGLRenderingContext | null)?.getExtension('WEBGL_lose_context')?.loseContext();
   } catch {
-    return false;
+    webglProbeResult = false;
   }
+  return webglProbeResult;
 }
 
 function readEnvironment(): {

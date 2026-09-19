@@ -682,7 +682,8 @@ function slotBox(c: LabelCandidate, slot: LabelSlot) {
  */
 function placeLabels(
   cands: LabelCandidate[],
-  prev: Map<number, string>
+  prev: Map<number, string>,
+  bounds: { w: number; h: number }
 ): Map<number, LabelPlacement> {
   const out = new Map<number, LabelPlacement>();
   const taken: { x0: number; x1: number; y0: number; y1: number }[] = [];
@@ -707,6 +708,8 @@ function placeLabels(
       : LABEL_SLOTS;
     for (const slot of order) {
       const box = slotBox(c, slot);
+      // Never let a label run off the edge of the card (it would be clipped).
+      if (box.x0 < 4 || box.x1 > bounds.w - 4 || box.y0 < 4 || box.y1 > bounds.h - 4) continue;
       if (dots.some((d) => hits(box, d)) || taken.some((t) => hits(box, t))) continue;
       taken.push(box);
       out.set(c.i, { slot, dir: box.dir });
@@ -951,7 +954,6 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const pathRefs = useRef<Map<string, SVGPathElement>>(new Map());
-  const ghostPathRefs = useRef<Map<string, SVGPathElement>>(new Map());
   const markerRefs = useRef<Map<number, SVGGElement>>(new Map());
   const labelSlotRef = useRef<Map<number, string>>(new Map());
   const gridPathRef = useRef<SVGPathElement | null>(null);
@@ -1153,10 +1155,58 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
     if (W <= 0 || H <= 0 || R <= 0) return;
 
     let raf = 0;
+    const lastD = new Map<string, string>();
+
+    // Per-country bounding cap, built once. A country whose whole cap is beyond
+    // the horizon cannot be visible, so its ring projection is skipped outright
+    // (about half the ~180 countries are on the far side at any moment).
+    const DEG = Math.PI / 180;
+    const unit = (lng: number, lat: number): [number, number, number] => {
+      const a = lat * DEG;
+      const l = lng * DEG;
+      return [Math.cos(a) * Math.cos(l), Math.cos(a) * Math.sin(l), Math.sin(a)];
+    };
+    const caps = countryIndex.map((c) => {
+      const b = c.bbox;
+      const lc = (b.minLng + b.maxLng) / 2;
+      const ac = (b.minLat + b.maxLat) / 2;
+      const center = unit(lc, ac);
+      let widest = 0;
+      const samples: [number, number][] = [
+        [b.minLng, b.minLat],
+        [b.maxLng, b.minLat],
+        [b.minLng, b.maxLat],
+        [b.maxLng, b.maxLat],
+        [lc, b.minLat],
+        [lc, b.maxLat],
+        [b.minLng, ac],
+        [b.maxLng, ac],
+      ];
+      for (const [lng, lat] of samples) {
+        const v = unit(lng, lat);
+        const dot = Math.max(-1, Math.min(1, center[0] * v[0] + center[1] * v[1] + center[2] * v[2]));
+        widest = Math.max(widest, Math.acos(dot));
+      }
+      const rho = widest + 3 * DEG;
+      // Hidden iff angle(viewCentre, capCentre) > 90deg + rho  <=>  dot < -sin(rho).
+      // A cap wider than a quarter-sphere is never skipped.
+      return { center, hiddenBelow: rho < Math.PI / 2 ? -Math.sin(rho) : -2 };
+    });
+    let running = false;
+    let inView = true;
     let lastTime = typeof performance !== 'undefined' ? performance.now() : 0;
     const idleMs = 1200;
+    // ~30fps is plenty for a slow auto-spin; full rate only while the user is
+    // dragging or hovering (hover hit-testing wants a fresh frame).
+    const IDLE_FRAME_MS = 42;
+    const canRun = () => inView && !document.hidden;
 
     const step = (now: number) => {
+      const interacting = dragRef.current.active || lastMouseRef.current !== null;
+      if (!interacting && now - lastTime < IDLE_FRAME_MS) {
+        raf = requestAnimationFrame(step);
+        return;
+      }
       const dt = Math.min(0.05, (now - lastTime) / 1000);
       lastTime = now;
       const sinceUser = now - userInteractedRef.current;
@@ -1168,12 +1218,23 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
       const { lambda, phi, gamma } = rotRef.current;
 
       // Update country paths
-      for (const c of countryIndex) {
-        const d = buildSphericalPath(c.type, c.coords, lambda, phi, gamma, R, cx, cy);
+      // View centre = (lng: lambda, lat: phi); see project().
+      const cphi = Math.cos(phi * DEG);
+      const vx = cphi * Math.cos(lambda * DEG);
+      const vy = cphi * Math.sin(lambda * DEG);
+      const vz = Math.sin(phi * DEG);
+      for (let ci = 0; ci < countryIndex.length; ci++) {
+        const c = countryIndex[ci]!;
+        const cap = caps[ci]!;
+        const hidden = vx * cap.center[0] + vy * cap.center[1] + vz * cap.center[2] < cap.hiddenBelow;
+        const d = hidden
+          ? ''
+          : buildSphericalPath(c.type, c.coords, lambda, phi, gamma, R, cx, cy);
+        // Countries on the far side produce '' every frame — don't touch the DOM for those.
+        if (d === lastD.get(c.id)) continue;
+        lastD.set(c.id, d);
         const p = pathRefs.current.get(c.id);
         if (p) p.setAttribute('d', d);
-        const g = ghostPathRefs.current.get(c.id);
-        if (g) g.setAttribute('d', d);
       }
 
       // Update grid
@@ -1201,6 +1262,15 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
             el.style.display = '';
             el.setAttribute('transform', `translate(${p.sx.toFixed(1)},${p.sy.toFixed(1)})`);
 
+            // Pulse ring (first child): scale 1 -> 1.6 -> 1 and fade, 2.4s cycle.
+            const pulse = el.firstElementChild as SVGElement | null;
+            if (pulse && !reduced) {
+              const phase = ((now / 2400 + i * 0.13) % 1);
+              const wave = (1 - Math.cos(phase * Math.PI * 2)) / 2; // 0 -> 1 -> 0
+              pulse.setAttribute('transform', `scale(${(1 + wave * 0.6).toFixed(3)})`);
+              pulse.style.opacity = (0.6 - wave * 0.52).toFixed(2);
+            }
+
             const name = m.city || m.label;
             // Bold 11px name vs 9px tracked-out country line — take the wider.
             const w = Math.max(name.length * 6.8, (m.country?.length ?? 0) * 6.4) + 4;
@@ -1214,7 +1284,7 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
 
       // Lay out labels so dense clusters (Surat / Mundra / Kandla / Nhava Sheva /
       // Jebel Ali / Dammam) never print over each other.
-      const placements = placeLabels(labelCands, labelSlotRef.current);
+      const placements = placeLabels(labelCands, labelSlotRef.current, { w: W, h: H });
       for (const c of labelCands) {
         const textEl = markerRefs.current.get(c.i)?.querySelector('text');
         if (!textEl) continue;
@@ -1269,11 +1339,48 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
         }
       }
 
-      raf = requestAnimationFrame(step);
+      if (canRun()) {
+        raf = requestAnimationFrame(step);
+      } else {
+        running = false;
+      }
     };
 
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
+    const start = () => {
+      if (running || !canRun()) return;
+      running = true;
+      lastTime = performance.now();
+      raf = requestAnimationFrame(step);
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+
+    // The globe redraws ~180 country paths per frame. Never do that while it is
+    // scrolled out of view or the tab is in the background.
+    const root = containerRef.current;
+    let io: IntersectionObserver | null = null;
+    if (root && typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver(
+        (entries) => {
+          inView = entries.some((e) => e.isIntersecting);
+          if (inView) start();
+          else stop();
+        },
+        { rootMargin: '120px' }
+      );
+      io.observe(root);
+    }
+    const onVisibility = () => (canRun() ? start() : stop());
+    document.addEventListener('visibilitychange', onVisibility);
+
+    start();
+    return () => {
+      stop();
+      io?.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
   }, [
     isClient,
     countryIndex,
@@ -1424,7 +1531,6 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
   const reactId = React.useId();
   const uid = reactId.replace(/:/g, '');
   const fG = 'g' + uid;
-  const fL = 'l' + uid;
   const gO = 'o' + uid;
   const gShade = 's' + uid;
   const gAtm = 'a' + uid;
@@ -1455,15 +1561,9 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
       <style>{`
         .mm-c { transition: fill 140ms ease, filter 140ms ease; }
         .mm-c:hover { filter: brightness(1.2); }
-        @keyframes mm-pulse {
-          0%, 100% { transform: scale(1); opacity: 0.6; }
-          50% { transform: scale(1.6); opacity: 0.08; }
-        }
-        .mm-pulse {
-          animation: mm-pulse 2.4s ease-out infinite;
-          transform-box: fill-box;
-          transform-origin: center;
-        }
+        /* The marker pulse is driven from the render loop (see tick), not a CSS
+           animation: a separate 60fps animation repaints this whole SVG on top of
+           the loop's own redraws. */
       `}</style>
 
       {loading && (
@@ -1534,15 +1634,6 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
             </feMerge>
           </filter>
 
-          <filter id={fL} x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="3" result="b" />
-            <feColorMatrix
-              in="b"
-              type="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.16 0"
-            />
-          </filter>
-
           <radialGradient id={gShade} cx="38%" cy="32%" r="78%">
             <stop offset="0%" stopColor={rgba('#ffffff', 0.1)} />
             <stop offset="55%" stopColor={rgba('#ffffff', 0)} />
@@ -1594,21 +1685,6 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
 
         {/* Land & Graticule inside clipped sphere */}
         <g clipPath={`url(#${clipDisc})`}>
-          <g opacity={0.07} filter={`url(#${fL})`}>
-            {countryIndex.map((c) => (
-              <path
-                key={'g' + c.id}
-                ref={(el) => {
-                  if (el) ghostPathRefs.current.set(c.id, el);
-                  else ghostPathRefs.current.delete(c.id);
-                }}
-                fill={landFill}
-                stroke="none"
-                pointerEvents="none"
-              />
-            ))}
-          </g>
-
           {showGrid && (
             <path
               ref={gridPathRef}
@@ -1636,7 +1712,6 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
                 fill={initialFill}
                 stroke={landStroke}
                 strokeWidth={strokeWidth}
-                vectorEffect="non-scaling-stroke"
                 style={{ cursor: 'default' }}
               />
             );

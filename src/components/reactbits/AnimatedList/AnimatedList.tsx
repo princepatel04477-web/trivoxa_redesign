@@ -76,6 +76,7 @@ const AnimatedList: React.FC<AnimatedListProps> = ({
   initialSelectedIndex = -1
 }) => {
   const listRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(initialSelectedIndex);
   const [keyboardNav, setKeyboardNav] = useState<boolean>(false);
   const [topGradientOpacity, setTopGradientOpacity] = useState<number>(0);
@@ -103,13 +104,17 @@ const AnimatedList: React.FC<AnimatedListProps> = ({
   };
 
   useEffect(() => {
-    if (!enableArrowNavigation) return;
+    const wrapper = wrapperRef.current;
+    if (!enableArrowNavigation || !wrapper) return;
+    // Scoped to the list (it is focusable) and Tab is left alone. This used to be
+    // a window-level listener that preventDefault()'d Tab and the arrow keys, so
+    // on any page containing a list the keyboard could neither scroll nor tab.
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) {
+      if (e.key === 'ArrowDown') {
         e.preventDefault();
         setKeyboardNav(true);
         setSelectedIndex(prev => Math.min(prev + 1, items.length - 1));
-      } else if (e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey)) {
+      } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         setKeyboardNav(true);
         setSelectedIndex(prev => Math.max(prev - 1, 0));
@@ -124,8 +129,8 @@ const AnimatedList: React.FC<AnimatedListProps> = ({
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    wrapper.addEventListener('keydown', handleKeyDown);
+    return () => wrapper.removeEventListener('keydown', handleKeyDown);
   }, [items, selectedIndex, onItemSelect, enableArrowNavigation]);
 
   useEffect(() => {
@@ -151,7 +156,11 @@ const AnimatedList: React.FC<AnimatedListProps> = ({
   }, [selectedIndex, keyboardNav]);
 
   return (
-    <div className={`relative w-[500px] ${className}`}>
+    <div
+      ref={wrapperRef}
+      tabIndex={enableArrowNavigation ? 0 : undefined}
+      className={`relative w-full max-w-[500px] ${className}`}
+    >
       <div
         ref={listRef}
         className={`max-h-[400px] overflow-y-auto p-4 ${

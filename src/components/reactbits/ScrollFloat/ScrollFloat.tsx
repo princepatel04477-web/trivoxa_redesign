@@ -48,10 +48,10 @@ const ScrollFloat: React.FC<ScrollFloatProps> = ({
 
     const charElements = el.querySelectorAll('.inline-block');
 
+    const ctx = gsap.context(() => {
     gsap.fromTo(
       charElements,
       {
-        willChange: 'opacity, transform',
         opacity: 0,
         yPercent: 120,
         scaleY: 2.3,
@@ -75,6 +75,9 @@ const ScrollFloat: React.FC<ScrollFloatProps> = ({
         }
       }
     );
+    }, el);
+
+    return () => ctx.revert();
   }, [scrollContainerRef, animationDuration, ease, scrollStart, scrollEnd, stagger]);
 
   return (

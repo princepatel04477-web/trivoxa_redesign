@@ -22,7 +22,8 @@ interface ScrollRevealProps {
 const ScrollReveal: React.FC<ScrollRevealProps> = ({
   children,
   scrollContainerRef,
-  enableBlur = true,
+  // Scrubbed filter:blur on every word repaints continuously while scrolling; off by default.
+  enableBlur = false,
   baseOpacity = 0.1,
   baseRotation = 3,
   blurStrength = 4,
@@ -51,6 +52,10 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
 
     const scroller = scrollContainerRef && scrollContainerRef.current ? scrollContainerRef.current : window;
 
+    // Scoped context: revert() removes only THIS component's tweens/triggers.
+    // (This used to call ScrollTrigger.getAll().forEach(kill), which tore down
+    // every scroll animation on the site whenever this component unmounted.)
+    const ctx = gsap.context(() => {
     gsap.fromTo(
       el,
       { transformOrigin: '0% 50%', rotate: baseRotation },
@@ -71,7 +76,7 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
 
     gsap.fromTo(
       wordElements,
-      { opacity: baseOpacity, willChange: 'opacity' },
+      { opacity: baseOpacity },
       {
         ease: 'none',
         opacity: 1,
@@ -105,9 +110,9 @@ const ScrollReveal: React.FC<ScrollRevealProps> = ({
       );
     }
 
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
+    }, el);
+
+    return () => ctx.revert();
   }, [scrollContainerRef, enableBlur, baseRotation, baseOpacity, rotationEnd, wordAnimationEnd, blurStrength]);
 
   return (

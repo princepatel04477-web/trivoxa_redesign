@@ -20,6 +20,16 @@ const HOLD_AFTER_FLIP_MS = 450;
 const HARD_CAP_MS = 4500;
 const MIN_TIME_AFTER_MOUNT_MS = 1500;
 
+/**
+ * Tells the page the overlay is gone. Entrance animations (see `.hero-copy-enter`
+ * in globals.css) wait for this attribute, so they play when the wipe reveals the
+ * page instead of finishing unseen underneath the overlay.
+ */
+function signalReady(): void {
+  document.documentElement.setAttribute('data-preloader-done', '');
+  window.dispatchEvent(new CustomEvent('trivoxa:ready'));
+}
+
 export function Preloader() {
   const [show, setShow] = useState<boolean>(true);
   const reducedMotion = useReducedMotion();
@@ -47,12 +57,12 @@ export function Preloader() {
         ease: 'power3.inOut',
         onComplete: () => {
           setShow(false);
-          window.dispatchEvent(new CustomEvent('trivoxa:ready'));
+          signalReady();
         },
       });
     } else {
       setShow(false);
-      window.dispatchEvent(new CustomEvent('trivoxa:ready'));
+      signalReady();
     }
   };
 
@@ -62,12 +72,12 @@ export function Preloader() {
       if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
       }
-      window.scrollTo(0, 0);
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     }
 
     if (reducedMotion) {
       setShow(false);
-      window.dispatchEvent(new CustomEvent('trivoxa:ready'));
+      signalReady();
       return;
     }
 
@@ -75,12 +85,12 @@ export function Preloader() {
       const seen = sessionStorage.getItem('trivoxa_preloader_seen');
       if (seen) {
         setShow(false);
-        window.dispatchEvent(new CustomEvent('trivoxa:ready'));
+        signalReady();
         return;
       }
     } catch {
       setShow(false);
-      window.dispatchEvent(new CustomEvent('trivoxa:ready'));
+      signalReady();
       return;
     }
 

@@ -3,7 +3,8 @@
 import type { MotionValue} from 'motion/react';
 import { motion, useSpring, useTransform } from 'motion/react';
 import type React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useReducedMotion } from '@/lib/motion/useReducedMotion';
 
 type PlaceValue = number | '.';
 
@@ -46,10 +47,18 @@ function getValueRoundedToPlace(value: number, place: number): number {
   return Math.floor(normalizeNearInteger(scaled));
 }
 
+/**
+ * idle  — server render / before hydration: digits show the real value (no-JS safe)
+ * armed — hydrated, off screen: digits parked at 0, ready to roll
+ * live  — scrolled into view (or reduced motion): digits roll to the real value
+ */
+type CounterPhase = 'idle' | 'armed' | 'live';
+
 interface DigitProps {
   place: PlaceValue;
   value: number;
   height: number;
+  phase: CounterPhase;
   digitStyle?: React.CSSProperties;
 }
 
@@ -64,13 +73,14 @@ function DecimalDigit({ height, digitStyle }: { height: number; digitStyle?: Rea
   );
 }
 
-function NumericDigit({ place, value, height, digitStyle }: { place: number; value: number; height: number; digitStyle?: React.CSSProperties }) {
+function NumericDigit({ place, value, height, phase, digitStyle }: { place: number; value: number; height: number; phase: CounterPhase; digitStyle?: React.CSSProperties }) {
   const valueRoundedToPlace = getValueRoundedToPlace(value, place);
   const animatedValue = useSpring(valueRoundedToPlace);
 
   useEffect(() => {
-    animatedValue.set(valueRoundedToPlace);
-  }, [animatedValue, valueRoundedToPlace]);
+    if (phase === 'armed') animatedValue.jump(0);
+    else if (phase === 'live') animatedValue.set(valueRoundedToPlace);
+  }, [animatedValue, valueRoundedToPlace, phase]);
 
   const defaultStyle: React.CSSProperties = {
     height,
@@ -88,11 +98,11 @@ function NumericDigit({ place, value, height, digitStyle }: { place: number; val
   );
 }
 
-function Digit({ place, value, height, digitStyle }: DigitProps) {
+function Digit({ place, value, height, phase, digitStyle }: DigitProps) {
   if (place === '.') {
     return <DecimalDigit height={height} digitStyle={digitStyle} />;
   }
-  return <NumericDigit place={place} value={value} height={height} digitStyle={digitStyle} />;
+  return <NumericDigit place={place} value={value} height={height} phase={phase} digitStyle={digitStyle} />;
 }
 
 interface CounterProps {
@@ -152,6 +162,29 @@ export default function Counter({
   bottomGradientStyle
 }: CounterProps) {
   const height = fontSize + padding;
+  const rootRef = useRef<HTMLSpanElement>(null);
+  const reducedMotion = useReducedMotion();
+  const [phase, setPhase] = useState<CounterPhase>('idle');
+
+  useEffect(() => {
+    const el = rootRef.current;
+    if (reducedMotion || !el || typeof IntersectionObserver === 'undefined') {
+      setPhase('live');
+      return;
+    }
+    setPhase('armed');
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setPhase('live');
+          io.disconnect();
+        }
+      },
+      { threshold: 0.4 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [reducedMotion]);
 
   const defaultContainerStyle: React.CSSProperties = {
     position: 'relative',
@@ -192,10 +225,10 @@ export default function Counter({
   };
 
   return (
-    <span style={{ ...defaultContainerStyle, ...containerStyle }}>
+    <span ref={rootRef} style={{ ...defaultContainerStyle, ...containerStyle }}>
       <span style={{ ...defaultCounterStyle, ...counterStyle }}>
         {places.map((place, idx) => (
-          <Digit key={`${place}-${idx}`} place={place} value={value} height={height} digitStyle={digitStyle} />
+          <Digit key={`${place}-${idx}`} place={place} value={value} height={height} phase={phase} digitStyle={digitStyle} />
         ))}
       </span>
       <span style={gradientContainerStyle}>

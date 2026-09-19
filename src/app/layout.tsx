@@ -52,7 +52,15 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={fontVariables} data-surface="light" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={fontVariables}
+      data-surface="light"
+      // globals.css sets scroll-behavior:smooth. Since Next 16 no longer overrides it, without
+      // this every route change animates a slow scroll-to-top instead of jumping instantly.
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         {/*
           The preloader is server-rendered, so without this it paints on EVERY hard

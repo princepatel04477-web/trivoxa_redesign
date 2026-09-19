@@ -75,6 +75,9 @@ const AnimatedContent: React.FC<AnimatedContentProps> = ({
       delay,
       onComplete: () => {
         if (onComplete) onComplete();
+        // Drop the leftover translate/scale so the block is no longer a stacking
+        // context / fixed-position containing block once it has settled.
+        if (disappearAfter <= 0) gsap.set(el, { clearProps: 'transform,willChange' });
         if (disappearAfter > 0) {
           gsap.to(el, {
             [axis]: reverse ? distance : -distance,

@@ -123,8 +123,9 @@ const SplitText: React.FC<SplitTextProps> = ({
                 animationCompletedRef.current = true;
                 onCompleteRef.current?.();
               },
-              willChange: 'transform, opacity',
-              force3D: true
+              // No will-change / forced 3D: promoting every character to its own
+              // compositor layer is what made long headlines stutter and eat
+              // memory. GSAP promotes only while a transform is actually animating.
             }
           );
         }
@@ -160,8 +161,7 @@ const SplitText: React.FC<SplitTextProps> = ({
   const renderTag = () => {
     const style: React.CSSProperties = {
       textAlign,
-      wordWrap: 'break-word',
-      willChange: 'transform, opacity'
+      wordWrap: 'break-word'
     };
     const classes = `split-parent overflow-hidden inline-block whitespace-normal ${className}`;
     const Tag = tag || 'p';

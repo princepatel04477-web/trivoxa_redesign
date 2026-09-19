@@ -148,7 +148,16 @@ const SpecularButton = ({
     if (!btn || !fx) return;
 
     const dpr = window.devicePixelRatio || 1;
-    const renderer = new Renderer({ alpha: true, premultipliedAlpha: true, antialias: true, dpr });
+    // If a GL context cannot be created (GPU blocklisted, context limit hit,
+    // hardware acceleration off) ogl throws from its constructor. That used to be
+    // uncaught inside this effect and took the ENTIRE page down with it; the
+    // button simply works without the specular shine instead.
+    let renderer: Renderer;
+    try {
+      renderer = new Renderer({ alpha: true, premultipliedAlpha: true, antialias: true, dpr });
+    } catch {
+      return;
+    }
     const gl = renderer.gl;
     gl.clearColor(0, 0, 0, 0);
     gl.enable(gl.BLEND);
@@ -239,6 +248,11 @@ const SpecularButton = ({
       intersectionObserver = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) isVisible = entry.isIntersecting;
+          // The loop parks itself while hidden (below); bring it back when visible again.
+          if (isVisible && !raf) {
+            last = performance.now();
+            raf = requestAnimationFrame(update);
+          }
         },
         { rootMargin: '200px' },
       );
@@ -246,11 +260,12 @@ const SpecularButton = ({
     }
 
     const update = (now: number) => {
-      raf = requestAnimationFrame(update);
       if (!isVisible) {
-        last = now;
+        // Park: no rAF request at all while off screen.
+        raf = 0;
         return;
       }
+      raf = requestAnimationFrame(update);
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       const p = propsRef.current;

@@ -10,6 +10,7 @@ import TextPressure from '@/components/reactbits/TextPressure/TextPressure';
 import { COMPANY, SHIVESHWAR_CANONICAL_SENTENCE } from '@/content/company';
 import { DIVISIONS, INDUSTRIES } from '@/content/taxonomy';
 import { useWebGLSlot } from '@/lib/motion/webgl-budget';
+import { WebGLErrorBoundary } from '@/components/three/webgl-error-boundary';
 import { useReducedMotion } from '@/lib/motion/useReducedMotion';
 
 const LightRays = dynamic(() => import('@/components/reactbits/LightRays/LightRays'), {
@@ -26,14 +27,16 @@ export function GroupHero() {
       {/* LightRays WebGL background with CSS fallback */}
       <div className="absolute inset-0 pointer-events-none opacity-50">
         {webglSlot.hasSlot && !reducedMotion ? (
-          <LightRays
-            raysOrigin="top-center"
-            raysColor={BRAND.bronze.hex}
-            raysSpeed={1.0}
-            lightSpread={0.7}
-            rayLength={1.8}
-            noiseAmount={0.04}
-          />
+          <WebGLErrorBoundary fallback={null}>
+            <LightRays
+              raysOrigin="top-center"
+              raysColor={BRAND.bronze.hex}
+              raysSpeed={1.0}
+              lightSpread={0.7}
+              rayLength={1.8}
+              noiseAmount={0.04}
+            />
+          </WebGLErrorBoundary>
         ) : (
           <div className="h-full w-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-bronze/25 via-espresso/80 to-espresso-deep" />
         )}

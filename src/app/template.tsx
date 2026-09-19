@@ -29,6 +29,10 @@ export default function Template({ children }: { children: React.ReactNode }) {
           y: 0,
           duration: 0.25,
           ease: 'power2.out',
+          // A leftover transform (even translate(0,0)) makes this wrapper the
+          // containing block for every position:fixed descendant and a stacking
+          // context for the whole page, and promotes the full page to a layer.
+          clearProps: 'transform,opacity',
           onComplete: () => ScrollTrigger.refresh(),
         }
       );
