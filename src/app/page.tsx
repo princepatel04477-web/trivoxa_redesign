@@ -1,4 +1,3 @@
-import { BusinessesPreview } from '@/components/sections/businesses-preview';
 import { ClosingCta } from '@/components/sections/closing-cta';
 import { GlobalPresencePreview } from '@/components/sections/global-presence-preview';
 import { Hero } from '@/components/sections/hero';
@@ -38,13 +37,12 @@ export const metadata: Metadata = {
  *     nouns a procurement reader can act on.
  *  4. Who we are — the manufacturing lineage stated as the spine, not a
  *     footnote, with the canonical Shiveshwar sentence.
- *  5. Businesses — the two divisions, in a grid that accepts a third.
- *  6. Industries — a slice of six, WITH the true total and a visible
+ *  5. Industries — a slice of six, WITH the true total and a visible
  *     "View all 9 industries →" in the section header. Never silent.
- *  7. Global presence — the tiered globe and the region list that is the real
+ *  6. Global presence — the tiered globe and the region list that is the real
  *     content for anyone without a pointer.
- *  8. Insights / Careers — conditional. Empty dataset, no section.
- *  9. Closing CTA — the single commercial conversion: the RFQ.
+ *  7. Insights / Careers — conditional. Empty dataset, no section.
+ *  8. Closing CTA — the single commercial conversion: the RFQ.
  */
 export default function Home() {
   return (
@@ -53,7 +51,6 @@ export default function Home() {
       <ProofBand />
       <WhyTrivoxa />
       <WhoWeAre />
-      <BusinessesPreview />
       <IndustriesPreview />
       <GlobalPresencePreview />
       <InsightsPreview />

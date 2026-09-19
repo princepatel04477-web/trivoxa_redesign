@@ -42,6 +42,8 @@ export interface SplitFlapTextProps extends HTMLAttributes<HTMLDivElement> {
   fontSize?: number | string;
   loop?: boolean;
   padTo?: number;
+  /** Fires once the final word has fully settled (only when `loop` is false). */
+  onComplete?: () => void;
 }
 
 const DEFAULT_WORDS = ['LAUNCH READY', 'SYNC ONLINE', 'SIGNAL LIVE'];
@@ -135,6 +137,7 @@ const SplitFlapText = ({
   fontSize = 52,
   loop = true,
   padTo,
+  onComplete,
   className = '',
   style = {},
   ...props
@@ -143,6 +146,8 @@ const SplitFlapText = ({
   const rafRef = useRef<number | null>(null);
   const cycleTimerRef = useRef<ReturnType<typeof setTimeout> | number | null>(null);
   const currentTextRef = useRef('');
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
 
   const sourceWords = Array.isArray(words) && words.length > 0 ? words : DEFAULT_WORDS;
   const phrasesKey = typeof text === 'string' ? text : sourceWords.map(word => String(word ?? '')).join('\u001f');
@@ -196,10 +201,11 @@ const SplitFlapText = ({
     const safeFlips = Math.max(0, Math.floor(Number(flipsPerChar) || 0));
     const activeCharset = resolveCharset(charset);
 
-    const animateTo = (targetPhrase: string) => {
+    const animateTo = (targetPhrase: string, onSettled: () => void) => {
       if (prefersReducedMotion) {
         currentTextRef.current = targetPhrase;
         setTiles(createTiles(targetPhrase));
+        onSettled();
         return 0;
       }
 
@@ -226,6 +232,7 @@ const SplitFlapText = ({
       if (!plans.length) {
         currentTextRef.current = targetPhrase;
         setTiles(createTiles(targetPhrase));
+        onSettled();
         return 0;
       }
 
@@ -300,6 +307,7 @@ const SplitFlapText = ({
         } else {
           currentTextRef.current = targetPhrase;
           rafRef.current = null;
+          onSettled();
         }
       };
 
@@ -318,7 +326,10 @@ const SplitFlapText = ({
         phraseIndex = nextIndex % normalizedPhrases.length;
         const phrase = normalizedPhrases[phraseIndex];
         if (!phrase) return;
-        const animationDuration = animateTo(phrase);
+        const isFinal = !loop && phraseIndex === normalizedPhrases.length - 1;
+        const animationDuration = animateTo(phrase, () => {
+          if (isFinal && !cancelled) onCompleteRef.current?.();
+        });
         scheduleNext(safeCycleDelay + animationDuration);
       }, delay);
     };

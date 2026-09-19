@@ -108,7 +108,6 @@ export const NAV_GROUPS: NavGroup[] = [
       {
         heading: 'Trust',
         items: [
-          { href: '/compliance', label: 'Compliance & Certifications' },
           { href: '/legal/anti-corruption', label: 'Anti-corruption Policy' },
         ],
       },

@@ -551,3 +551,8 @@ html {
     transform: none !important;
   }
 }
+
+/* Preloader: hidden before first paint for return visits / reduced motion (see layout.tsx head script). */
+html[data-preloader-skip] #trivoxa-preloader {
+  display: none !important;
+}

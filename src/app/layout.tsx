@@ -53,6 +53,18 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={fontVariables} data-surface="light" suppressHydrationWarning>
+      <head>
+        {/*
+          The preloader is server-rendered, so without this it paints on EVERY hard
+          load until hydration removes it — a flash for return visitors and for
+          reduced-motion users. This runs before first paint and hides it up front.
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(sessionStorage.getItem('trivoxa_preloader_seen')||window.matchMedia('(prefers-reduced-motion: reduce)').matches){document.documentElement.setAttribute('data-preloader-skip','')}}catch(e){document.documentElement.setAttribute('data-preloader-skip','')}`,
+          }}
+        />
+      </head>
       <body className="surface-bg surface-fg antialiased">
         <a href="#main" className="skip-link">
           Skip to content

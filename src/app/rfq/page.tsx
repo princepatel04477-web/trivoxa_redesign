@@ -106,7 +106,6 @@ export default function RfqPage() {
                 </Prose>
                 <div className="mt-xs flex flex-wrap gap-lg">
                   <ArrowLink href="/businesses/product-exports">Browse the catalogue</ArrowLink>
-                  <ArrowLink href="/compliance">Check our credentials</ArrowLink>
                 </div>
               </div>
             </aside>

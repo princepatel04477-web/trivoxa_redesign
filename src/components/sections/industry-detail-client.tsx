@@ -238,14 +238,6 @@ export function IndustryDetailClient({
               <p className="mt-4 text-sm sm:text-base text-ivory/70 leading-relaxed">
                 Before booking vessel space or production capacity, every parameter is verified with our factory floors and testing labs in Surat and Gujarat export clusters.
               </p>
-              <div className="mt-6">
-                <Link
-                  href="/compliance"
-                  className="font-mono text-xs text-bronze hover:underline"
-                >
-                  View group compliance registers →
-                </Link>
-              </div>
             </div>
 
             <div className="col-span-12 lg:col-span-7">
@@ -404,12 +396,7 @@ export function IndustryDetailClient({
                 ))}
               </ul>
 
-              <p className="mt-6 text-xs text-ivory/60 leading-relaxed">
-                Group credentials — what we hold and what is in progress, with target quarters — are published in one register rather than repeated per industry.
-              </p>
-
               <div className="mt-6 flex flex-wrap gap-4">
-                <ArrowLink href="/compliance" className="text-xs text-bronze">Compliance register</ArrowLink>
                 <ArrowLink href="/businesses#how-it-works" className="text-xs text-bronze">How an order runs</ArrowLink>
               </div>
             </div>

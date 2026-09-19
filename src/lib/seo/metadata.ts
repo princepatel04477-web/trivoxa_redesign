@@ -34,16 +34,6 @@ export interface RouteMetadataInput {
 export function resolveOgImage(path: string, pageTitle: string): { url: string; width: number; height: number; alt: string } {
   const cleanPath = path.replace(/\/$/, '') || '/';
 
-  // Compliance template
-  if (cleanPath === '/compliance') {
-    return {
-      url: `${PRODUCTION_ORIGIN}/brand/og/compliance.png`,
-      width: 1200,
-      height: 630,
-      alt: 'Trivoxa Group Compliance & Certifications Register — 2 active credentials, 7 in progress targeting 2026-Q4',
-    };
-  }
-
   // Catalogue template
   if (cleanPath === '/businesses/product-exports') {
     return {

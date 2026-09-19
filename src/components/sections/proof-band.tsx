@@ -2,7 +2,6 @@
 
 import { BRAND } from '@/lib/tokens/colors';
 import React, { useRef } from 'react';
-import Link from 'next/link';
 import { Container, Section } from '@/components/ui/layout';
 import { CERTIFICATIONS, PORTS } from '@/content/taxonomy';
 import { proofBand } from '@/lib/selectors';
@@ -128,12 +127,6 @@ export function ProofBand() {
                     {inProgress.map((c) => c.name).join(', ')} in progress with target dates published.
                   </p>
                 </div>
-                <Link
-                  href="/compliance"
-                  className="link-underline text-bronze hover:text-ivory mt-6 inline-flex items-center gap-1 text-body-sm font-semibold transition-colors"
-                >
-                  Read the certification register →
-                </Link>
               </div>
             </div>
           </div>

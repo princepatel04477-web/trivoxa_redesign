@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { StatusBadge } from '@/components/ui/badge';
 import { ButtonLink } from '@/components/ui/button';
 
@@ -60,9 +59,6 @@ export function OnboardingState({
         <ButtonLink href={rfqHref} variant="secondary" size="sm" arrow>
           Tell us what you are sourcing
         </ButtonLink>
-        <Link href="/compliance" className="link-underline surface-muted self-center text-body-sm">
-          See what we are certifying, and when
-        </Link>
       </div>
     </div>
   );

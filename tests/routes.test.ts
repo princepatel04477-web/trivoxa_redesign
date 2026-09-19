@@ -71,7 +71,7 @@ type Found = { href: string; file: string; template: boolean };
 
 /**
  * Every internal href in src/. Two kinds:
- *  · static literals — `href="/compliance"`;
+ *  · static literals — `href="/rfq"`;
  *  · template prefixes — `href={`/industries/${industry.slug}`}`, captured up to
  *    the interpolation. A prefix is validated as "leads to a real route" rather
  *    than as an exact path, and it counts as a reference for reachability.
@@ -147,7 +147,7 @@ describe('no orphan links', () => {
     expect(routes).toContain('/businesses/product-exports');
     expect(routes).toContain('/industries/:slug');
     expect(routes).toContain('/legal/:slug');
-    expect(routes).toContain('/compliance');
+    expect(routes).not.toContain('/compliance');
   });
 
   it('resolves every internal href in the source to a real route', () => {
@@ -193,7 +193,7 @@ describe('no orphan links', () => {
     }
   });
 
-  it('links every legal document from the footer or compliance page', () => {
+  it('links every legal document from the footer or nav', () => {
     for (const slug of Object.keys(LEGAL_DOCUMENTS)) {
       const href = `/legal/${slug}`;
       const referenced =

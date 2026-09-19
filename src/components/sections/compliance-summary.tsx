@@ -1,6 +1,5 @@
 import { StatusBadge } from '@/components/ui/badge';
 import { Container, Section } from '@/components/ui/layout';
-import { ArrowLink } from '@/components/ui/link';
 import { Prose, SectionHeading } from '@/components/ui/typography';
 import { CERTIFICATIONS } from '@/content/taxonomy';
 
@@ -35,11 +34,6 @@ export function ComplianceSummary({
           lede={
             lede ??
             'What we hold today, what we are applying for, and the quarter each application is targeted at.'
-          }
-          action={
-            <ArrowLink href="/compliance" className="text-body-md">
-              Full compliance register
-            </ArrowLink>
           }
         />
 

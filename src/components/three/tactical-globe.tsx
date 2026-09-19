@@ -614,6 +614,109 @@ function buildGraticule(
 }
 
 /* ========================================================================== */
+/* Marker label collision avoidance                                           */
+/* ========================================================================== */
+interface LabelSlot {
+  key: string;
+  /** +1 = towards the globe centre ("in"), -1 = away from it ("out"), 0 = centred. */
+  side: 1 | -1 | 0;
+  dx: number;
+  y0: number;
+}
+
+// Slots are tried in order; the first one that clears every dot and every
+// already-placed label wins. "in" labels stay on the globe face, "out" ones
+// spill towards the limb.
+const LABEL_SLOTS: LabelSlot[] = [
+  { key: 'in', side: 1, dx: 14, y0: -2 },
+  { key: 'out', side: -1, dx: 14, y0: -2 },
+  { key: 'in-up', side: 1, dx: 14, y0: -18 },
+  { key: 'in-down', side: 1, dx: 14, y0: 16 },
+  { key: 'out-up', side: -1, dx: 14, y0: -18 },
+  { key: 'out-down', side: -1, dx: 14, y0: 16 },
+  { key: 'top', side: 0, dx: 0, y0: -26 },
+  { key: 'bottom', side: 0, dx: 0, y0: 30 },
+  { key: 'in-top', side: 1, dx: 8, y0: -32 },
+  { key: 'out-top', side: -1, dx: 8, y0: -32 },
+  { key: 'in-bottom', side: 1, dx: 8, y0: 36 },
+  { key: 'out-bottom', side: -1, dx: 8, y0: 36 },
+];
+
+interface LabelCandidate {
+  i: number;
+  x: number;
+  y: number;
+  w: number;
+  /** Direction towards the globe centre: +1 = label extends to the right. */
+  inward: 1 | -1;
+}
+
+interface LabelPlacement {
+  slot: LabelSlot;
+  /** Resolved horizontal direction: +1 = text extends right of x, -1 = left, 0 = centred. */
+  dir: 1 | -1 | 0;
+}
+
+const LABEL_H_ABOVE = 10;
+const LABEL_H_BELOW = 14;
+const DOT_RADIUS = 11;
+
+function slotBox(c: LabelCandidate, slot: LabelSlot) {
+  const dir = slot.side === 0 ? 0 : ((slot.side * c.inward) as 1 | -1);
+  const ax = c.x + dir * slot.dx;
+  const x0 = dir === 0 ? ax - c.w / 2 : dir > 0 ? ax : ax - c.w;
+  return {
+    dir: dir as 1 | -1 | 0,
+    x0,
+    x1: x0 + c.w,
+    y0: c.y + slot.y0 - LABEL_H_ABOVE,
+    y1: c.y + slot.y0 + LABEL_H_BELOW,
+  };
+}
+
+/**
+ * Greedy label layout for a set of projected markers. Earlier candidates win
+ * ties (the array is HQ-first), and a marker's previous slot is preferred so
+ * labels don't hop around as the globe auto-rotates. A label that fits nowhere
+ * is dropped; its dot stays and the hover tooltip still names it.
+ */
+function placeLabels(
+  cands: LabelCandidate[],
+  prev: Map<number, string>
+): Map<number, LabelPlacement> {
+  const out = new Map<number, LabelPlacement>();
+  const taken: { x0: number; x1: number; y0: number; y1: number }[] = [];
+  const dots = cands.map((c) => ({
+    x0: c.x - DOT_RADIUS,
+    x1: c.x + DOT_RADIUS,
+    y0: c.y - DOT_RADIUS,
+    y1: c.y + DOT_RADIUS,
+  }));
+  const hits = (
+    a: { x0: number; x1: number; y0: number; y1: number },
+    b: { x0: number; x1: number; y0: number; y1: number }
+  ) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+
+  for (const c of cands) {
+    const prevKey = prev.get(c.i);
+    const order = prevKey
+      ? [
+          ...LABEL_SLOTS.filter((s) => s.key === prevKey),
+          ...LABEL_SLOTS.filter((s) => s.key !== prevKey),
+        ]
+      : LABEL_SLOTS;
+    for (const slot of order) {
+      const box = slotBox(c, slot);
+      if (dots.some((d) => hits(box, d)) || taken.some((t) => hits(box, t))) continue;
+      taken.push(box);
+      out.set(c.i, { slot, dir: box.dir });
+      break;
+    }
+  }
+  return out;
+}
+
+/* ========================================================================== */
 /* Types & Defaults                                                           */
 /* ========================================================================== */
 export interface GlobeMarker {
@@ -850,6 +953,7 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
   const pathRefs = useRef<Map<string, SVGPathElement>>(new Map());
   const ghostPathRefs = useRef<Map<string, SVGPathElement>>(new Map());
   const markerRefs = useRef<Map<number, SVGGElement>>(new Map());
+  const labelSlotRef = useRef<Map<number, string>>(new Map());
   const gridPathRef = useRef<SVGPathElement | null>(null);
 
   const [isClient, setIsClient] = useState(false);
@@ -1081,6 +1185,7 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
       }
 
       // Update markers
+      const labelCands: LabelCandidate[] = [];
       for (let i = 0; i < markers.length; i++) {
         const m = markers[i];
         const el = markerRefs.current.get(i);
@@ -1096,21 +1201,43 @@ export const TacticalGlobe: FC<TacticalGlobeProps> = ({
             el.style.display = '';
             el.setAttribute('transform', `translate(${p.sx.toFixed(1)},${p.sy.toFixed(1)})`);
 
-            const textEl = el.querySelector('text');
-            if (textEl) {
-              const isRight = p.sx > cx;
-              const xOff = isRight ? -14 : 14;
-              textEl.setAttribute('text-anchor', isRight ? 'end' : 'start');
-              textEl.setAttribute('x', String(xOff));
-              const tspans = textEl.querySelectorAll('tspan');
-              for (let j = 0; j < tspans.length; j++) {
-                tspans[j]?.setAttribute('x', String(xOff));
-              }
-            }
+            const name = m.city || m.label;
+            // Bold 11px name vs 9px tracked-out country line — take the wider.
+            const w = Math.max(name.length * 6.8, (m.country?.length ?? 0) * 6.4) + 4;
+            labelCands.push({ i, x: p.sx, y: p.sy, w, inward: p.sx > cx ? -1 : 1 });
           }
         } else {
           el.style.opacity = '0';
           el.style.display = 'none';
+        }
+      }
+
+      // Lay out labels so dense clusters (Surat / Mundra / Kandla / Nhava Sheva /
+      // Jebel Ali / Dammam) never print over each other.
+      const placements = placeLabels(labelCands, labelSlotRef.current);
+      for (const c of labelCands) {
+        const textEl = markerRefs.current.get(c.i)?.querySelector('text');
+        if (!textEl) continue;
+        const placed = placements.get(c.i);
+        if (!placed) {
+          labelSlotRef.current.delete(c.i);
+          textEl.style.display = 'none';
+          continue;
+        }
+        if (labelSlotRef.current.get(c.i) !== placed.slot.key) {
+          labelSlotRef.current.set(c.i, placed.slot.key);
+        }
+        const xOff = placed.dir * placed.slot.dx;
+        textEl.style.display = '';
+        textEl.setAttribute(
+          'text-anchor',
+          placed.dir === 0 ? 'middle' : placed.dir > 0 ? 'start' : 'end'
+        );
+        textEl.setAttribute('x', String(xOff));
+        textEl.setAttribute('y', String(placed.slot.y0));
+        const tspans = textEl.querySelectorAll('tspan');
+        for (let j = 0; j < tspans.length; j++) {
+          tspans[j]?.setAttribute('x', String(xOff));
         }
       }
 

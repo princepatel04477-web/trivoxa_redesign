@@ -4,7 +4,6 @@ import { ContactForm } from '@/components/forms/contact-form';
 import { ContactDetailsPanel } from '@/components/sections/contact-details-panel';
 import { Accordion } from '@/components/ui/accordion';
 import { ButtonLink } from '@/components/ui/button';
-import { ArrowLink } from '@/components/ui/link';
 import { Container, HairlineRow, Section } from '@/components/ui/layout';
 import { Prose, SectionHeading } from '@/components/ui/typography';
 import { CONTACT_FAQ, INQUIRY_TYPES } from '@/content/faqs';
@@ -122,9 +121,6 @@ export default function ContactPage() {
             <ButtonLink href="/rfq" arrow>
               Request a quotation
             </ButtonLink>
-            <ArrowLink href="/compliance" className="ml-xl">
-              Compliance register
-            </ArrowLink>
           </div>
         </Container>
       </Section>

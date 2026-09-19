@@ -7,21 +7,28 @@ import SplitFlapText from '@/components/reactbits/SplitFlapText/SplitFlapText';
 import Noise from '@/components/reactbits/Noise/Noise';
 
 /**
- * Minimum time the mark stays on screen once shown, so the split-flap
- * transition (Surat → Trivoxa) always completes instead of being cut off
- * mid-flip. Exit fires at max(MIN_DISPLAY_MS, page load), capped by
- * MAX_DISPLAY_MS so a slow connection never holds the visitor hostage.
+ * The exit is driven by the split-flap actually finishing (Surat → Trivoxa),
+ * not by a wall-clock guess — timers started at hydration raced the flip and,
+ * on slow devices, wiped the overlay away while tiles were still mid-scramble.
+ * Once TRIVOXA has settled it holds for HOLD_AFTER_FLIP_MS so it can be read,
+ * then wipes as soon as the page has loaded.
+ *
+ * HARD_CAP_MS is measured from navigation start (performance.now()), so a slow
+ * connection or a stalled flip can never hold the visitor hostage.
  */
-const MIN_DISPLAY_MS = 900;
-const MAX_DISPLAY_MS = 2000;
+const HOLD_AFTER_FLIP_MS = 450;
+const HARD_CAP_MS = 4500;
+const MIN_TIME_AFTER_MOUNT_MS = 1500;
 
 export function Preloader() {
   const [show, setShow] = useState<boolean>(true);
   const reducedMotion = useReducedMotion();
   const preloaderRef = useRef<HTMLDivElement>(null);
   const exitedRef = useRef<boolean>(false);
-  const minElapsedRef = useRef<boolean>(false);
+  const flipHeldRef = useRef<boolean>(false);
   const pageLoadedRef = useRef<boolean>(false);
+  const flipHoldTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onFlipCompleteRef = useRef<(() => void) | null>(null);
 
   const exitPreloader = () => {
     if (exitedRef.current) return;
@@ -78,8 +85,10 @@ export function Preloader() {
     }
 
     const maybeExit = () => {
-      if (minElapsedRef.current && pageLoadedRef.current) exitPreloader();
+      if (flipHeldRef.current && pageLoadedRef.current) exitPreloader();
     };
+    flipHeldRef.current = false;
+    flipHoldTimerRef.current = null;
 
     pageLoadedRef.current = document.readyState === 'complete';
     const handleLoad = () => {
@@ -90,19 +99,26 @@ export function Preloader() {
       window.addEventListener('load', handleLoad, { once: true });
     }
 
-    const minTimer = setTimeout(() => {
-      minElapsedRef.current = true;
-      maybeExit();
-    }, MIN_DISPLAY_MS);
+    // Called by SplitFlapText once TRIVOXA has fully settled.
+    onFlipCompleteRef.current = () => {
+      if (flipHoldTimerRef.current) return;
+      flipHoldTimerRef.current = setTimeout(() => {
+        flipHeldRef.current = true;
+        maybeExit();
+      }, HOLD_AFTER_FLIP_MS);
+    };
 
     // Hard fallback: force remove no matter what, so slow assets never strand the visitor
-    const fallbackTimer = setTimeout(() => {
-      exitPreloader();
-    }, MAX_DISPLAY_MS);
+    const sinceNavStart = typeof performance !== 'undefined' ? performance.now() : 0;
+    const fallbackTimer = setTimeout(
+      () => exitPreloader(),
+      Math.max(MIN_TIME_AFTER_MOUNT_MS, HARD_CAP_MS - sinceNavStart)
+    );
 
     return () => {
       window.removeEventListener('load', handleLoad);
-      clearTimeout(minTimer);
+      onFlipCompleteRef.current = null;
+      if (flipHoldTimerRef.current) clearTimeout(flipHoldTimerRef.current);
       clearTimeout(fallbackTimer);
     };
   }, [reducedMotion]);
@@ -137,6 +153,7 @@ export function Preloader() {
           textColor="var(--color-ivory)"
           tileColor="var(--color-espresso)"
           fontSize="clamp(28px, 6vw, 48px)"
+          onComplete={() => onFlipCompleteRef.current?.()}
         />
         <span aria-hidden="true" className="bg-bronze h-px w-10 origin-center scale-x-0 animate-[preloader-rule_0.5s_var(--ease-house)_0.4s_forwards]" />
       </div>

@@ -69,8 +69,8 @@ export const CAPABILITIES: Capability[] = CapabilitySchema.array().parse([
     slug: 'compliance-mapping',
     name: 'Compliance mapping',
     body: 'We map what a destination market requires against what we hold today, and we publish the credentials still in progress with their target quarter rather than implying coverage we do not have.',
-    evidence: 'The compliance register',
-    evidenceHref: '/compliance',
+    evidence: 'Compliance posture, stated plainly',
+    evidenceHref: '/businesses',
   },
   {
     slug: 'category-onboarding',

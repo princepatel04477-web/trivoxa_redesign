@@ -204,12 +204,7 @@ export function SiteFooter() {
                     Registered entity
                   </dt>
                   <dd className="text-stone-400">
-                    <Link
-                      href="/compliance#entity"
-                      className="text-stone-300 underline decoration-stone-700 hover:text-accent"
-                    >
-                      Number in supplier-onboarding pack — see Compliance
-                    </Link>
+                    <span className="text-stone-300">Number in supplier-onboarding pack</span>
                   </dd>
                 </div>
               </dl>
@@ -288,7 +283,6 @@ export function SiteFooter() {
               Resources
             </p>
             {[
-              { href: '/compliance', label: 'Compliance' },
               { href: '/rfq', label: 'Request a Quote' },
               { href: '/contact', label: 'Contact' },
             ].map((item) => (
