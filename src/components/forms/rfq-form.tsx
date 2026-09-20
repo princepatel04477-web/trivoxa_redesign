@@ -302,6 +302,8 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
     }
   };
 
+  const [isCustomProduct, setIsCustomProduct] = useState(false);
+
   const categoryOptions = useMemo(() => {
     const pool = values.industry
       ? CATEGORIES.filter((category) => category.industrySlug === values.industry)
@@ -311,6 +313,32 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
       ...pool.map((category) => ({ value: category.slug, label: category.name })),
     ];
   }, [values.industry]);
+
+  const productOptions = useMemo(() => {
+    let pool = PRODUCTS;
+    if (values.category) {
+      pool = pool.filter((p) => p.categorySlug === values.category);
+    } else if (values.industry) {
+      const ownedCatSlugs = new Set(
+        CATEGORIES.filter((c) => c.industrySlug === values.industry).map((c) => c.slug)
+      );
+      pool = pool.filter((p) => ownedCatSlugs.has(p.categorySlug));
+    }
+
+    return [
+      {
+        value: '',
+        label: values.industry
+          ? 'Select a product from catalog'
+          : 'Select a product (or pick an industry above)',
+      },
+      ...pool.map((product) => ({
+        value: product.name,
+        label: `${product.name} (MOQ: ${product.moq})`,
+      })),
+      { value: '__CUSTOM__', label: 'Other / Custom Line Specification…' },
+    ];
+  }, [values.industry, values.category]);
 
   const validateAll = (): boolean => {
     const result = RfqSubmissionSchema.safeParse({
@@ -648,22 +676,40 @@ export function RfqForm({ prefill }: { prefill?: RfqPrefill } = {}) {
 
             <div className="grid grid-cols-12 gap-md pt-2">
               <Select
-                className="col-span-12 sm:col-span-6"
+                className={isCustomProduct ? 'col-span-12 sm:col-span-4' : 'col-span-12 sm:col-span-6'}
                 label="Narrow Category"
                 options={categoryOptions}
                 value={values.category}
                 onChange={(event) => set('category', event.target.value)}
                 disabled={isSubmitting}
               />
-              <Input
-                className="col-span-12 sm:col-span-6"
-                label="Specific Product of Interest"
-                list="rfq-products"
-                placeholder="e.g. Suiting Fabric, Grey Fabric, Basmati Rice"
-                value={values.product}
-                onChange={(event) => set('product', event.target.value)}
+              <Select
+                className={isCustomProduct ? 'col-span-12 sm:col-span-4' : 'col-span-12 sm:col-span-6'}
+                label="Product of Interest"
+                options={productOptions}
+                value={isCustomProduct ? '__CUSTOM__' : values.product}
+                onChange={(event) => {
+                  if (event.target.value === '__CUSTOM__') {
+                    setIsCustomProduct(true);
+                    set('product', '');
+                  } else {
+                    setIsCustomProduct(false);
+                    set('product', event.target.value);
+                  }
+                }}
                 disabled={isSubmitting}
               />
+              {isCustomProduct ? (
+                <Input
+                  className="col-span-12 sm:col-span-4"
+                  label="Specify Custom Product"
+                  placeholder="Enter custom product name / standard"
+                  value={values.product}
+                  onChange={(event) => set('product', event.target.value)}
+                  disabled={isSubmitting}
+                  autoFocus
+                />
+              ) : null}
             </div>
           </div>
         )}

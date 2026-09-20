@@ -31,20 +31,20 @@ export const SHIVESHWAR_RELATIONSHIP: ShiveshwarRelationship = 'parent-company';
  * If you find this string typed anywhere else, that is a bug — report it.
  */
 export const SHIVESHWAR_CANONICAL_SENTENCE =
-  'Built on the manufacturing foundation of our parent company, Shiveshwar Textiles — decades of woven textile production expertise in Surat that inform every sourcing decision and quality standard we uphold.';
+  'Built on the manufacturing foundation of our parent company, Shiveshwar Textiles in Sayan, Surat — specialized woven textile production expertise that informs every sourcing decision and quality standard we uphold across Trivoxa Group.';
 
 /** Footer-length variant of the same fact. Same meaning, no new claim. */
 export const SHIVESHWAR_FOOTER_LINE =
-  'A venture built on the manufacturing heritage of Shiveshwar Textiles.';
+  'A venture built on the manufacturing heritage of Shiveshwar Textiles, Sayan.';
 
 export const COMPANY = {
   legalName: 'Trivoxa Group',
   /** Surfacing city-level only until the founders release the full address. */
   headquarters: 'Surat, Gujarat, India',
   founded: {
-    /** Trivoxa Group's incorporation year, per the Company Profile. */
-    year: 2025,
-    note: 'The group\'s operating arm; the manufacturing foundation predates it by decades.',
+    /** Started and factory commenced in 2020. */
+    year: 2020,
+    note: 'Operations and manufacturing commenced in 2020 at Sayan, Surat, establishing the group foundation.',
   },
   divisions: ['product-exports', 'service-exports'] as const,
   tagline: 'International Trade & Business Group',
@@ -65,21 +65,21 @@ export type Leader = {
 export const LEADERSHIP: Leader[] = [
   {
     name: 'Parth Mangukiya',
-    role: 'Founder & Managing Director',
+    role: 'Founder',
     email: 'parth@trivoxagroup.com',
     message:
       'Directs group governance, mill allocations at Shiveshwar Textiles, and strategic manufacturing partner vetting. Decisions on his desk: master supply agreements, production floor allocations, and institutional contracts. Write to him for volume procurement contracts and group-level partnerships.',
   },
   {
     name: 'Dhruv Patel',
-    role: 'Co-Founder, Business Development',
+    role: 'Co-founder',
     email: 'dhruv@trivoxagroup.com',
     message:
       'Leads international commercial operations and export desk execution across our nine industries. Decisions on his desk: Incoterms structuring, freight and port lane allocation (Mundra, Kandla, Nhava Sheva), and payment terms. Write to him for quotations, sample approval sign-offs, and shipping schedules.',
   },
   {
     name: 'Tirth Kalathiya',
-    role: 'Co-Founder, Technology & Innovation',
+    role: 'Co-founder',
     email: 'tirth@trivoxagroup.com',
     message:
       'Leads Global Service Exports (digital.trivoxagroup.com), internal compliance registries, and supply-chain track-and-trace systems. Decisions on his desk: digital transformation architectures, client software and AI delivery scopes, and data integrity. Write to him for service export proposals and technology engineering engagements.',
@@ -120,33 +120,33 @@ export const VALUES = [
 export const JOURNEY = [
   {
     step: 1,
-    year: '1998–2023',
+    year: '2020',
     title: 'Manufacturing Foundations',
-    body: 'Decades of woven textile production expertise established at Shiveshwar Textiles in Surat, mastering yarn selection, loom operations, and physical fabric inspection.',
+    body: 'Manufacturing and mill operations commenced at Shiveshwar Textiles in Sayan, Surat, establishing specialized weaving and production capability.',
   },
   {
     step: 2,
-    year: '2024',
-    title: 'An International Vision',
-    body: 'Founders identify systemic international buyer friction around Indian export consistency, transparent specifications, and verified testing documentation.',
+    year: '2022',
+    title: 'Domestic & Regional Expansion',
+    body: 'Expanded production lines and forged strategic partnerships across Gujarat\'s manufacturing and agricultural belts.',
   },
   {
     step: 3,
-    year: '2025',
-    title: 'Trivoxa Group Established',
-    body: 'Trivoxa Group incorporates in Surat as an international trade house to connect overseas procurement desks directly to audited Indian manufacturing lines.',
+    year: '2024',
+    title: 'International Trade Initiative',
+    body: 'Founders identify systemic international buyer friction around Indian export consistency, transparent specifications, and verified testing documentation.',
   },
   {
     step: 4,
-    year: '2025–2026',
-    title: 'Two Operating Divisions',
-    body: 'Launch of Global Product Exports (physical commodities) and Global Service Exports (digital engineering & AI) on a unified specifications-first discipline.',
+    year: '2025',
+    title: 'Trivoxa Group Formed',
+    body: 'Trivoxa Group establishes unified operating divisions: Global Product Exports (physical commodities) and Global Service Exports (digital engineering & AI).',
   },
   {
     step: 5,
     year: '2026+',
-    title: 'Global Trade Network',
-    body: 'Cross-border supply network operational across nine industries, six destination regions, and published compliance target quarters.',
+    title: 'Global Export Operations',
+    body: 'Cross-border supply network operational across nine industries, six destination regions, and verified documentation standards.',
   },
 ] as const;
 
@@ -160,7 +160,7 @@ export const COMMITMENTS = [
 
 /** Factory photography, captioned — proof, not decoration. */
 export const FOUNDATION_PHOTOS = [
-  { slug: 'exterior', alt: 'Shiveshwar Textiles factory exterior, Surat', caption: 'Shiveshwar Textiles — Factory Exterior' },
-  { slug: 'weaving', alt: 'Weaving floor at the Shiveshwar Textiles mill', caption: 'Shiveshwar Textiles — Weaving Floor' },
-  { slug: 'inspection', alt: 'Quality inspection of woven fabric before packing', caption: 'Shiveshwar Textiles — Quality Inspection' },
+  { slug: 'exterior', alt: 'Shiveshwar Textiles factory exterior, Sayan, Surat', caption: 'Shiveshwar Textiles — Factory Exterior, Sayan' },
+  { slug: 'weaving', alt: 'Weaving floor at the Shiveshwar Textiles mill, Sayan', caption: 'Shiveshwar Textiles — Weaving Floor, Sayan' },
+  { slug: 'inspection', alt: 'Quality inspection of woven fabric before packing, Sayan', caption: 'Shiveshwar Textiles — Quality Inspection, Sayan' },
 ] as const;

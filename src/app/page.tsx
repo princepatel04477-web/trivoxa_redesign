@@ -1,6 +1,7 @@
 import { ClosingCta } from '@/components/sections/closing-cta';
 import { GlobalPresencePreview } from '@/components/sections/global-presence-preview';
 import { Hero } from '@/components/sections/hero';
+import { SupplierPartners } from '@/components/sections/supplier-partners';
 import { IndustriesPreview } from '@/components/sections/industries-preview';
 import { CareersPreview, InsightsPreview } from '@/components/sections/insights-careers';
 import { ProofBand } from '@/components/sections/proof-band';
@@ -48,6 +49,7 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <SupplierPartners />
       <ProofBand />
       <WhyTrivoxa />
       <WhoWeAre />

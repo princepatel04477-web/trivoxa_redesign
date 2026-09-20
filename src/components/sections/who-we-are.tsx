@@ -6,7 +6,6 @@ import { Container, Section } from '@/components/ui/layout';
 import { SHIVESHWAR_CANONICAL_SENTENCE } from '@/content/company';
 import { DIVISIONS, INDUSTRIES, REGIONS } from '@/content/taxonomy';
 import Threads from '@/components/reactbits/Threads/Threads';
-import TextPressure from '@/components/reactbits/TextPressure/TextPressure';
 import SplitText from '@/components/reactbits/SplitText/SplitText';
 import ScrollReveal from '@/components/reactbits/ScrollReveal/ScrollReveal';
 import VariableProximity from '@/components/reactbits/VariableProximity/VariableProximity';
@@ -132,26 +131,13 @@ export function WhoWeAre() {
                 Who We Are
               </p>
 
-              {/* Desktop TextPressure (>= 1024px) / Mobile & Tablet SplitText (< 1024px) */}
+              {/* Fluid Editorial Reveal for Headline */}
               <h2 className="my-2">
-                <span className="hidden lg:block">
-                  <TextPressure
-                    as="span"
-                    text="A Vision Beyond Business."
-                    fontFamily="Instrument Serif"
-                    minFontSize={44}
-                    width
-                    weight
-                    italic={false}
-                    textColor="var(--color-ivory)"
-                  />
-                </span>
-                <span className="block lg:hidden">
-                  <SplitText
-                    text="A Vision Beyond Business."
-                    className="font-serif text-3xl font-medium text-stone-100 sm:text-4xl"
-                  />
-                </span>
+                <SplitText
+                  text="A Vision Beyond Business."
+                  className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-ivory tracking-tight leading-[1.12]"
+                  delay={40}
+                />
               </h2>
 
               <div className="mt-8">

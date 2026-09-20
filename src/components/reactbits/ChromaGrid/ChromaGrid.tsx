@@ -12,6 +12,7 @@ export interface ChromaItem {
   borderColor?: string;
   gradient?: string;
   url?: string;
+  icon?: React.ReactNode;
 }
 
 export interface ChromaGridProps {
@@ -175,7 +176,7 @@ const ChromaGrid: React.FC<ChromaGridProps> = ({
           onMouseMove={handleCardMove}
           onMouseEnter={() => onItemHover?.(i)}
           onClick={() => handleCardClick(c.url)}
-          className="group relative flex flex-col w-full max-w-[360px] mx-auto rounded-[20px] overflow-hidden border-2 border-transparent transition-colors duration-300 cursor-pointer"
+          className="group relative flex flex-col w-full max-w-[360px] mx-auto rounded-[20px] overflow-hidden border border-bronze/30 bg-espresso-deep/80 backdrop-blur-md shadow-lg hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 cursor-pointer"
           style={
             {
               '--card-border': c.borderColor || 'transparent',
@@ -194,14 +195,18 @@ const ChromaGrid: React.FC<ChromaGridProps> = ({
           <div className="relative z-10 flex-1 p-[10px] box-border">
             <img src={c.image} alt={c.title} loading="lazy" className="w-full h-40 object-cover rounded-[10px]" />
           </div>
-          <footer className="relative z-10 p-3.5 text-[#F4EFE6] font-sans flex flex-col gap-1">
+          <footer className="relative z-10 p-3.5 text-[#F4EFE6] font-sans flex flex-col gap-1.5">
             <div className="flex items-center justify-between">
-              <h3 className="m-0 text-[1.05rem] font-semibold text-[#F4EFE6]">{c.title}</h3>
-              {c.handle && <span className="font-mono text-[10px] uppercase tracking-wider text-[#A88B68]">{c.handle}</span>}
+              <div className="flex items-center gap-2">
+                {c.icon && <span className="text-bronze shrink-0">{c.icon}</span>}
+                <h3 className="m-0 text-[1.05rem] font-serif font-bold text-[#F4EFE6]">{c.title}</h3>
+              </div>
+              {c.handle && <span className="font-mono text-[10px] uppercase tracking-wider text-[#A88B68] bg-bronze/10 px-2 py-0.5 rounded border border-bronze/20">{c.handle}</span>}
             </div>
             {c.location && (
-              <div className="font-mono text-xs text-[#C9AE89] font-medium">
-                {c.location}
+              <div className="font-mono text-xs text-[#C9AE89] font-medium flex items-center gap-1.5">
+                <span className="size-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
+                <span>{c.location}</span>
               </div>
             )}
             <p className="m-0 text-xs text-[#8C8279] leading-relaxed line-clamp-2">{c.subtitle}</p>

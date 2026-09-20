@@ -38,7 +38,7 @@ export function ClosingCta() {
 
   // Email copy to clipboard
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText('careers@trivoxagroup.com');
+    navigator.clipboard.writeText('parth@trivoxagroup.com');
     setCopied(true);
     if (copiedPillRef.current) {
       animate(copiedPillRef.current, {
@@ -109,14 +109,14 @@ export function ClosingCta() {
         <Container>
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="flex flex-wrap items-center justify-center gap-2 text-center font-sans text-xs text-stone-300 md:justify-start md:text-sm">
-              <span>No open roles today. We still read every application that arrives at</span>
+              <span>We are growing our global trade desks across 5 active roles. Direct applications to Parth (Founder) at</span>
               <button
                 type="button"
                 onClick={handleCopyEmail}
                 className="link-underline relative inline-flex items-center gap-1.5 font-mono font-medium text-accent"
                 title="Click to copy email"
               >
-                careers@trivoxagroup.com
+                parth@trivoxagroup.com
                 {copied && (
                   <span
                     ref={copiedPillRef}

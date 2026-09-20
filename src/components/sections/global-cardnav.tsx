@@ -1,7 +1,7 @@
 'use client';
 
 import { BRAND } from '@/lib/tokens/colors';
-import React, { useLayoutEffect, useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { gsap, ScrollTrigger } from '@/lib/motion/gsap';
@@ -68,25 +68,36 @@ export function GlobalCardNav() {
   const cardsContainerRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
-  const tlRef = useRef<gsap.core.Timeline | null>(null);
 
-  // Close on route changes
+  // Close and reset on route changes cleanly
   useEffect(() => {
-    if (isExpanded) {
-      toggleMenu();
+    setIsExpanded(false);
+    setIsHidden(false);
+    const navEl = navRef.current;
+    const cardsEl = cardsContainerRef.current;
+    if (navEl) {
+      gsap.killTweensOf(navEl);
+      gsap.killTweensOf(cardsRef.current);
+      const baseH = window.scrollY > 120 ? 52 : 64;
+      navEl.style.height = `${baseH}px`;
+      navEl.style.overflow = 'hidden';
     }
+    if (cardsEl) {
+      cardsEl.style.display = 'none';
+    }
+    ScrollTrigger.refresh();
   }, [pathname]);
 
   // Close on Escape or click outside
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isExpanded) {
-        toggleMenu();
+        closeMenu();
       }
     };
     const handleClickOutside = (e: MouseEvent) => {
       if (isExpanded && containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        toggleMenu();
+        closeMenu();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -125,67 +136,95 @@ export function GlobalCardNav() {
     };
   }, [isExpanded]);
 
-  const calculateHeight = () => {
-    const headerHeight = isScrolled ? 52 : 64;
+  const openMenu = () => {
+    const navEl = navRef.current;
     const cardsEl = cardsContainerRef.current;
-    if (cardsEl) {
-      return headerHeight + cardsEl.scrollHeight;
-    }
-    const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches;
-    return isMobile ? 680 : 340;
+    if (!navEl || !cardsEl) return;
+
+    setIsExpanded(true);
+    // Unhide to measure natural content height
+    cardsEl.style.display = 'grid';
+    cardsEl.style.opacity = '0';
+    const contentH = cardsEl.scrollHeight;
+    const baseH = isScrolled ? 52 : 64;
+    const targetH = baseH + contentH;
+
+    gsap.killTweensOf(navEl);
+    gsap.killTweensOf(cardsRef.current);
+    gsap.set(navEl, { overflow: 'hidden' });
+
+    gsap.fromTo(
+      navEl,
+      { height: navEl.offsetHeight || baseH },
+      {
+        height: targetH,
+        duration: 0.38,
+        ease: 'power3.out',
+        onComplete: () => {
+          if (navEl) {
+            navEl.style.height = 'auto';
+            navEl.style.overflow = 'visible';
+          }
+        },
+      }
+    );
+
+    gsap.fromTo(
+      cardsEl,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.25, ease: 'power2.out' }
+    );
+
+    gsap.fromTo(
+      cardsRef.current,
+      { y: 16, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.32, ease: 'power3.out', stagger: 0.05, delay: 0.05 }
+    );
   };
 
-  const createTimeline = () => {
+  const closeMenu = () => {
     const navEl = navRef.current;
-    if (!navEl) return null;
+    const cardsEl = cardsContainerRef.current;
+    if (!navEl) return;
 
-    gsap.set(navEl, { height: isScrolled ? 52 : 64, overflow: 'hidden' });
-    gsap.set(cardsRef.current, { y: 20, opacity: 0 });
+    const baseH = isScrolled ? 52 : 64;
+    gsap.killTweensOf(navEl);
+    gsap.killTweensOf(cardsRef.current);
+    if (cardsEl) gsap.killTweensOf(cardsEl);
+    gsap.set(navEl, { overflow: 'hidden' });
 
-    const tl = gsap.timeline({ paused: true });
-    tl.to(navEl, {
-      height: calculateHeight,
-      duration: 0.45,
-      ease: 'power3.out',
+    gsap.to(cardsRef.current, {
+      y: 10,
+      opacity: 0,
+      duration: 0.18,
+      ease: 'power2.in',
+    });
+
+    if (cardsEl) {
+      gsap.to(cardsEl, {
+        opacity: 0,
+        duration: 0.2,
+        ease: 'power2.in',
+      });
+    }
+
+    gsap.to(navEl, {
+      height: baseH,
+      duration: 0.32,
+      ease: 'power3.inOut',
       onComplete: () => {
-        if (navEl) {
-          navEl.style.height = 'auto';
-          navEl.style.overflow = 'visible';
-        }
+        setIsExpanded(false);
+        if (cardsEl) cardsEl.style.display = 'none';
+        if (navEl) navEl.style.height = `${baseH}px`;
       },
     });
-    tl.to(
-      cardsRef.current,
-      { y: 0, opacity: 1, duration: 0.35, ease: 'power3.out', stagger: 0.05 },
-      '-=0.25'
-    );
-    return tl;
   };
 
-  useLayoutEffect(() => {
-    tlRef.current = createTimeline();
-    return () => {
-      tlRef.current?.kill();
-      tlRef.current = null;
-    };
-  }, [isScrolled]);
-
   const toggleMenu = () => {
-    const tl = tlRef.current;
-    const navEl = navRef.current;
-    if (!tl || !navEl) return;
-    if (!isExpanded) {
-      navEl.style.overflow = 'hidden';
-      setIsExpanded(true);
-      tl.play(0);
+    if (isExpanded) {
+      closeMenu();
     } else {
-      navEl.style.overflow = 'hidden';
-      navEl.style.height = `${navEl.offsetHeight}px`;
-      tl.eventCallback('onReverseComplete', () => {
-        setIsExpanded(false);
-        navEl.style.height = `${isScrolled ? 52 : 64}px`;
-      });
-      tl.reverse();
+      openMenu();
     }
   };
 
@@ -349,8 +388,9 @@ export function GlobalCardNav() {
         {/* Expandable 3 Cards Container */}
         <div
           ref={cardsContainerRef}
-          className={`grid grid-cols-1 md:grid-cols-3 gap-3 p-3 md:p-4 border-t border-bronze/20 transition-opacity duration-300 max-h-[calc(100vh-100px)] overflow-y-auto ${
-            isExpanded ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none hidden'
+          style={{ display: isExpanded ? 'grid' : 'none' }}
+          className={`grid-cols-1 md:grid-cols-3 gap-3 p-3 md:p-4 border-t border-bronze/20 transition-opacity duration-300 max-h-[calc(100vh-100px)] overflow-y-auto ${
+            isExpanded ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           }`}
           aria-hidden={!isExpanded}
         >
@@ -375,6 +415,7 @@ export function GlobalCardNav() {
                         href={link.href}
                         aria-label={link.ariaLabel}
                         aria-current={isActive ? 'page' : undefined}
+                        onClick={closeMenu}
                         onMouseEnter={handleLinkMouseEnter}
                         onMouseLeave={handleLinkMouseLeave}
                         className={`relative flex items-center justify-between text-sm font-medium transition-colors py-1 group ${

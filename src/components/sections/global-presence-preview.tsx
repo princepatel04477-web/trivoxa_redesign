@@ -17,7 +17,7 @@ const REGION_DATA = [
     title: 'Europe',
     subtitle: 'Textiles and precision components into Rotterdam & Hamburg',
     location: 'Rotterdam (NL RTM)',
-    handle: 'Hub Port',
+    handle: 'Destination Port',
     image: '/brand/og/industry-textile-apparel.png',
     borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(168,139,104,0.15), rgba(23,18,16,0.95))',
@@ -26,7 +26,7 @@ const REGION_DATA = [
     title: 'Middle East',
     subtitle: 'Spices, building materials, and denim fabrics',
     location: 'Jebel Ali (AE JEA)',
-    handle: 'Hub Port',
+    handle: 'Destination Port',
     image: '/brand/og/industry-building-materials.png',
     borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(196,164,124,0.15), rgba(23,18,16,0.95))',
@@ -35,7 +35,7 @@ const REGION_DATA = [
     title: 'Africa',
     subtitle: 'Pharmaceutical formulations and agricultural staples',
     location: 'Mombasa (KE MBA)',
-    handle: 'Hub Port',
+    handle: 'Destination Port',
     image: '/brand/og/industry-healthcare-pharmaceuticals.png',
     borderColor: BRAND.bronzeInk.hex,
     gradient: 'linear-gradient(145deg, rgba(140,115,85,0.15), rgba(23,18,16,0.95))',
@@ -44,7 +44,7 @@ const REGION_DATA = [
     title: 'North America',
     subtitle: 'Commercial textiles, quartz slabs, and engineered fittings',
     location: 'New York (US NYC)',
-    handle: 'Hub Port',
+    handle: 'Destination Port',
     image: '/brand/og/product-engineered-quartz.png',
     borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(168,139,104,0.15), rgba(23,18,16,0.95))',
@@ -53,7 +53,7 @@ const REGION_DATA = [
     title: 'South America',
     subtitle: 'Industrial fasteners, machine parts, and chemical intermediates',
     location: 'Santos (BR SSZ)',
-    handle: 'Hub Port',
+    handle: 'Destination Port',
     image: '/brand/og/industry-engineering-industrial.png',
     borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(175,145,110,0.15), rgba(23,18,16,0.95))',
@@ -62,7 +62,7 @@ const REGION_DATA = [
     title: 'Asia-Pacific',
     subtitle: 'Yarn, agro-commodities, and digital services',
     location: 'Singapore (SG SIN)',
-    handle: 'Hub Port',
+    handle: 'Destination Port',
     image: '/brand/og/product-cotton-yarn.png',
     borderColor: BRAND.bronze.hex,
     gradient: 'linear-gradient(145deg, rgba(196,164,124,0.15), rgba(23,18,16,0.95))',
@@ -128,9 +128,6 @@ export function GlobalPresencePreview() {
                     <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
                     <span>Global Trade Network</span>
                   </div>
-                  <span className="font-mono text-[11px] text-stone-500 uppercase tracking-wider hidden sm:inline">
-                    Interactive 3D Sphere
-                  </span>
                 </div>
 
                 {/* Bottom Route Summary Bar */}
@@ -138,9 +135,9 @@ export function GlobalPresencePreview() {
                   <div className="flex items-center justify-between font-mono text-xs">
                     <div className="flex items-center gap-2">
                       <span className="size-1.5 rounded-full bg-bronze" />
-                      <span className="text-bronze font-semibold">Surat Global HQ</span>
+                      <span className="text-bronze font-semibold">Surat Global HQ & Hub</span>
                     </div>
-                    <span className="text-stone-400">Gateways: Mundra & JNPT</span>
+                    <span className="text-stone-400">Gateways: Mundra, Kandla & JNPT</span>
                   </div>
                 </div>
               </div>
@@ -156,15 +153,15 @@ export function GlobalPresencePreview() {
                   Direct Corridors ex Western India
                 </h3>
                 <p className="mt-3 text-sm md:text-base leading-relaxed text-stone-400">
-                  Six primary overseas destinations serviced continuously from Western India ports. 
-                  Every consignment is monitored from factory gate-in through customs discharge with full compliance documentation.
+                  Six primary overseas destination corridors serviced continuously from Western India ports. 
+                  All cargo originates from India (Surat HQ / Mundra / Nhava Sheva / Kandla) and radiates outward to global destinations with complete regulatory compliance.
                 </p>
               </div>
 
-              {/* Designated Outbound Loading Hubs */}
+              {/* Western India Export Gateways */}
               <div className="space-y-2.5">
                 <span className="font-mono text-xs text-stone-400 uppercase tracking-wider block">
-                  Designated Outbound Loading Hubs
+                  Western India Export Gateways
                 </span>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[

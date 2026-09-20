@@ -79,7 +79,7 @@ export function CareersPreview() {
         />
 
         <Reveal staggerChildren className="mt-2xl flex flex-col gap-md">
-          {OPEN_ROLES.slice(0, 4).map((role) => (
+          {OPEN_ROLES.slice(0, 5).map((role) => (
             <Card key={role.slug} trace interactive className="flex flex-col gap-sm p-lg">
               <div className="flex flex-wrap items-baseline justify-between gap-md">
                 <h3 className="text-heading-lg">{role.title}</h3>

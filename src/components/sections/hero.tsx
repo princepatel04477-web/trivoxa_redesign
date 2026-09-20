@@ -36,7 +36,7 @@ export function Hero() {
       ref={sectionRef}
       id="hero"
       data-surface="deep"
-      className="surface-bg surface-fg relative flex min-h-[100svh] flex-col justify-center overflow-hidden pt-28 pb-16 sm:pt-32 sm:pb-20 lg:pt-36 lg:pb-24"
+      className="surface-bg surface-fg relative flex min-h-[100dvh] lg:h-[100dvh] lg:max-h-[100dvh] flex-col justify-center overflow-hidden pt-20 pb-6 sm:pt-24 sm:pb-8 lg:pt-24 lg:pb-6"
     >
       {/* Background WebGL / Token Fallback */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
@@ -61,16 +61,25 @@ export function Hero() {
         className="from-espresso-deep/95 via-espresso-deep/60 to-espresso-deep/95 pointer-events-none absolute inset-0 z-[2] bg-gradient-to-b"
       />
 
-      <div className="container-content relative z-10 py-4 sm:py-6 lg:py-8">
-        <div className="flex flex-col items-center w-full max-w-[1240px] mx-auto text-center gap-5 sm:gap-7">
-          {/* Eyebrow / Dateline — CSS entrance only; this sits on the LCP path. */}
+      <div className="container-content relative z-10 py-2 sm:py-4 lg:py-4 flex flex-col justify-center h-full">
+        <div className="flex flex-col items-center w-full max-w-[1240px] mx-auto text-center gap-3 sm:gap-4 lg:gap-5">
+          {/* Eyebrow / Dateline with 3D Logo Emblem */}
           <HeroCopyMotion delay={0}>
-            <div className="flex items-center gap-2.5">
-              <span aria-hidden className="bg-bronze inline-block h-[2px] w-6 shrink-0" />
+            <div className="flex items-center gap-3">
+              <div className="relative w-8 h-8 sm:w-9 sm:h-9 shrink-0 drop-shadow-[0_0_12px_rgba(168,139,104,0.5)]">
+                <Image
+                  src="/brand/_incoming/1.png"
+                  alt="Trivoxa Group 3D Emblem"
+                  fill
+                  priority
+                  className="object-contain"
+                />
+              </div>
+              <span aria-hidden className="bg-bronze inline-block h-[2px] w-5 shrink-0" />
               <span className="text-bronze text-xs sm:text-sm font-semibold tracking-widest uppercase font-mono">
                 SURAT · GLOBAL HQ
               </span>
-              <span aria-hidden className="bg-bronze inline-block h-[2px] w-6 shrink-0" />
+              <span aria-hidden className="bg-bronze inline-block h-[2px] w-5 shrink-0" />
             </div>
           </HeroCopyMotion>
 
@@ -80,27 +89,27 @@ export function Hero() {
           </h1>
 
           {/* Split Headline around Center Media Card */}
-          <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-8 my-1 sm:my-2">
+          <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-3 lg:gap-6 my-0 sm:my-1">
             <span
               aria-hidden="true"
-              className="text-ivory font-serif text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-normal leading-[1.06] tracking-tight lg:text-right lg:flex-1"
+              className="text-ivory font-serif text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-normal leading-[1.08] tracking-tight lg:text-right lg:flex-1"
             >
               Building the Future
             </span>
 
             {/* Center Media Card: Mundra Port / Shipping Corridor */}
-            <div className="border-bronze/40 bg-espresso group relative aspect-[16/10] w-full max-w-[300px] shrink-0 overflow-hidden rounded-2xl border shadow-[0_20px_50px_rgba(0,0,0,0.7)] sm:max-w-[360px] lg:max-w-[380px]">
+            <div className="border-bronze/40 bg-espresso group relative aspect-[16/10] w-full max-w-[260px] shrink-0 overflow-hidden rounded-2xl border shadow-[0_20px_50px_rgba(0,0,0,0.7)] sm:max-w-[300px] lg:max-w-[320px]">
               <Image
                 src="/brand/eagle-poster.webp"
                 alt="Trivoxa international maritime logistics and manufacturing operations"
                 fill
                 priority
-                sizes="(max-width: 768px) 300px, 380px"
+                sizes="(max-width: 768px) 260px, 320px"
                 className="object-cover object-center transition-transform duration-700 group-hover:scale-105 opacity-85"
               />
               <div className="from-espresso-deep/95 pointer-events-none absolute inset-0 bg-gradient-to-t via-transparent to-transparent" />
-              <div className="pointer-events-none absolute inset-x-3 bottom-2.5 flex items-center justify-between">
-                <span className="text-ivory/90 bg-espresso-deep/80 border-bronze/30 rounded border px-2.5 py-0.5 font-mono text-[10px] font-medium tracking-wider uppercase sm:text-xs">
+              <div className="pointer-events-none absolute inset-x-3 bottom-2 flex items-center justify-between">
+                <span className="text-ivory/90 bg-espresso-deep/80 border-bronze/30 rounded border px-2 py-0.5 font-mono text-[10px] font-medium tracking-wider uppercase sm:text-xs">
                   Mundra Port · INMUN
                 </span>
                 <span className="flex h-2 w-2 relative">
@@ -112,23 +121,24 @@ export function Hero() {
 
             <span
               aria-hidden="true"
-              className="text-ivory font-serif text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-normal leading-[1.06] tracking-tight lg:text-left lg:flex-1"
+              className="text-ivory font-serif text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-normal leading-[1.08] tracking-tight lg:text-left lg:flex-1"
             >
               of Global Commerce.
             </span>
           </div>
 
           {/* Sector Taxonomy Pill */}
-          <div className="border-bronze/30 bg-espresso/80 text-bronze inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs sm:text-sm">
+          <div className="border-bronze/30 bg-espresso/80 text-bronze inline-flex items-center gap-2 rounded-full border px-4 py-1 text-xs sm:text-sm">
             <span className="text-ivory/70 font-mono text-[10px] uppercase tracking-wider">
               Export Sectors:
             </span>
             <RotatingText
               texts={[
                 'Textiles & Apparel',
+                'Jewellery & Precious Products',
                 'Pharmaceuticals',
                 'Building Materials',
-                'Agri & Food',
+                'Agri, Food & Seafood',
                 'Engineering Hardware',
               ]}
               rotationInterval={2400}
@@ -137,25 +147,25 @@ export function Hero() {
           </div>
 
           {/* Authoritative Lede Paragraph */}
-          <p className="text-ivory/80 mx-auto max-w-[42rem] text-center text-base leading-relaxed sm:text-lg lg:max-w-[48rem] lg:text-xl">
+          <p className="text-ivory/80 mx-auto max-w-[40rem] text-center text-sm sm:text-base leading-relaxed lg:max-w-[46rem]">
             Sourcing, manufacturing partnerships and professional services for international
             buyers. {SHIVESHWAR_CANONICAL_SENTENCE}
           </p>
 
           {/* Dual CTAs */}
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-1">
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
             <Magnet magnetStrength={0.25} padding={40}>
-              <ButtonLink href="/rfq" size="lg" arrow data-cursor="target">
+              <ButtonLink href="/rfq" size="md" arrow data-cursor="target">
                 Request a Quote
               </ButtonLink>
             </Magnet>
-            <ButtonLink href="/businesses" size="lg" variant="secondary" data-cursor="target">
+            <ButtonLink href="/businesses" size="md" variant="secondary" data-cursor="target">
               Explore What We Export
             </ButtonLink>
           </div>
 
           {/* Institutional Proof Ribbon */}
-          <div className="text-ivory/70 mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t pt-4 text-xs sm:mt-6 sm:gap-x-8 sm:text-sm">
+          <div className="text-ivory/70 mt-2 flex flex-wrap items-center justify-center gap-x-6 gap-y-1.5 border-t border-bronze/20 pt-3 text-xs sm:text-sm">
             <span className="flex items-center gap-2">
               <span className="bg-bronze size-1.5 shrink-0 rounded-full" />
               <span className="text-bronze font-mono font-semibold">Surat, Gujarat</span>
@@ -174,9 +184,9 @@ export function Hero() {
           </div>
 
           {/* Scroll Cue */}
-          <div className="pt-2">
-            <p className="text-ivory/50 flex items-center justify-center gap-2 font-mono text-xs uppercase tracking-widest">
-              <span aria-hidden className="bg-bronze inline-block h-4 w-px animate-pulse" />
+          <div className="pt-1">
+            <p className="text-ivory/50 flex items-center justify-center gap-2 font-mono text-[11px] uppercase tracking-widest">
+              <span aria-hidden className="bg-bronze inline-block h-3 w-px animate-pulse" />
               scroll to explore
             </p>
           </div>

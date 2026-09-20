@@ -43,10 +43,56 @@ export type Insight = z.infer<typeof InsightSchema>;
 export type Role = z.infer<typeof RoleSchema>;
 
 export const INSIGHTS: Insight[] = InsightSchema.array().parse([]);
-export const OPEN_ROLES: Role[] = RoleSchema.array().parse([]);
+export const OPEN_ROLES: Role[] = RoleSchema.array().parse([
+  {
+    slug: 'export-documentation-specialist',
+    title: 'Export Documentation Specialist',
+    team: 'Global Trade Operations',
+    location: 'Surat HQ',
+    type: 'full-time',
+    summary: 'Oversee end-to-end export documentation: Bills of Lading, Certificates of Origin, Letters of Credit, and customs declarations across Mundra, Kandla, and JNPT.',
+    href: '/careers#export-documentation-specialist',
+  },
+  {
+    slug: 'international-bd-manager',
+    title: 'International Business Development Manager',
+    team: 'Overseas Trade Desks',
+    location: 'Remote / Hybrid',
+    type: 'full-time',
+    summary: 'Expand institutional buyer networks across Europe, Middle East, and North America for our multi-commodity export catalogues and contract manufacturing programs.',
+    href: '/careers#international-bd-manager',
+  },
+  {
+    slug: 'sourcing-qa-lead',
+    title: 'Sourcing & Quality Assurance Lead — Textiles & Commodities',
+    team: 'Supply Chain & Sourcing',
+    location: 'Surat / On-site',
+    type: 'full-time',
+    summary: 'Manage mill-level QA inspections at Shiveshwar and partner manufacturing units, enforcing zero-defect pre-shipment auditing across textile lots and agricultural commodities.',
+    href: '/careers#sourcing-qa-lead',
+  },
+  {
+    slug: 'logistics-freight-coordinator',
+    title: 'Logistics & Maritime Freight Coordinator',
+    team: 'Maritime Logistics',
+    location: 'Surat / Mundra Port',
+    type: 'full-time',
+    summary: 'Coordinate maritime container bookings (FCL/LCL/Reefer), multimodal rail freight from Gujarat dry ports, and carrier schedule adherence with major shipping lines.',
+    href: '/careers#logistics-freight-coordinator',
+  },
+  {
+    slug: 'technical-sales-engineer-machinery',
+    title: 'Technical Sales Engineer — Heavy Machinery & Industrial',
+    team: 'Industrial Equipment Division',
+    location: 'Hybrid',
+    type: 'full-time',
+    summary: 'Lead technical specification reviews, client factory layout assessments, and commissioning agreements for CNC, stone-processing, and packaging machinery exports.',
+    href: '/careers#technical-sales-engineer-machinery',
+  },
+]);
 
-/** Where speculative applications go while there are no open roles. */
-export const CAREERS_EMAIL = 'careers@trivoxagroup.com';
+/** Where trade desk applications go directly. */
+export const CAREERS_EMAIL = 'parth@trivoxagroup.com';
 
 export function hasInsights(): boolean {
   return INSIGHTS.length > 0;
@@ -102,8 +148,8 @@ export type HiringStep = z.infer<typeof HiringStepSchema>;
 export const HIRING_PROCESS: HiringStep[] = HiringStepSchema.array().parse([
   {
     step: 1,
-    title: 'Application read by a founder',
-    body: 'Every application to careers@trivoxagroup.com is read by one of the three founders, not filtered by a keyword scan. We reply either way, including when the answer is no.',
+    title: 'Application read directly by Parth (Founder)',
+    body: 'Every application sent to parth@trivoxagroup.com is evaluated directly by Parth (Founder), not filtered by an automated scanner. Every qualified candidate receives a response.',
   },
   {
     step: 2,

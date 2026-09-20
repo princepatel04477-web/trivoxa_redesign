@@ -21,7 +21,6 @@ import { Container, Section } from '@/components/ui/layout';
 import { INDUSTRIES } from '@/content/taxonomy';
 import DepthCarousel from '@/components/reactbits/DepthCarousel/DepthCarousel';
 import StarBorder from '@/components/reactbits/StarBorder/StarBorder';
-import ShinyText from '@/components/reactbits/ShinyText/ShinyText';
 import DecryptedText from '@/components/reactbits/DecryptedText/DecryptedText';
 import SplitFlapText from '@/components/reactbits/SplitFlapText/SplitFlapText';
 import GradualBlur from '@/components/reactbits/GradualBlur/GradualBlur';
@@ -153,7 +152,6 @@ export function IndustriesPreview() {
               onChange={(idx) => setActiveIndex(idx)}
               renderItem={(rawItem, idx: number, isActive: boolean) => {
                 const item = rawItem as (typeof carouselItems)[0];
-                const isFurniture = item.slug === 'furniture-interiors';
                 const IconComp = INDUSTRY_ICONS[item.slug] || Building2;
                 const numStr = String(idx + 1).padStart(2, '0');
 
@@ -176,16 +174,12 @@ export function IndustriesPreview() {
                       <span className="text-bronze font-mono text-xs font-bold tracking-wider">
                         {numStr}
                       </span>
-                      {isFurniture ? (
-                        <span className="border-bronze/40 bg-espresso-deep/90 text-bronze rounded-full border px-3 py-1 font-mono text-[10px]">
-                          <ShinyText text="Quoted, not yet catalogued" speed={3} />
-                        </span>
-                      ) : item.status === 'onboarding' ? (
+                      {item.status === 'onboarding' ? (
                         <span className="bg-espresso-deep/90 surface-faint rounded-full border px-3 py-1 font-mono text-[10px]">
                           In Onboarding
                         </span>
                       ) : (
-                        <span className="border-bronze/30 bg-bronze/10 text-bronze rounded-full border px-3 py-1 font-mono text-[10px]">
+                        <span className="border-bronze/40 bg-bronze/15 text-bronze rounded-full border px-3 py-1 font-mono text-[10px] font-medium">
                           Live Export
                         </span>
                       )}

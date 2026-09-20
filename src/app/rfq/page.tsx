@@ -46,7 +46,8 @@ export default function RfqPage() {
     <>
       <PageHero
         eyebrow="Request a Quotation"
-        title="Send the specification. We'll come back with numbers."
+        title="Send the specification. We'll come back with product."
+        size="display-md"
         lede="Grade, quantity, destination port and target Incoterm. That is enough for the export desk to price a real quotation — unit price, MOQ, lead time, Incoterm and loading port — instead of sending a brochure."
         trail={[{ href: '/', label: 'Home' }, { href: '/rfq', label: 'Request a Quotation' }]}
         meta={[

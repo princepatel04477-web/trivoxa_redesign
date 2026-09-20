@@ -24,6 +24,30 @@ const Grainient = dynamic(() => import('@/components/reactbits/Grainient/Grainie
   ssr: false,
 });
 
+import {
+  Shirt,
+  Stethoscope,
+  Building2,
+  Armchair,
+  Wheat,
+  Cog,
+  Sparkles,
+  ShoppingBag,
+  Cpu,
+} from 'lucide-react';
+
+const INDUSTRY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  'textile-apparel': Shirt,
+  'jewellery-precious-products': Sparkles,
+  'agriculture-food': Wheat,
+  'building-materials': Building2,
+  'furniture-interiors': Armchair,
+  'engineering-industrial': Cog,
+  'healthcare-pharmaceuticals': Stethoscope,
+  'retail-consumer-goods': ShoppingBag,
+  technology: Cpu,
+};
+
 export interface IndustryHubItem {
   slug: string;
   name: string;
@@ -84,16 +108,20 @@ export function IndustriesHubClient({
     }
   };
 
-  const chromaItems: ChromaItem[] = filteredIndustries.map((ind) => ({
-    image: `/brand/og/industry-${ind.slug}.png`,
-    title: ind.name,
-    subtitle: ind.shortDescription,
-    handle: ind.productCount > 0 ? `${ind.productCount} rows` : 'Quoted on order',
-    location: ind.status === 'live' ? 'Live' : 'Onboarding',
-    url: `/industries/${ind.slug}`,
-    borderColor: BRAND.bronze.hex,
-    gradient: 'linear-gradient(145deg, rgba(168,139,104,0.18), rgba(23,18,16,0.95))',
-  }));
+  const chromaItems: ChromaItem[] = filteredIndustries.map((ind) => {
+    const IconComp = INDUSTRY_ICONS[ind.slug];
+    return {
+      image: `/brand/og/industry-${ind.slug}.png`,
+      title: ind.name,
+      subtitle: ind.shortDescription,
+      handle: ind.productCount > 0 ? `${ind.productCount} rows` : 'Quoted on order',
+      location: ind.status === 'live' ? 'Live Export' : 'Onboarding',
+      url: `/industries/${ind.slug}`,
+      borderColor: BRAND.bronze.hex,
+      gradient: 'linear-gradient(145deg, rgba(168,139,104,0.18), rgba(23,18,16,0.95))',
+      icon: IconComp ? <IconComp className="size-4 text-bronze" /> : undefined,
+    };
+  });
 
   return (
     <>

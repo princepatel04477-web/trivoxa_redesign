@@ -207,7 +207,7 @@ export function GlobalPresenceFull() {
                       Region 0{activeRegionIndex + 1} of 06
                     </span>
                     <span className="font-mono text-xs font-semibold text-ivory bg-espresso px-2.5 py-1 rounded border border-bronze/30">
-                      Hub: {currentRegion.hubPort} ({currentRegion.locode})
+                      Destination: {currentRegion.hubPort} ({currentRegion.locode})
                     </span>
                   </div>
 
