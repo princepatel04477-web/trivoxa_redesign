@@ -169,7 +169,7 @@ export const INDUSTRIES: Industry[] = [
     shortDescription:
       'Software, AI solutions and digital transformation delivered by the Service Export division — the group\'s second operating arm.',
     icon: 'Cpu',
-    status: 'live',
+    status: 'onboarding',
     relatedCategories: [],
     typicalBuyers: ['SMBs modernising operations', 'Agencies', 'Startups', 'Enterprise teams'],
     complianceNotes: [
@@ -183,7 +183,7 @@ export const INDUSTRIES: Industry[] = [
     shortDescription:
       'Supply-chain sourcing programmes for international retailers, FMCG distributors and direct-to-consumer private labels.',
     icon: 'ShoppingBag',
-    status: 'live',
+    status: 'onboarding',
     relatedCategories: [],
     typicalBuyers: ['Retail chains', 'Distributors', 'Consumer brands', 'E-commerce sellers'],
     complianceNotes: [

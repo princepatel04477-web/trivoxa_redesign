@@ -2,6 +2,7 @@
 
 import React, { useRef } from 'react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { ButtonLink } from '@/components/ui/button';
 import { SHIVESHWAR_CANONICAL_SENTENCE } from '@/content/company';
 import { HeroCopyMotion } from '@/components/sections/hero-copy-motion';
@@ -11,6 +12,26 @@ import DarkVeil from '@/components/reactbits/DarkVeil/DarkVeil';
 import Noise from '@/components/reactbits/Noise/Noise';
 import { useWebGLSlot } from '@/lib/motion/webgl-budget';
 import { useReducedMotion } from '@/lib/motion/useReducedMotion';
+
+const Hero3DLogo = dynamic(
+  () => import('@/components/three/hero-3d-logo').then((mod) => mod.Hero3DLogo),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="relative w-full h-full flex items-center justify-center p-4">
+        <div className="relative w-28 h-28 sm:w-36 sm:h-36 drop-shadow-[0_0_24px_rgba(168,139,104,0.4)]">
+          <Image
+            src="/brand/_incoming/1.png"
+            alt="Trivoxa Group 3D Emblem"
+            fill
+            priority
+            className="object-contain"
+          />
+        </div>
+      </div>
+    ),
+  }
+);
 
 /**
  * Hero component — Rebuilt strictly to Prompt 2 / State 1 specifications.
@@ -97,26 +118,10 @@ export function Hero() {
               Building the Future
             </span>
 
-            {/* Center Media Card: Mundra Port / Shipping Corridor */}
-            <div className="border-bronze/40 bg-espresso group relative aspect-[16/10] w-full max-w-[260px] shrink-0 overflow-hidden rounded-2xl border shadow-[0_20px_50px_rgba(0,0,0,0.7)] sm:max-w-[300px] lg:max-w-[320px]">
-              <Image
-                src="/brand/eagle-poster.webp"
-                alt="Trivoxa international maritime logistics and manufacturing operations"
-                fill
-                priority
-                sizes="(max-width: 768px) 260px, 320px"
-                className="object-cover object-center transition-transform duration-700 group-hover:scale-105 opacity-85"
-              />
-              <div className="from-espresso-deep/95 pointer-events-none absolute inset-0 bg-gradient-to-t via-transparent to-transparent" />
-              <div className="pointer-events-none absolute inset-x-3 bottom-2 flex items-center justify-between">
-                <span className="text-ivory/90 bg-espresso-deep/80 border-bronze/30 rounded border px-2 py-0.5 font-mono text-[10px] font-medium tracking-wider uppercase sm:text-xs">
-                  Mundra Port · INMUN
-                </span>
-                <span className="flex h-2 w-2 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-                </span>
-              </div>
+            {/* Center Media Card: Interactive 3D Horse Emblem */}
+            <div className="border-bronze/40 bg-radial from-bronze/15 via-espresso/90 to-espresso-deep group relative aspect-[16/11] sm:aspect-[16/10] w-full max-w-[280px] shrink-0 overflow-hidden rounded-2xl border shadow-[0_20px_50px_rgba(0,0,0,0.7)] sm:max-w-[320px] lg:max-w-[340px]">
+              <Hero3DLogo />
+              <div className="from-espresso-deep/40 pointer-events-none absolute inset-0 bg-gradient-to-t via-transparent to-transparent" />
             </div>
 
             <span

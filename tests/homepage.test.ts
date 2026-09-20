@@ -124,11 +124,11 @@ describe('previews report their true totals (P8 / audit fix)', () => {
 });
 
 describe('conditional sections stay conditional (P10)', () => {
-  it('renders neither Insights nor Careers while the datasets are empty', () => {
+  it('renders conditional sections: insights empty, careers active with 5 roles', () => {
     expect(INSIGHTS).toHaveLength(0);
-    expect(OPEN_ROLES).toHaveLength(0);
+    expect(OPEN_ROLES).toHaveLength(5);
     expect(hasInsights()).toBe(false);
-    expect(hasOpenRoles()).toBe(false);
+    expect(hasOpenRoles()).toBe(true);
   });
 
   it('rejects a placeholder insight', () => {
