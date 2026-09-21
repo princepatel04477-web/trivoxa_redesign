@@ -67,7 +67,7 @@ export function IndustryDetailClient({
   // Masonry items for categories
   const masonryItems = categories.map((cat, i) => ({
     id: cat.slug,
-    img: `/brand/og/industry-${cat.slug}.png`,
+    img: `/brand/categories/${cat.slug}.jpg`,
     url: `/businesses/product-exports?category=${cat.slug}`,
     height: 240 + (i % 3) * 50,
     title: cat.name,
@@ -88,7 +88,7 @@ export function IndustryDetailClient({
         </div>
 
         <ScrollExpand
-          src={`/brand/og/industry-${industry.slug}.png`}
+          src={isService ? `/brand/og/industry-${industry.slug}.png` : `/brand/categories/${industry.slug}.jpg`}
           alt={industry.name}
           startWidth={70}
           startHeight={45}
