@@ -1,6 +1,5 @@
 'use client';
 
-import { BRAND } from '@/lib/tokens/colors';
 import React from 'react';
 import Link from 'next/link';
 import { Container, Section, HairlineRow } from '@/components/ui/layout';
@@ -20,7 +19,6 @@ import BlurText from '@/components/reactbits/BlurText/BlurText';
 import Masonry from '@/components/reactbits/Masonry/Masonry';
 import AnimatedList from '@/components/reactbits/AnimatedList/AnimatedList';
 import SplitFlapText from '@/components/reactbits/SplitFlapText/SplitFlapText';
-import ElectricBorder from '@/components/reactbits/ElectricBorder/ElectricBorder';
 import CardSwap, { Card as SwapCard } from '@/components/reactbits/CardSwap/CardSwap';
 
 interface IndustryDetailClientProps {
@@ -459,34 +457,6 @@ export function IndustryDetailClient({
           </Container>
         </Section>
       )}
-
-      {/* 10. Sticky CTA with ElectricBorder */}
-      <div className="sticky bottom-4 z-40 mx-auto max-w-[56rem] px-4 py-2 pointer-events-auto">
-        <ElectricBorder
-          color={BRAND.bronze.hex}
-          chaos={0.25}
-          borderRadius={18}
-          className="p-4 bg-espresso-deep/95 backdrop-blur-md shadow-2xl border border-bronze/50 flex flex-col sm:flex-row items-center justify-between gap-4"
-        >
-          <div className="flex flex-col">
-            <span className="font-serif text-base sm:text-lg font-semibold text-ivory">
-              Request a quote for {industry.name}
-            </span>
-            <span className="font-mono text-xs text-bronze">
-              Response within 24 business hours (IST) with HS code and MOQ
-            </span>
-          </div>
-
-          <ButtonLink
-            href={`/rfq?industry=${industry.slug}`}
-            size="sm"
-            arrow
-            className="shrink-0 font-mono text-xs"
-          >
-            Request Quotation
-          </ButtonLink>
-        </ElectricBorder>
-      </div>
     </div>
   );
 }
