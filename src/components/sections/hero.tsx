@@ -119,9 +119,8 @@ export function Hero() {
             </span>
 
             {/* Center Media Card: Interactive 3D Horse Emblem */}
-            <div className="border-bronze/40 bg-radial from-bronze/15 via-espresso/90 to-espresso-deep group relative aspect-[16/11] sm:aspect-[16/10] w-full max-w-[280px] shrink-0 overflow-hidden rounded-2xl border shadow-[0_20px_50px_rgba(0,0,0,0.7)] sm:max-w-[320px] lg:max-w-[340px]">
+            <div className="border-bronze/50 bg-radial from-bronze/20 via-espresso/95 to-espresso-deep group relative w-[260px] h-[210px] sm:w-[310px] sm:h-[240px] lg:w-[340px] lg:h-[260px] shrink-0 overflow-hidden rounded-2xl border shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_35px_rgba(168,139,104,0.15)]">
               <Hero3DLogo />
-              <div className="from-espresso-deep/40 pointer-events-none absolute inset-0 bg-gradient-to-t via-transparent to-transparent" />
             </div>
 
             <span
