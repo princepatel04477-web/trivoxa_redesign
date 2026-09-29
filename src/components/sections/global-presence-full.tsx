@@ -26,7 +26,7 @@ const REGIONS = [
     hubPort: 'Rotterdam',
     locode: 'NLRTM',
     marketFocus: 'European single market buyers with strict REACH chemical compliance and OEKO-TEX certification standards.',
-    image: '/brand/og/industry-textile-apparel.png',
+    image: '/images/industries/textile-apparel.jpg',
     lanePath: 'M 30 180 Q 140 40 310 70',
   },
   {
@@ -36,7 +36,7 @@ const REGIONS = [
     hubPort: 'Jebel Ali',
     locode: 'AEJEA',
     marketFocus: 'High-velocity replenishment corridors across UAE, Saudi Arabia, and Oman through Dubai logistics hubs.',
-    image: '/brand/og/industry-building-materials.png',
+    image: '/images/industries/building-materials.jpg',
     lanePath: 'M 30 180 Q 120 120 220 135',
   },
   {
@@ -46,7 +46,7 @@ const REGIONS = [
     hubPort: 'Mombasa',
     locode: 'KEMBA',
     marketFocus: 'East and West African commercial distribution tenders, hospital supply contracts, and grain/spice packaging plants.',
-    image: '/brand/og/industry-healthcare-pharmaceuticals.png',
+    image: '/images/industries/healthcare-pharmaceuticals.jpg',
     lanePath: 'M 30 180 Q 70 200 170 260',
   },
   {
@@ -56,7 +56,7 @@ const REGIONS = [
     hubPort: 'New York',
     locode: 'USNYC',
     marketFocus: 'US and Canadian institutional procurement requiring FDA registered facilities, UL standards, and verified warehouse drops.',
-    image: '/brand/og/product-engineered-quartz.png',
+    image: '/images/industries/furniture-interiors.jpg',
     lanePath: 'M 30 180 Q 130 30 330 60',
   },
   {
@@ -66,7 +66,7 @@ const REGIONS = [
     hubPort: 'Santos',
     locode: 'BRSSZ',
     marketFocus: 'Mercosur manufacturing assembly and agricultural equipment supply requiring consular documentation and phytosanitary certificates.',
-    image: '/brand/og/industry-engineering-industrial.png',
+    image: '/images/industries/engineering-industrial.jpg',
     lanePath: 'M 30 180 Q 90 230 230 290',
   },
   {
@@ -76,7 +76,7 @@ const REGIONS = [
     hubPort: 'Singapore',
     locode: 'SGSIN',
     marketFocus: 'ASEAN regional re-export, electronics packaging, and contract blending supply chains operating on just-in-time schedules.',
-    image: '/brand/og/product-cotton-yarn.png',
+    image: '/images/industries/agriculture-food.jpg',
     lanePath: 'M 30 180 Q 200 190 320 220',
   },
 ];
