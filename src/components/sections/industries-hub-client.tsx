@@ -111,10 +111,7 @@ export function IndustriesHubClient({
   const chromaItems: ChromaItem[] = filteredIndustries.map((ind) => {
     const IconComp = INDUSTRY_ICONS[ind.slug];
     return {
-      image:
-        ind.slug === 'technology' || ind.slug === 'retail-consumer-goods'
-          ? `/brand/og/industry-${ind.slug}.png`
-          : `/brand/categories/${ind.slug}.jpg`,
+      image: `/brand/categories/${ind.slug}.jpg`,
       title: ind.name,
       subtitle: ind.shortDescription,
       handle: ind.productCount > 0 ? `${ind.productCount} rows` : 'Quoted on order',

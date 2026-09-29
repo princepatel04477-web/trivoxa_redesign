@@ -88,7 +88,7 @@ export function IndustryDetailClient({
         </div>
 
         <ScrollExpand
-          src={isService ? `/brand/og/industry-${industry.slug}.png` : `/brand/categories/${industry.slug}.jpg`}
+          src={`/brand/categories/${industry.slug}.jpg`}
           alt={industry.name}
           startWidth={70}
           startHeight={45}
