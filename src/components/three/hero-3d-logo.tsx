@@ -50,7 +50,7 @@ function LogoModel({ modelPath, activeModel = 'cream' }: ModelProps) {
 
   return (
     <Center>
-      <primitive object={clonedScene} scale={4.6} />
+      <primitive object={clonedScene} scale={3.6} />
     </Center>
   );
 }

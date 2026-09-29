@@ -1398,7 +1398,8 @@ export const CONTACT: Contact = {
   registeredEntityNumber: null,
   responseWindow: 'within 24 business hours (IST)',
   socials: [
-    { label: 'LinkedIn', href: 'https://www.linkedin.com/company/trivoxagroup' },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/company/trivoxa-group/' },
+    { label: 'Instagram', href: 'https://www.instagram.com/trivoxa_group/' },
   ],
 };
 

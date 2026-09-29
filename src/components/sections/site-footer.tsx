@@ -204,10 +204,22 @@ export function SiteFooter() {
 
                 <div>
                   <dt className="surface-accent text-eyebrow mb-1 font-mono uppercase tracking-widest text-stone-500">
-                    Registered entity
+                    Official Socials
                   </dt>
-                  <dd className="text-stone-400">
-                    <span className="text-stone-300">Number in supplier-onboarding pack</span>
+                  <dd className="flex items-center gap-3 pt-1">
+                    {CONTACT.socials.map((social) => (
+                      <a
+                        key={social.label}
+                        href={social.href}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        className="inline-flex items-center gap-1 font-mono text-xs text-stone-300 transition-colors hover:text-accent"
+                        aria-label={`Trivoxa Group on ${social.label}`}
+                      >
+                        <span>{social.label}</span>
+                        <ArrowUpRight className="size-3 text-accent" />
+                      </a>
+                    ))}
                   </dd>
                 </div>
               </dl>

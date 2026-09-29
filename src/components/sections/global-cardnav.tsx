@@ -1,103 +1,99 @@
 'use client';
 
-import { BRAND } from '@/lib/tokens/colors';
 import React, { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { gsap, ScrollTrigger } from '@/lib/motion/gsap';
-import { animate } from '@/lib/motion/anime';
+import { ScrollTrigger } from '@/lib/motion/gsap';
 import { GoArrowUpRight } from 'react-icons/go';
+import { ChevronDown } from 'lucide-react';
 import { BrandLockup } from '@/components/ui/brand-lockup';
-import Magnet from '@/components/reactbits/Magnet/Magnet';
 
-export type CardNavLink = {
+export type NavSubLink = {
   label: string;
   href: string;
-  ariaLabel: string;
+  description: string;
 };
 
-export type CardNavItem = {
+export type NavItem = {
   label: string;
-  bgColor: string;
-  textColor: string;
-  links: CardNavLink[];
+  href: string;
+  sublinks?: NavSubLink[];
 };
 
-export const TRIVOXA_CARDNAV_ITEMS: CardNavItem[] = [
+export const NAV_ITEMS: NavItem[] = [
   {
-    label: 'What we export',
-    bgColor: BRAND.ivorySoft.hex,
-    textColor: BRAND.espresso.hex,
-    links: [
-      { label: 'Global product exports', href: '/businesses/product-exports', ariaLabel: 'Product Exports' },
-      { label: 'Global service exports', href: '/businesses/service-exports', ariaLabel: 'Service Exports' },
-      { label: 'All 9 industries', href: '/industries', ariaLabel: 'Industries We Serve' },
+    label: 'The Group',
+    href: '/group',
+    sublinks: [
+      { label: 'Group Overview', href: '/group', description: 'Surat headquarters & manufacturing lineage' },
+      { label: 'Leadership', href: '/group#leadership', description: 'Executive board & governance' },
+      { label: 'Shiveshwar Foundation', href: '/group#foundation', description: 'CSR & community empowerment initiatives' },
     ],
   },
   {
-    label: 'Who we are',
-    bgColor: BRAND.ivory.hex,
-    textColor: BRAND.espresso.hex,
-    links: [
-      { label: 'The Group', href: '/group', ariaLabel: 'About Trivoxa Group' },
-      { label: 'Leadership', href: '/group#leadership', ariaLabel: 'Group Leadership' },
-      { label: 'Shiveshwar Foundation', href: '/group#foundation', ariaLabel: 'Shiveshwar Foundation' },
-      { label: 'Insights', href: '/insights', ariaLabel: 'Articles and Analysis' },
+    label: 'Businesses',
+    href: '/businesses',
+    sublinks: [
+      { label: 'Product Exports', href: '/businesses/product-exports', description: 'Industrial goods, textiles, agro & stone exports' },
+      { label: 'Service Exports', href: '/businesses/service-exports', description: 'Contract manufacturing & supply chain tech' },
     ],
   },
   {
-    label: 'Global network',
-    bgColor: BRAND.ivorySoft.hex,
-    textColor: BRAND.espresso.hex,
-    links: [
-      { label: 'Global presence', href: '/global-presence', ariaLabel: 'Global Operations Map' },
-      { label: 'Careers', href: '/careers', ariaLabel: 'Careers at Trivoxa' },
-      { label: 'Contact', href: '/contact', ariaLabel: 'Contact Information' },
-    ],
+    label: 'Industries',
+    href: '/industries',
+  },
+  {
+    label: 'Global Presence',
+    href: '/global-presence',
+  },
+  {
+    label: 'Insights',
+    href: '/insights',
+  },
+  {
+    label: 'Careers',
+    href: '/careers',
+  },
+  {
+    label: 'Contact',
+    href: '/contact',
   },
 ];
 
+// Preserved for backwards compatibility
+export const TRIVOXA_CARDNAV_ITEMS = NAV_ITEMS;
+
 export function GlobalCardNav() {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isHidden, setIsHidden] = useState(false);
   const pathname = usePathname();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const navRef = useRef<HTMLDivElement | null>(null);
-  const cardsContainerRef = useRef<HTMLDivElement | null>(null);
-  const cardsRef = useRef<HTMLDivElement[]>([]);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
+  const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Close and reset on route changes cleanly
+  // Close all menus on route change
   useEffect(() => {
-    setIsExpanded(false);
+    setIsMobileOpen(false);
+    setOpenDropdown(null);
     setIsHidden(false);
-    const navEl = navRef.current;
-    const cardsEl = cardsContainerRef.current;
-    if (navEl) {
-      gsap.killTweensOf(navEl);
-      gsap.killTweensOf(cardsRef.current);
-      const baseH = window.scrollY > 120 ? 52 : 64;
-      navEl.style.height = `${baseH}px`;
-      navEl.style.overflow = 'hidden';
-    }
-    if (cardsEl) {
-      cardsEl.style.display = 'none';
-    }
     ScrollTrigger.refresh();
   }, [pathname]);
 
   // Close on Escape or click outside
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isExpanded) {
-        closeMenu();
+      if (e.key === 'Escape') {
+        setIsMobileOpen(false);
+        setOpenDropdown(null);
       }
     };
     const handleClickOutside = (e: MouseEvent) => {
-      if (isExpanded && containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        closeMenu();
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsMobileOpen(false);
+        setOpenDropdown(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -106,7 +102,7 @@ export function GlobalCardNav() {
       window.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isExpanded]);
+  }, []);
 
   // Scroll listener for height compression, hide on scroll down, and scroll-progress hairline
   useEffect(() => {
@@ -117,14 +113,12 @@ export function GlobalCardNav() {
         const currentY = window.scrollY;
         setIsScrolled(currentY > 120);
 
-        // Responsive hide on scroll down past 160px; reveal immediately on scroll up
-        if (currentY > 160 && self.direction === 1 && !isExpanded) {
+        if (currentY > 160 && self.direction === 1 && !isMobileOpen) {
           setIsHidden(true);
         } else if (self.direction === -1 || currentY < 120) {
           setIsHidden(false);
         }
 
-        // Scrub progress bar scaleX
         if (progressBarRef.current) {
           progressBarRef.current.style.transform = `scaleX(${self.progress})`;
         }
@@ -134,157 +128,36 @@ export function GlobalCardNav() {
     return () => {
       st.kill();
     };
-  }, [isExpanded]);
+  }, [isMobileOpen]);
 
-  const openMenu = () => {
-    const navEl = navRef.current;
-    const cardsEl = cardsContainerRef.current;
-    if (!navEl || !cardsEl) return;
-
-    setIsExpanded(true);
-    // Unhide to measure natural content height
-    cardsEl.style.display = 'grid';
-    cardsEl.style.opacity = '0';
-    const contentH = cardsEl.scrollHeight;
-    const baseH = isScrolled ? 52 : 64;
-    const targetH = baseH + contentH;
-
-    gsap.killTweensOf(navEl);
-    gsap.killTweensOf(cardsRef.current);
-    gsap.set(navEl, { overflow: 'hidden' });
-
-    gsap.fromTo(
-      navEl,
-      { height: navEl.offsetHeight || baseH },
-      {
-        height: targetH,
-        duration: 0.38,
-        ease: 'power3.out',
-        onComplete: () => {
-          if (navEl) {
-            navEl.style.height = 'auto';
-            navEl.style.overflow = 'visible';
-          }
-        },
-      }
-    );
-
-    gsap.fromTo(
-      cardsEl,
-      { opacity: 0 },
-      { opacity: 1, duration: 0.25, ease: 'power2.out' }
-    );
-
-    gsap.fromTo(
-      cardsRef.current,
-      { y: 16, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.32, ease: 'power3.out', stagger: 0.05, delay: 0.05 }
-    );
+  const handleDropdownEnter = (label: string) => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current);
+    }
+    setOpenDropdown(label);
   };
 
-  const closeMenu = () => {
-    const navEl = navRef.current;
-    const cardsEl = cardsContainerRef.current;
-    if (!navEl) return;
-
-    const baseH = isScrolled ? 52 : 64;
-    gsap.killTweensOf(navEl);
-    gsap.killTweensOf(cardsRef.current);
-    if (cardsEl) gsap.killTweensOf(cardsEl);
-    gsap.set(navEl, { overflow: 'hidden' });
-
-    gsap.to(cardsRef.current, {
-      y: 10,
-      opacity: 0,
-      duration: 0.18,
-      ease: 'power2.in',
-    });
-
-    if (cardsEl) {
-      gsap.to(cardsEl, {
-        opacity: 0,
-        duration: 0.2,
-        ease: 'power2.in',
-      });
-    }
-
-    gsap.to(navEl, {
-      height: baseH,
-      duration: 0.32,
-      ease: 'power3.inOut',
-      onComplete: () => {
-        setIsExpanded(false);
-        if (cardsEl) cardsEl.style.display = 'none';
-        if (navEl) navEl.style.height = `${baseH}px`;
-      },
-    });
-  };
-
-  const toggleMenu = () => {
-    if (isExpanded) {
-      closeMenu();
-    } else {
-      openMenu();
-    }
-  };
-
-  // Anime.js hover effect for navigation links
-  const handleLinkMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const icon = e.currentTarget.querySelector('.nav-arrow-icon');
-    const underline = e.currentTarget.querySelector('.nav-underline');
-    if (icon) {
-      animate(icon, {
-        translateX: 4,
-        rotate: -45,
-        duration: 250,
-        ease: 'outQuad',
-      });
-    }
-    if (underline) {
-      animate(underline, {
-        scaleX: [0, 1],
-        duration: 300,
-        ease: 'outQuad',
-      });
-    }
-  };
-
-  const handleLinkMouseLeave = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const icon = e.currentTarget.querySelector('.nav-arrow-icon');
-    const underline = e.currentTarget.querySelector('.nav-underline');
-    if (icon) {
-      animate(icon, {
-        translateX: 0,
-        rotate: 0,
-        duration: 250,
-        ease: 'outQuad',
-      });
-    }
-    if (underline) {
-      animate(underline, {
-        scaleX: 0,
-        duration: 200,
-        ease: 'outQuad',
-      });
-    }
+  const handleDropdownLeave = () => {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setOpenDropdown(null);
+    }, 150);
   };
 
   return (
     <header
       ref={containerRef}
       role="banner"
-      className={`fixed left-1/2 -translate-x-1/2 w-[92%] max-w-[1020px] z-[99] transition-transform duration-300 ${
+      className={`fixed left-1/2 -translate-x-1/2 w-[94%] max-w-[1100px] z-[99] transition-transform duration-300 ${
         isScrolled ? 'top-3 md:top-4' : 'top-4 md:top-6'
       } ${isHidden ? '-translate-y-32' : 'translate-y-0'}`}
     >
       <nav
-        ref={navRef}
         aria-label="Global Primary Navigation"
         className={`relative block w-full rounded-2xl border border-bronze/30 shadow-2xl transition-colors duration-300 backdrop-blur-xl ${
-          isScrolled ? 'bg-espresso/90' : 'bg-espresso/80'
+          isScrolled ? 'bg-espresso-deep/95' : 'bg-espresso-deep/90'
         }`}
       >
-        {/* Scroll Progress Hairline at top edge of CardNav */}
+        {/* Scroll Progress Hairline at top edge */}
         <div
           ref={progressBarRef}
           aria-hidden="true"
@@ -294,7 +167,7 @@ export function GlobalCardNav() {
         {/* Top Header Bar */}
         <div
           className={`flex items-center justify-between px-4 md:px-6 transition-all duration-300 ${
-            isScrolled ? 'h-[52px]' : 'h-[64px]'
+            isScrolled ? 'h-[54px]' : 'h-[64px]'
           }`}
         >
           {/* Left: Brand Wordmark */}
@@ -303,141 +176,206 @@ export function GlobalCardNav() {
             className="flex items-center gap-2 text-ivory transition-opacity hover:opacity-90 shrink-0"
             aria-label="Trivoxa Group - Homepage"
           >
-            {/* Smaller lockup on phones so logo + Menu + CTA fit inside the bar. */}
             <BrandLockup size={24} className="md:hidden" />
-            <BrandLockup size={32} className="hidden md:inline-flex" />
+            <BrandLockup size={30} className="hidden md:inline-flex" />
           </Link>
 
-          {/* Center: Desktop 3 Card Triggers */}
-          <div className="hidden md:flex items-center gap-1 lg:gap-2">
-            {TRIVOXA_CARDNAV_ITEMS.map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={toggleMenu}
-                aria-expanded={isExpanded}
-                className={`group flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all cursor-pointer ${
-                  isExpanded
-                    ? 'bg-ivory/15 text-ivory'
-                    : 'text-ivory/80 hover:bg-ivory/10 hover:text-ivory'
-                }`}
-              >
-                <span>{item.label}</span>
-                <svg
-                  className={`size-3 text-bronze transition-transform duration-300 ${
-                    isExpanded ? 'rotate-180' : ''
+          {/* Center: Desktop Direct Navigation & Flyouts */}
+          <div className="hidden lg:flex items-center gap-1 xl:gap-1.5">
+            {NAV_ITEMS.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== '/' && pathname.startsWith(item.href));
+
+              if (item.sublinks) {
+                const isOpen = openDropdown === item.label;
+                return (
+                  <div
+                    key={item.label}
+                    className="relative py-2"
+                    onMouseEnter={() => handleDropdownEnter(item.label)}
+                    onMouseLeave={handleDropdownLeave}
+                  >
+                    <Link
+                      href={item.href}
+                      className={`group flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                        isActive || isOpen
+                          ? 'bg-ivory/15 text-ivory font-semibold'
+                          : 'text-ivory/80 hover:bg-ivory/10 hover:text-ivory'
+                      }`}
+                      aria-expanded={isOpen}
+                    >
+                      <span>{item.label}</span>
+                      <ChevronDown
+                        className={`size-3 text-bronze transition-transform duration-200 ${
+                          isOpen ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </Link>
+
+                    {/* Flyout Dropdown */}
+                    <div
+                      className={`absolute top-full left-1/2 -translate-x-1/2 pt-1.5 transition-all duration-200 ${
+                        isOpen
+                          ? 'opacity-100 translate-y-0 pointer-events-auto'
+                          : 'opacity-0 -translate-y-2 pointer-events-none'
+                      }`}
+                    >
+                      <div className="w-72 rounded-2xl border border-bronze/35 bg-espresso-deep/98 p-2.5 shadow-2xl backdrop-blur-2xl">
+                        {item.sublinks.map((sub) => {
+                          const isSubActive = pathname === sub.href;
+                          return (
+                            <Link
+                              key={sub.href}
+                              href={sub.href}
+                              onClick={() => setOpenDropdown(null)}
+                              className={`group/sub flex flex-col rounded-xl p-2.5 transition-colors ${
+                                isSubActive
+                                  ? 'bg-ivory/15'
+                                  : 'hover:bg-ivory/10'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className={`font-serif text-sm font-semibold transition-colors ${
+                                  isSubActive ? 'text-bronze font-bold' : 'text-ivory group-hover/sub:text-bronze'
+                                }`}>
+                                  {sub.label}
+                                </span>
+                                <GoArrowUpRight className="size-3 text-bronze/70 group-hover/sub:text-bronze group-hover/sub:translate-x-0.5 group-hover/sub:-translate-y-0.5 transition-transform" />
+                              </div>
+                              <span className="mt-0.5 text-[11px] text-stone-400 font-sans leading-tight">
+                                {sub.description}
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                    isActive
+                      ? 'bg-ivory/15 text-bronze font-bold shadow-sm'
+                      : 'text-ivory/80 hover:bg-ivory/10 hover:text-ivory'
                   }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-            ))}
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-2">
-            {/* Mobile Hamburger Toggle */}
+          <div className="flex items-center gap-2.5">
+            {/* Mobile / Tablet Hamburger Toggle */}
             <button
               type="button"
-              onClick={toggleMenu}
-              aria-expanded={isExpanded}
-              aria-label={isExpanded ? 'Close navigation menu' : 'Open navigation menu'}
-              className="flex md:hidden group items-center gap-2 rounded-full px-3 py-1.5 border border-bronze/30 bg-ivory-soft/10 text-ivory hover:bg-ivory-soft/20 transition-all cursor-pointer"
+              onClick={() => setIsMobileOpen(!isMobileOpen)}
+              aria-expanded={isMobileOpen}
+              aria-label={isMobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              className="flex lg:hidden group items-center gap-2 rounded-full px-3 py-1.5 border border-bronze/30 bg-ivory/10 text-ivory hover:bg-ivory/20 transition-all cursor-pointer"
             >
               <span className="text-xs font-medium text-ivory">
-                {isExpanded ? 'Close' : 'Menu'}
+                {isMobileOpen ? 'Close' : 'Menu'}
               </span>
               <div className="flex flex-col gap-1 w-3.5">
                 <span
                   className={`block h-0.5 w-full bg-bronze transition-transform duration-300 ${
-                    isExpanded ? 'translate-y-1.5 rotate-45' : ''
+                    isMobileOpen ? 'translate-y-1.5 rotate-45' : ''
                   }`}
                 />
                 <span
                   className={`block h-0.5 w-full bg-bronze transition-opacity duration-300 ${
-                    isExpanded ? 'opacity-0' : 'opacity-100'
+                    isMobileOpen ? 'opacity-0' : 'opacity-100'
                   }`}
                 />
                 <span
                   className={`block h-0.5 w-full bg-bronze transition-transform duration-300 ${
-                    isExpanded ? '-translate-y-1.5 -rotate-45' : ''
+                    isMobileOpen ? '-translate-y-1.5 -rotate-45' : ''
                   }`}
                 />
               </div>
             </button>
 
-            {/* Solid Ink "Request a quote" Button */}
-            <Magnet magnetStrength={0.25} padding={25}>
-              <Link
-                href="/rfq"
-                aria-label="Request a quote"
-                data-cursor="target"
-                className="inline-flex items-center justify-center rounded-full bg-ivory px-4 py-2 text-xs font-semibold text-espresso shadow-sm transition-all duration-200 hover:bg-ivory-soft hover:shadow-md active:scale-95 whitespace-nowrap"
-              >
-                <span className="sm:hidden">Quote</span>
-                <span className="hidden sm:inline">Request a quote</span>
-              </Link>
-            </Magnet>
+            {/* Solid Ink "Request a quote" Button — NO Magnet hover repellent */}
+            <Link
+              href="/rfq"
+              aria-label="Request a quote"
+              className="inline-flex items-center justify-center rounded-full bg-ivory px-4 py-2 text-xs font-semibold text-espresso shadow-sm transition-all duration-200 hover:bg-bronze hover:text-stone-950 hover:shadow-md active:scale-95 whitespace-nowrap cursor-pointer"
+            >
+              <span className="sm:hidden">Quote</span>
+              <span className="hidden sm:inline">Request a quote</span>
+            </Link>
           </div>
         </div>
 
-        {/* Expandable 3 Cards Container */}
-        <div
-          ref={cardsContainerRef}
-          style={{ display: isExpanded ? 'grid' : 'none' }}
-          className={`grid-cols-1 md:grid-cols-3 gap-3 p-3 md:p-4 border-t border-bronze/20 transition-opacity duration-300 max-h-[calc(100vh-100px)] overflow-y-auto ${
-            isExpanded ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-          }`}
-          aria-hidden={!isExpanded}
-        >
-          {TRIVOXA_CARDNAV_ITEMS.map((item, idx) => (
-            <div
-              key={item.label}
-              ref={(el) => {
-                if (el) cardsRef.current[idx] = el;
-              }}
-              style={{ backgroundColor: item.bgColor, color: item.textColor }}
-              className="flex flex-col justify-between rounded-xl p-4 md:p-5 shadow-lg min-h-[170px]"
-            >
-              <h3 className="text-sm font-semibold tracking-wide text-bronze pb-2 border-b border-espresso/10">
-                {item.label}
-              </h3>
-              <ul className="flex flex-col gap-2 mt-3 list-none p-0 m-0">
-                {item.links.map((link) => {
-                  const isActive = pathname === link.href;
+        {/* Mobile / Tablet Drawer */}
+        {isMobileOpen && (
+          <div className="lg:hidden border-t border-bronze/25 bg-espresso-deep/98 px-5 py-6 rounded-b-2xl max-h-[calc(100vh-120px)] overflow-y-auto">
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col divide-y divide-stone-800/80">
+                {NAV_ITEMS.map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== '/' && pathname.startsWith(item.href));
                   return (
-                    <li key={link.href}>
-                      <Link
-                        href={link.href}
-                        aria-label={link.ariaLabel}
-                        aria-current={isActive ? 'page' : undefined}
-                        onClick={closeMenu}
-                        onMouseEnter={handleLinkMouseEnter}
-                        onMouseLeave={handleLinkMouseLeave}
-                        className={`relative flex items-center justify-between text-sm font-medium transition-colors py-1 group ${
-                          isActive ? 'text-bronze font-bold' : 'text-espresso hover:text-bronze'
-                        }`}
-                      >
-                        <span className="relative">
-                          {link.label}
-                          <span className="nav-underline absolute bottom-0 left-0 h-[1.5px] w-full bg-bronze origin-left scale-x-0" />
-                        </span>
-                        <GoArrowUpRight
-                          className="nav-arrow-icon text-sm text-bronze transition-transform"
-                          aria-hidden="true"
-                        />
-                      </Link>
-                    </li>
+                    <div key={item.label} className="py-2.5">
+                      <div className="flex items-center justify-between">
+                        <Link
+                          href={item.href}
+                          onClick={() => setIsMobileOpen(false)}
+                          className={`font-serif text-base font-semibold transition-colors ${
+                            isActive ? 'text-bronze font-bold' : 'text-ivory hover:text-bronze'
+                          }`}
+                        >
+                          {item.label}
+                        </Link>
+                        {item.sublinks && (
+                          <span className="font-mono text-[10px] text-bronze/60 uppercase">
+                            {item.sublinks.length} divisions
+                          </span>
+                        )}
+                      </div>
+
+                      {item.sublinks && (
+                        <div className="mt-2 ml-2 flex flex-col gap-2 border-l border-bronze/25 pl-3">
+                          {item.sublinks.map((sub) => (
+                            <Link
+                              key={sub.href}
+                              href={sub.href}
+                              onClick={() => setIsMobileOpen(false)}
+                              className="group flex items-center justify-between text-xs text-stone-300 hover:text-bronze py-0.5"
+                            >
+                              <span>{sub.label}</span>
+                              <GoArrowUpRight className="size-3 text-bronze/60 group-hover:text-bronze" />
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
-              </ul>
+              </div>
+
+              {/* Mobile RFQ CTA */}
+              <div className="pt-2">
+                <Link
+                  href="/rfq"
+                  onClick={() => setIsMobileOpen(false)}
+                  className="flex w-full items-center justify-center rounded-xl bg-bronze py-3 text-center font-mono text-xs uppercase font-semibold text-stone-950 shadow-lg hover:bg-bronze-light transition-all"
+                >
+                  Request an Official Quotation (RFQ)
+                </Link>
+              </div>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </nav>
     </header>
   );

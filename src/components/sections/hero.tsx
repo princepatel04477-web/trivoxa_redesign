@@ -7,7 +7,6 @@ import { ButtonLink } from '@/components/ui/button';
 import { SHIVESHWAR_CANONICAL_SENTENCE } from '@/content/company';
 import { HeroCopyMotion } from '@/components/sections/hero-copy-motion';
 import RotatingText from '@/components/reactbits/RotatingText/RotatingText';
-import Magnet from '@/components/reactbits/Magnet/Magnet';
 import DarkVeil from '@/components/reactbits/DarkVeil/DarkVeil';
 import Noise from '@/components/reactbits/Noise/Noise';
 import { useWebGLSlot } from '@/lib/motion/webgl-budget';
@@ -19,7 +18,7 @@ const Hero3DLogo = dynamic(
     ssr: false,
     loading: () => (
       <div className="relative w-full h-full flex items-center justify-center p-4">
-        <div className="relative w-28 h-28 sm:w-36 sm:h-36 drop-shadow-[0_0_24px_rgba(168,139,104,0.4)]">
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24 drop-shadow-[0_0_18px_rgba(168,139,104,0.35)]">
           <Image
             src="/brand/_incoming/1.png"
             alt="Trivoxa Group 3D Emblem"
@@ -119,7 +118,7 @@ export function Hero() {
             </span>
 
             {/* Center Media Card: Interactive 3D Horse Emblem */}
-            <div className="border-bronze/50 bg-radial from-bronze/20 via-espresso/95 to-espresso-deep group relative w-[260px] h-[210px] sm:w-[310px] sm:h-[240px] lg:w-[340px] lg:h-[260px] shrink-0 overflow-hidden rounded-2xl border shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_35px_rgba(168,139,104,0.15)]">
+            <div className="border-bronze/50 bg-radial from-bronze/20 via-espresso/95 to-espresso-deep group relative w-[210px] h-[170px] sm:w-[250px] sm:h-[195px] lg:w-[270px] lg:h-[210px] shrink-0 overflow-hidden rounded-2xl border shadow-[0_20px_60px_rgba(0,0,0,0.8),0_0_35px_rgba(168,139,104,0.15)]">
               <Hero3DLogo />
             </div>
 
@@ -158,11 +157,9 @@ export function Hero() {
 
           {/* Dual CTAs */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-1">
-            <Magnet magnetStrength={0.25} padding={40}>
-              <ButtonLink href="/rfq" size="md" arrow data-cursor="target">
-                Request a Quote
-              </ButtonLink>
-            </Magnet>
+            <ButtonLink href="/rfq" size="md" arrow data-cursor="target">
+              Request a Quote
+            </ButtonLink>
             <ButtonLink href="/businesses" size="md" variant="secondary" data-cursor="target">
               Explore What We Export
             </ButtonLink>

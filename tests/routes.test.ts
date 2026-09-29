@@ -152,11 +152,12 @@ describe('no orphan links', () => {
 
   it('resolves every internal href in the source to a real route', () => {
     const orphans = hrefs
-      .filter(({ href, template }) =>
-        template
+      .filter(({ href, template }) => {
+        if (fs.existsSync(path.join(ROOT, 'public', href))) return false;
+        return template
           ? !prefixLeadsToRoute(href, routes)
-          : !routes.some((route) => matches(route, href)),
-      )
+          : !routes.some((route) => matches(route, href));
+      })
       .map(({ href, file }) => `${href}  (${file})`);
 
     expect(orphans, `Orphan links:\n${orphans.join('\n')}`).toEqual([]);

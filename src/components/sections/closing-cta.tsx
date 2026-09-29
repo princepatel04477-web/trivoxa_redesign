@@ -13,7 +13,6 @@ import TrueFocus from '@/components/reactbits/TrueFocus/TrueFocus';
 import GlareHover from '@/components/reactbits/GlareHover/GlareHover';
 import SpecularButton from '@/components/reactbits/SpecularButton/SpecularButton';
 import StarBorder from '@/components/reactbits/StarBorder/StarBorder';
-import Magnet from '@/components/reactbits/Magnet/Magnet';
 import { useWebGLSlot } from '@/lib/motion/webgl-budget';
 import { useReducedMotion } from '@/lib/motion/useReducedMotion';
 import { animate } from '@/lib/motion/anime';
@@ -211,19 +210,17 @@ export function ClosingCta() {
             {/* CTAs */}
             <div className="col-span-12 flex flex-col items-start gap-6 lg:col-span-5 lg:items-end">
               <div className="flex flex-wrap gap-4">
-                <Magnet padding={20} magnetStrength={2}>
-                  <div data-cursor="target">
-                    <SpecularButton
-                      size="lg"
-                      tint={BRAND.bronze.hex}
-                      tintOpacity={0.4}
-                      onClick={() => router.push('/rfq')}
-                      className="cursor-pointer"
-                    >
-                      Request a Quotation →
-                    </SpecularButton>
-                  </div>
-                </Magnet>
+                <div data-cursor="target">
+                  <SpecularButton
+                    size="lg"
+                    tint={BRAND.bronze.hex}
+                    tintOpacity={0.4}
+                    onClick={() => router.push('/rfq')}
+                    className="cursor-pointer"
+                  >
+                    Request a Quotation →
+                  </SpecularButton>
+                </div>
 
                 <Link href="/contact" data-cursor="target">
                   <StarBorder color="var(--color-bronze)" speed="5s">

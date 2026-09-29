@@ -11,7 +11,6 @@ import ScrollReveal from '@/components/reactbits/ScrollReveal/ScrollReveal';
 import VariableProximity from '@/components/reactbits/VariableProximity/VariableProximity';
 import CountUp from '@/components/reactbits/CountUp/CountUp';
 import SpecularButton from '@/components/reactbits/SpecularButton/SpecularButton';
-import Magnet from '@/components/reactbits/Magnet/Magnet';
 import ScrollVelocity from '@/components/reactbits/ScrollVelocity/ScrollVelocity';
 import { useWebGLSlot } from '@/lib/motion/webgl-budget';
 import { WebGLErrorBoundary } from '@/components/three/webgl-error-boundary';
@@ -211,19 +210,17 @@ export function WhoWeAre() {
 
               {/* CTA Discover the Group */}
               <div className="mt-4 flex items-center gap-6">
-                <Magnet padding={20} magnetStrength={2}>
-                  <div data-cursor="target">
-                    <SpecularButton
-                      size="md"
-                      tint="var(--color-bronze)"
-                      tintOpacity={0.4}
-                      onClick={() => router.push('/group')}
-                      className="cursor-pointer"
-                    >
-                      Discover the Group →
-                    </SpecularButton>
-                  </div>
-                </Magnet>
+                <div data-cursor="target">
+                  <SpecularButton
+                    size="md"
+                    tint="var(--color-bronze)"
+                    tintOpacity={0.4}
+                    onClick={() => router.push('/group')}
+                    className="cursor-pointer"
+                  >
+                    Discover the Group →
+                  </SpecularButton>
+                </div>
               </div>
             </div>
           </div>

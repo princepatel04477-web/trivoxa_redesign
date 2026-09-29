@@ -1,7 +1,7 @@
 'use client';
 
 import { BRAND } from '@/lib/tokens/colors';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Factory, ClipboardCheck, Stamp, Handshake } from 'lucide-react';
 import { Container, Section } from '@/components/ui/layout';
 import MagicBento, { ParticleCard } from '@/components/reactbits/MagicBento/MagicBento';
@@ -24,11 +24,13 @@ const QUALITY_CHECKS = [
   'Report before sailing',
 ];
 
-const FABRIC_IMAGES = [
-  '/brand/og/product-cotton-denim-fabric.png',
-  '/brand/og/product-cotton-yarn.png',
-  '/brand/og/product-home-textiles.png',
-  '/brand/og/product-technical-non-woven-textiles.png',
+const SECTOR_IMAGES = [
+  '/images/industries/textile-apparel.jpg',
+  '/images/industries/engineering-industrial.jpg',
+  '/images/industries/building-materials.jpg',
+  '/images/industries/agriculture-food.jpg',
+  '/images/industries/healthcare-pharmaceuticals.jpg',
+  '/images/industries/jewellery-precious-products.jpg',
 ];
 
 export function WhyTrivoxa() {
@@ -36,6 +38,7 @@ export function WhyTrivoxa() {
   const stepsSvgRef = useRef<SVGSVGElement>(null);
   const checkmarksRef = useRef<(SVGSVGElement | null)[]>([]);
   const reducedMotion = useReducedMotion();
+  const [activeStep, setActiveStep] = useState(0);
 
   useEffect(() => {
     if (reducedMotion || !sectionRef.current) return;
@@ -67,32 +70,13 @@ export function WhyTrivoxa() {
     return () => ctx.revert();
   }, [reducedMotion]);
 
-  // Anime.js step visual "Order 1 -> 2 -> 3 -> 5" - slow, elegant 4.5s ease-in-out cycle
+  // Stable sequential light-up step cycle: Order 1 -> 2 -> 3 -> 4 -> 5 (Partner)
   useEffect(() => {
-    if (reducedMotion || !stepsSvgRef.current) return;
-
-    const path = stepsSvgRef.current.querySelector<SVGPathElement>('.step-path');
-    const glowDot = stepsSvgRef.current.querySelector<SVGCircleElement>('.dot-glow');
-    if (!path) return;
-
-    const drawable = svg.createDrawable(path);
-    animate(drawable, {
-      draw: ['0 0', '0 1'],
-      duration: 4500,
-      ease: 'inOutCubic',
-      loop: true,
-      direction: 'alternate',
-    });
-
-    if (glowDot) {
-      animate(glowDot, {
-        scale: [1, 1.4, 1],
-        opacity: [0.8, 1, 0.8],
-        duration: 2500,
-        ease: 'easeInOutSine',
-        loop: true,
-      });
-    }
+    if (reducedMotion) return;
+    const interval = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % 5);
+    }, 1300);
+    return () => clearInterval(interval);
   }, [reducedMotion]);
 
   // Anime.js checkmark stroke draw
@@ -139,7 +123,7 @@ export function WhyTrivoxa() {
             glowColor="168, 139, 104"
             className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4"
           >
-            {/* Tile 1: Manufacturing Foundation (2x2 on desktop) */}
+            {/* Tile 1: Multi-Sector Sourcing & Manufacturing (2x2 on desktop) */}
             <div className="bento-batch-item col-span-1 md:col-span-2 lg:col-span-2 lg:row-span-2">
               <ParticleCard
                 glowColor="168, 139, 104"
@@ -151,31 +135,30 @@ export function WhyTrivoxa() {
                       <Factory className="size-5 text-accent" strokeWidth={1.5} />
                     </div>
                     <span className="rounded-full border border-stone-700/60 bg-stone-900/80 px-3 py-1 font-mono text-xs text-stone-400">
-                      Sayan, Surat Mill Heritage
+                      Surat HQ & Pan-India Mill Grid
                     </span>
                   </div>
                   <h3 className="font-serif text-2xl text-stone-100 md:text-3xl">
-                    Manufacturing Foundation
+                    Multi-Sector Sourcing & Manufacturing
                   </h3>
                   <p className="mt-3 text-sm leading-relaxed text-stone-300 md:text-base">
-                    Our parent company Shiveshwar Textiles operates integrated weaving and manufacturing in
-                    Sayan, Surat. That floor-level knowledge sets every specification we quote.
+                    Founded on the industrial backbone of Shiveshwar Textiles in Surat, Trivoxa Group orchestrates audited production across Textiles, Engineered Hardware, Building Materials, Agriculture, and Healthcare. Direct shopfloor oversight guarantees verified technical specs and dependable export consignments.
                   </p>
                 </div>
 
-                {/* Orbiting fabric thumbnails */}
+                {/* Orbiting multi-sector thumbnails */}
                 <div className="relative mt-8 flex h-52 w-full items-center justify-center overflow-hidden rounded-xl border border-stone-800/60 bg-stone-900/40 md:h-64">
                   <OrbitImages
-                    images={FABRIC_IMAGES}
-                    radius={75}
-                    duration={24}
-                    itemSize={44}
+                    images={SECTOR_IMAGES}
+                    radius={80}
+                    duration={26}
+                    itemSize={48}
                     centerContent={
-                      <div className="flex flex-col items-center justify-center rounded-lg border border-accent/40 bg-stone-950/90 px-3 py-2 text-center shadow-lg">
-                        <span className="font-serif text-xs font-medium text-accent">
-                          Shiveshwar Textiles
+                      <div className="flex flex-col items-center justify-center rounded-xl border border-accent/50 bg-stone-950/95 px-3.5 py-2 text-center shadow-xl backdrop-blur-md">
+                        <span className="font-serif text-xs font-bold text-accent">
+                          Trivoxa Group
                         </span>
-                        <span className="font-mono text-[10px] text-stone-400">Sayan, Surat</span>
+                        <span className="font-mono text-[9px] text-stone-400">Multi-Sector Grid</span>
                       </div>
                     }
                   />
@@ -277,14 +260,23 @@ export function WhyTrivoxa() {
                   </p>
                 </div>
 
-                {/* Step visual "Order 1 -> 2 -> 3 -> 4 -> 5" */}
+                {/* Step visual "Order 1 -> 2 -> 3 -> 4 -> 5" with stable track & sequential lighting */}
                 <div className="mt-4 flex flex-col justify-center rounded-xl border border-stone-800/80 bg-espresso-deep/60 p-4">
-                  <div className="mb-2 flex items-center justify-between font-mono text-[11px] surface-faint">
-                    <span>Order 1</span>
-                    <span>Order 2</span>
-                    <span>Order 3</span>
-                    <span>Order 4</span>
-                    <span className="font-semibold text-bronze">Order 5 (Partner)</span>
+                  <div className="mb-2 flex items-center justify-between font-mono text-[11px]">
+                    {['Order 1', 'Order 2', 'Order 3', 'Order 4', 'Order 5 (Partner)'].map((label, idx) => (
+                      <span
+                        key={label}
+                        className={`transition-colors duration-300 ${
+                          idx === activeStep
+                            ? 'font-bold text-bronze'
+                            : idx < activeStep
+                            ? 'text-ivory font-medium'
+                            : 'text-stone-500'
+                        }`}
+                      >
+                        {label}
+                      </span>
+                    ))}
                   </div>
                   <svg
                     ref={stepsSvgRef}
@@ -293,34 +285,56 @@ export function WhyTrivoxa() {
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                   >
+                    {/* Stable background track */}
                     <line
                       x1="16"
                       y1="16"
                       x2="304"
                       y2="16"
-                      stroke="var(--surface-hairline)"
+                      stroke={BRAND.bronze.hex}
+                      strokeOpacity="0.25"
                       strokeWidth="2"
-                      strokeDasharray="4 4"
                     />
-                    <path
-                      className="step-path"
-                      d="M 16 16 L 304 16"
+                    {/* Illuminated progress line up to activeStep */}
+                    <line
+                      x1="16"
+                      y1="16"
+                      x2={16 + (activeStep / 4) * 288}
+                      y2="16"
                       stroke={BRAND.bronze.hex}
                       strokeWidth="3"
                       strokeLinecap="round"
+                      className="transition-all duration-500 ease-out"
                     />
-                    <circle cx="16" cy="16" r="5" fill={BRAND.espressoDeep.hex} stroke={BRAND.bronze.hex} strokeWidth="2" />
-                    <circle cx="88" cy="16" r="5" fill={BRAND.espressoDeep.hex} stroke={BRAND.bronze.hex} strokeWidth="2" />
-                    <circle cx="160" cy="16" r="5" fill={BRAND.espressoDeep.hex} stroke={BRAND.bronze.hex} strokeWidth="2" />
-                    <circle cx="232" cy="16" r="5" fill={BRAND.espressoDeep.hex} stroke={BRAND.bronze.hex} strokeWidth="2" />
-                    <circle
-                      className="dot-glow"
-                      cx="304"
-                      cy="16"
-                      r="7"
-                      fill={BRAND.bronze.hex}
-                      filter="drop-shadow(0 0 6px rgba(168,139,104,0.8))"
-                    />
+                    {[16, 88, 160, 232, 304].map((cx, idx) => {
+                      const isLit = idx <= activeStep;
+                      const isCurrent = idx === activeStep;
+                      const isFinal = idx === 4;
+                      return (
+                        <g key={idx}>
+                          {isLit && (
+                            <circle
+                              cx={cx}
+                              cy="16"
+                              r={isFinal ? 10 : 8}
+                              fill={BRAND.bronze.hex}
+                              opacity={isCurrent ? 0.45 : 0.25}
+                              className="transition-all duration-500"
+                            />
+                          )}
+                          <circle
+                            cx={cx}
+                            cy="16"
+                            r={isFinal ? 7 : 5}
+                            fill={isLit ? BRAND.bronze.hex : BRAND.espressoDeep.hex}
+                            stroke={isLit ? BRAND.ivorySoft.hex : BRAND.bronze.hex}
+                            strokeWidth={isLit ? 2.5 : 1.5}
+                            className="transition-all duration-300"
+                            style={isLit ? { filter: 'drop-shadow(0 0 6px rgba(168,139,104,0.9))' } : undefined}
+                          />
+                        </g>
+                      );
+                    })}
                   </svg>
                 </div>
               </ParticleCard>

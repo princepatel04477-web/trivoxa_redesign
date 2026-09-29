@@ -4,7 +4,7 @@ import { BRAND } from '@/lib/tokens/colors';
 import React, { useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, Download, FileText } from 'lucide-react';
 import { Container, Section } from '@/components/ui/layout';
 import DepthCarousel from '@/components/reactbits/DepthCarousel/DepthCarousel';
 import AnimatedList from '@/components/reactbits/AnimatedList/AnimatedList';
@@ -145,6 +145,21 @@ export function InsightsClient() {
             We publish when we have something a buyer can act on — a price movement with the HS heading named, a credential with its registration number, a document set from a real consignment.
           </p>
 
+          {/* Direct Intelligence Report Download Button */}
+          <div className="mt-8 flex flex-wrap items-center gap-4">
+            <a
+              href="/downloads/trivoxa-market-intelligence-2026.pdf"
+              download="Trivoxa-Group-Market-Intelligence-Briefing-2026.pdf"
+              className="inline-flex items-center gap-2.5 rounded-full bg-bronze px-6 py-3 font-mono text-xs uppercase tracking-wider font-semibold text-stone-950 transition-all duration-200 hover:bg-bronze-light hover:shadow-lg hover:shadow-bronze/20 active:scale-95 cursor-pointer"
+            >
+              <Download className="size-4" />
+              <span>Download Intelligence Briefing (PDF)</span>
+            </a>
+            <span className="font-mono text-xs text-stone-400">
+              Horizon 2026-Q4 Maritime &amp; Corridors Report · PDF Document
+            </span>
+          </div>
+
           <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-bronze/20 pt-6">
             <div>
               <p className="font-mono text-xs text-bronze">Series Defined</p>
@@ -228,6 +243,41 @@ export function InsightsClient() {
                 );
               }}
             />
+          </div>
+        </Container>
+      </section>
+
+      {/* 2.5 Trade Intelligence Download Callout */}
+      <section className="bg-espresso border-y border-bronze/30 py-10 text-ivory">
+        <Container>
+          <div className="rounded-2xl border border-bronze/30 bg-espresso-deep/80 p-6 sm:p-8 backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-xl">
+            <div className="flex items-start gap-4">
+              <div className="flex size-12 shrink-0 items-center justify-center rounded-xl border border-bronze/40 bg-bronze/10 text-bronze">
+                <FileText className="size-6" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-bronze bg-bronze/15 px-2 py-0.5 rounded border border-bronze/30">
+                    Official Document
+                  </span>
+                  <span className="font-mono text-xs text-stone-400">Horizon 2026-Q4</span>
+                </div>
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-ivory mt-1">
+                  Global Trade &amp; Maritime Corridors Briefing
+                </h3>
+                <p className="mt-1 text-xs sm:text-sm text-stone-400 max-w-2xl leading-relaxed">
+                  Direct intelligence ex Western India export gateways (Mundra, Kandla, Nhava Sheva). HS classifications, port lanes, and certified factory-floor sourcing parameters.
+                </p>
+              </div>
+            </div>
+            <a
+              href="/downloads/trivoxa-market-intelligence-2026.pdf"
+              download="Trivoxa-Group-Market-Intelligence-Briefing-2026.pdf"
+              className="shrink-0 inline-flex items-center gap-2.5 rounded-full bg-bronze px-6 py-3 font-mono text-xs uppercase tracking-wider font-semibold text-stone-950 transition-all duration-200 hover:bg-bronze-light hover:shadow-lg hover:shadow-bronze/20 active:scale-95 cursor-pointer"
+            >
+              <Download className="size-4" />
+              <span>Download PDF Briefing</span>
+            </a>
           </div>
         </Container>
       </section>

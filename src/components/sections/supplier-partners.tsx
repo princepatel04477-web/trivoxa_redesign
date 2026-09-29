@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ShieldCheck, Anchor, Award, Factory, Building, Compass } from 'lucide-react';
+import { ShieldCheck, Anchor, Award, Factory, Building, Compass, Laptop } from 'lucide-react';
 
 interface Partner {
   name: string;
@@ -16,6 +16,12 @@ const PARTNERS: Partner[] = [
     category: 'Parent Manufacturing Mill',
     detail: 'Sayan, Surat',
     icon: Factory,
+  },
+  {
+    name: 'Varunya Technologies',
+    category: 'Digital & Tech Partner',
+    detail: 'Enterprise Cloud & Logistics Systems',
+    icon: Laptop,
   },
   {
     name: 'APEDA',
@@ -82,6 +88,12 @@ export function SupplierPartners() {
         className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 sm:w-32 bg-gradient-to-l from-espresso-deep via-espresso-deep/80 to-transparent"
         aria-hidden="true"
       />
+
+      <div className="mb-3 sm:mb-3.5 px-4 text-center">
+        <p className="font-mono text-[10px] sm:text-xs uppercase tracking-widest text-bronze font-semibold">
+          Companies &amp; Institutions We Work With
+        </p>
+      </div>
 
       <div
         className="marquee-track flex w-max items-center gap-6 sm:gap-10 hover:[animation-play-state:paused]"
